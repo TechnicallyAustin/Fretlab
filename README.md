@@ -15,6 +15,7 @@ Capabilities connect learning to projects, validation, reflection, and portfolio
 - Home: one next action, a readable eight-domain map, and the mastery loop.
 - My Path: interactive role lenses and four sequenced modules per role.
 - Knowledge Map: all domains, competencies, and capabilities.
+- Domain tutors: one copy-ready Socratic Claude prompt per domain, with domain-specific metaphors, questions, focus blocks, completion checks, and next-domain handoff.
 - Projects: staged Foundation, Applied, Integrated, and Capstone work.
 - Portfolio: evidence artifacts and senior-proof quality standards.
 - Capability workspaces: theory, methods, tools, lessons, evidence, and validation.

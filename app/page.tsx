@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FocusNotice, ProgressBar, SectionHeader, SubconceptCard, Surface } from "@/components/design-system";
+import { DomainTutorPrompt } from "@/components/learning/DomainTutorPrompt";
 
 type View = "home" | "path" | "map" | "projects" | "portfolio";
 
@@ -339,7 +340,7 @@ function AppHeader({ title, eyebrow }: { title: string; eyebrow: string }) {
 
 function DomainMap({ onSelect }: { onSelect: (domain: Domain) => void }) {
   return (
-    <div className="domain-map" aria-label="Eight-domain commercial product leadership map">
+    <div className="domain-map orbit-map" aria-label="Interactive eight-domain commercial product leadership map">
       <div className="map-core" aria-hidden="true"><small>One discipline</small><strong>Commercial Product Leadership</strong></div>
       {DOMAINS.map((domain, index) => (
         <button
@@ -463,6 +464,7 @@ function MapView({ selectedDomain, onDomain, onCapability }: { selectedDomain: D
               </article>
             ))}
           </div>
+          <DomainTutorPrompt domainId={selectedDomain.id} domainName={selectedDomain.name} />
         </div>
       </section>
     </>

@@ -44,3 +44,23 @@ test("keeps paths, lessons, projects, and the design system wired", async () => 
   assert.match(guide, /ADHD, dyslexia, and dysgraphia/i);
   assert.deepEqual(componentFiles.sort(), ["FocusNotice.tsx", "ProgressBar.tsx", "SectionHeader.tsx", "SubconceptCard.tsx", "Surface.tsx", "index.ts"]);
 });
+
+test("restores the orbital map and provides eight domain tutor prompts", async () => {
+  const [page, css, prompts, tutorComponent] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../lib/domainTutorPrompts.ts", import.meta.url), "utf8"),
+    readFile(new URL("../components/learning/DomainTutorPrompt.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /className="domain-map orbit-map"/);
+  assert.match(css, /Restored profession-at-a-glance orbital map/);
+  assert.match(page, /<DomainTutorPrompt domainId=\{selectedDomain\.id\}/);
+  for (const domain of ["product", "marketing", "business", "analytics", "customer", "strategy", "operations", "leadership"]) {
+    assert.match(prompts, new RegExp(`\\n  ${domain}: \\{`));
+  }
+  assert.match(prompts, /Socratic teacher and learning coach/);
+  assert.match(prompts, /hint ladder/);
+  assert.match(prompts, /Do not complete assignments/);
+  assert.match(tutorComponent, /navigator\.clipboard\.writeText/);
+});
