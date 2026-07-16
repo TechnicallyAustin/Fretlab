@@ -64,3 +64,21 @@ test("restores the orbital map and provides eight domain tutor prompts", async (
   assert.match(prompts, /Do not complete assignments/);
   assert.match(tutorComponent, /navigator\.clipboard\.writeText/);
 });
+
+test("uses progressive colors for progress and My Path accents", async () => {
+  const [page, css, progress, subconcept] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../components/design-system/ProgressBar.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/design-system/SubconceptCard.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(progress, /"starting" \| "building" \| "advancing" \| "strong" \| "mastered"/);
+  assert.match(progress, /export function ProgressValue/);
+  assert.match(css, /\.ds-progress\.tone-mastered/);
+  assert.match(css, /\.path-module-1/);
+  assert.match(css, /\.path-module-4/);
+  assert.match(css, /\.role-list button:nth-child\(8\)/);
+  assert.match(subconcept, /tone\?: "indigo" \| "aqua" \| "butter" \| "coral"/);
+  assert.match(page, /path-module-\$\{moduleIndex \+ 1\}/);
+});

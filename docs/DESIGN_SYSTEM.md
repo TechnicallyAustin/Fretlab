@@ -52,11 +52,19 @@ Creates a consistent eyebrow, heading, optional description, and one optional ac
 
 ### `ProgressBar`
 
-Provides accessible `progressbar` semantics and an optional visible label. Values are clamped to 0–100.
+Provides accessible `progressbar` semantics and an optional visible label. Values are clamped to 0–100. Both the bar and its percentage number change tone as progress grows:
+
+- 0–24: neutral starting tone
+- 25–49: violet building tone
+- 50–74: indigo advancing tone
+- 75–99: coral strong tone
+- 100: green mastered tone
+
+Use `ProgressValue` beside `ProgressBar` when a screen needs a larger percentage number. It uses the same tone automatically.
 
 ### `SubconceptCard`
 
-Use for capabilities, lessons, or sub-concepts within a directed sequence. It replaces dense pill groups and provides a larger reading and touch target.
+Use for capabilities, lessons, or sub-concepts within a directed sequence. It replaces dense pill groups and provides a larger reading and touch target. The optional `tone` prop accepts `indigo`, `aqua`, `butter`, or `coral`; use one consistent tone for all sub-concepts within the same path module.
 
 ### `FocusNotice`
 

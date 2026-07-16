@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FocusNotice, ProgressBar, SectionHeader, SubconceptCard, Surface } from "@/components/design-system";
+import { FocusNotice, ProgressBar, ProgressValue, SectionHeader, SubconceptCard, Surface } from "@/components/design-system";
 import { DomainTutorPrompt } from "@/components/learning/DomainTutorPrompt";
 
 type View = "home" | "path" | "map" | "projects" | "portfolio";
@@ -414,19 +414,19 @@ function PathView({ onCapability, selectedRole, onRole }: { onCapability: (name:
       </FocusNotice>
       <section className="path-intro card-shell">
         <div><p className="section-kicker">Current destination</p><h2>{path.destination}</h2><p>{path.description}</p></div>
-        <div className="path-score"><strong>{path.progress}%</strong><span>Path complete</span><ProgressBar value={path.progress} /></div>
+        <div className="path-score"><ProgressValue value={path.progress} /><span>Path complete</span><ProgressBar value={path.progress} /></div>
       </section>
       <section className="path-layout">
         <div className="module-list">
           <SectionHeader compact eyebrow="Four connected modules" title="Your directed path" description="Work from top to bottom, or open the sub-concept that matches your immediate need." />
-          {path.modules.map((module) => (
-            <article className="path-module" key={module.number}>
+          {path.modules.map((module, moduleIndex) => (
+            <article className={`path-module path-module-${moduleIndex + 1}`} key={module.number}>
               <span className="module-number">{module.number}</span>
               <div className="module-main">
                 <h3>{module.title}</h3><p>{module.description}</p>
-                <div className="subconcept-grid">{module.capabilities.map((capability, index) => <SubconceptCard key={capability} index={index} title={capability} status={module.progress > index * 25 ? "Ready to continue" : "Open concept"} onClick={() => onCapability(capability)} />)}</div>
+                <div className="subconcept-grid">{module.capabilities.map((capability, index) => <SubconceptCard key={capability} index={index} title={capability} tone={(["indigo", "aqua", "butter", "coral"] as const)[moduleIndex]} status={module.progress > index * 25 ? "Ready to continue" : "Open concept"} onClick={() => onCapability(capability)} />)}</div>
               </div>
-              <div className="module-progress"><strong>{module.progress}%</strong><ProgressBar value={module.progress} /></div>
+              <div className="module-progress"><ProgressValue value={module.progress} /><ProgressBar value={module.progress} /></div>
             </article>
           ))}
         </div>
@@ -528,7 +528,7 @@ function ProjectWorkspace({ project, completedSteps, onToggleStep, onBack, onCap
       <button className="back-button" onClick={onBack}>← Back to project studio</button>
       <header className="workspace-hero project-workspace-hero">
         <div><p className="eyebrow">{project.stage} project · {project.domain}</p><h1>{project.title}</h1><p>{project.summary}</p></div>
-        <Surface className="workspace-progress" corner="bottom-left"><span>Project progress</span><strong>{progress}%</strong><ProgressBar value={progress} /></Surface>
+        <Surface className="workspace-progress" corner="bottom-left"><span>Project progress</span><ProgressValue value={progress} /><ProgressBar value={progress} /></Surface>
       </header>
       <FocusNotice label="Project goal"><p>Complete one step at a time. Keep your evidence in the deliverables listed below, then use the final review to defend your recommendation.</p></FocusNotice>
       <section className="project-workspace-grid">
@@ -633,7 +633,7 @@ function CapabilityWorkspace({ name, completed, onToggle, onBack, onLesson, onPr
       <button className="back-button" onClick={onBack}>← Back to your map</button>
       <header className="capability-hero">
         <div><p className="eyebrow">Capability workspace · Product Discovery</p><h1>{name}</h1><p>{content.summary}</p></div>
-        <div className="mastery-score"><span>Mastery progress</span><strong>{progress}%</strong><ProgressBar value={progress} /></div>
+        <div className="mastery-score"><span>Mastery progress</span><ProgressValue value={progress} /><ProgressBar value={progress} /></div>
       </header>
       <nav className="capability-workflow" aria-label="Mastery workflow">
         {WORKFLOW.map((step, index) => { const done = completed.includes(`${name}:${step}`); return <button key={step} className={done ? "done" : index === activeIndex ? "current" : ""} onClick={() => onToggle(step)}><span>{done ? "✓" : index + 1}</span><strong>{step}</strong><small>{done ? "Complete" : index === activeIndex ? "Up next" : "Not started"}</small></button>; })}
