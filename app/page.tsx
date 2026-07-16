@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { FocusNotice, ProgressBar, SectionHeader, SubconceptCard, Surface } from "@/components/design-system";
 
-type View = "home" | "path" | "map" | "portfolio";
+type View = "home" | "path" | "map" | "projects" | "portfolio";
 
 type Competency = {
   name: string;
@@ -17,6 +18,42 @@ type Domain = {
   soft: string;
   description: string;
   competencies: Competency[];
+};
+
+type PathModule = {
+  number: string;
+  title: string;
+  description: string;
+  progress: number;
+  capabilities: string[];
+};
+
+type RolePath = {
+  role: string;
+  domains: string;
+  destination: string;
+  description: string;
+  progress: number;
+  modules: PathModule[];
+};
+
+type Project = {
+  id: string;
+  title: string;
+  stage: "Foundation" | "Applied" | "Integrated" | "Capstone";
+  domain: string;
+  difficulty: string;
+  time: string;
+  summary: string;
+  capabilities: string[];
+  deliverables: string[];
+  steps: string[];
+};
+
+type LessonSelection = {
+  capability: string;
+  title: string;
+  index: number;
 };
 
 const DOMAINS: Domain[] = [
@@ -136,22 +173,87 @@ const DOMAINS: Domain[] = [
 
 const WORKFLOW = ["Learn", "Understand", "Practice", "Build", "Validate", "Reflect", "Master"];
 
-const CAREER_PATHS = [
-  { role: "Product Management", fit: "Selected", domains: "Product · Customer · Strategy · Leadership" },
-  { role: "Product Marketing", fit: "Adjacent", domains: "Marketing · Customer · Strategy · Business" },
-  { role: "Business Analytics", fit: "Adjacent", domains: "Analytics · Business · Strategy · Operations" },
-  { role: "Product Analytics", fit: "Adjacent", domains: "Analytics · Product · Customer · Business" },
-  { role: "Business Operations", fit: "Explore", domains: "Operations · Business · Analytics · Leadership" },
-  { role: "Growth Marketing", fit: "Explore", domains: "Marketing · Analytics · Customer · Product" },
-  { role: "Customer Success", fit: "Explore", domains: "Customer · Leadership · Business · Operations" },
-  { role: "Strategy & Operations", fit: "Explore", domains: "Strategy · Operations · Business · Analytics" },
-];
-
-const PATH_MODULES = [
-  { number: "01", title: "Understand the customer", description: "Build reliable customer evidence before shaping solutions.", progress: 58, capabilities: ["Jobs to Be Done", "Customer Interviews", "Journey Mapping", "Problem Validation"] },
-  { number: "02", title: "Shape product direction", description: "Turn evidence into focused strategic choices.", progress: 25, capabilities: ["Opportunity Mapping", "Product Vision", "Portfolio Prioritization", "Roadmapping"] },
-  { number: "03", title: "Create market pull", description: "Make value legible and coordinate a credible market entry.", progress: 0, capabilities: ["Positioning", "Value Proposition", "GTM Strategy", "Launch Planning"] },
-  { number: "04", title: "Lead the business", description: "Connect outcomes, economics, and executive decisions.", progress: 0, capabilities: ["North Star Metrics", "Unit Economics", "Business Cases", "Executive Presentations"] },
+const ROLE_PATHS: RolePath[] = [
+  {
+    role: "Product Management", domains: "Product · Customer · Strategy · Leadership", destination: "Commercial Product Leader", progress: 42,
+    description: "Build from customer truth to product direction, market activation, and senior-level influence.",
+    modules: [
+      { number: "01", title: "Understand the customer", description: "Build reliable customer evidence before shaping solutions.", progress: 58, capabilities: ["Jobs to Be Done", "Customer Interviews", "Journey Mapping", "Problem Validation"] },
+      { number: "02", title: "Shape product direction", description: "Turn evidence into focused strategic choices.", progress: 25, capabilities: ["Opportunity Mapping", "Product Vision", "Portfolio Prioritization", "Roadmapping"] },
+      { number: "03", title: "Create market pull", description: "Make value legible and coordinate a credible market entry.", progress: 0, capabilities: ["Positioning", "Value Proposition", "GTM Strategy", "Launch Planning"] },
+      { number: "04", title: "Lead the business", description: "Connect outcomes, economics, and executive decisions.", progress: 0, capabilities: ["North Star Metrics", "Unit Economics", "Business Cases", "Executive Presentations"] },
+    ],
+  },
+  {
+    role: "Product Marketing", domains: "Marketing · Customer · Strategy · Business", destination: "Strategic Product Marketer", progress: 28,
+    description: "Translate market truth into positioning, launches, demand, and commercial alignment.",
+    modules: [
+      { number: "01", title: "Read the market", description: "Understand customers, alternatives, and market structure.", progress: 44, capabilities: ["Market Research", "Customer Interviews", "Competitive Analysis", "Needs Segmentation"] },
+      { number: "02", title: "Define the story", description: "Make product value clear and differentiated.", progress: 31, capabilities: ["Positioning", "Value Proposition", "Message Architecture", "Storytelling"] },
+      { number: "03", title: "Activate the market", description: "Coordinate a launch and create demand.", progress: 18, capabilities: ["GTM Strategy", "Launch Planning", "Demand Generation", "Sales Enablement"] },
+      { number: "04", title: "Measure impact", description: "Connect programs to commercial outcomes.", progress: 0, capabilities: ["Attribution", "CAC & LTV", "Campaign Measurement", "Executive Presentations"] },
+    ],
+  },
+  {
+    role: "Business Analytics", domains: "Analytics · Business · Strategy · Operations", destination: "Business Analytics Leader", progress: 24,
+    description: "Turn business questions into trustworthy models, insight, and decision support.",
+    modules: [
+      { number: "01", title: "Build data fluency", description: "Create reliable foundations for analysis.", progress: 52, capabilities: ["SQL", "Data Modeling", "Data Quality", "Metric Definitions"] },
+      { number: "02", title: "Explain performance", description: "Make operating signals visible and useful.", progress: 24, capabilities: ["KPI Design", "Dashboard Design", "Funnel Analysis", "Data Storytelling"] },
+      { number: "03", title: "Model the future", description: "Build forecasts and compare scenarios.", progress: 12, capabilities: ["Trend Analysis", "Scenario Models", "Demand Forecasting", "Sensitivity Analysis"] },
+      { number: "04", title: "Influence decisions", description: "Turn analysis into executive action.", progress: 0, capabilities: ["Business Cases", "Decision Memos", "Tradeoff Analysis", "Executive Presentations"] },
+    ],
+  },
+  {
+    role: "Product Analytics", domains: "Analytics · Product · Customer · Business", destination: "Product Analytics Leader", progress: 19,
+    description: "Connect user behavior, experimentation, and product strategy through evidence.",
+    modules: [
+      { number: "01", title: "Instrument the product", description: "Define events, metrics, and trustworthy data.", progress: 38, capabilities: ["Metric Definitions", "Data Quality", "North Star Metrics", "SQL"] },
+      { number: "02", title: "Understand behavior", description: "Diagnose journeys, funnels, and retention.", progress: 25, capabilities: ["Funnel Analysis", "Lifecycle Analysis", "Journey Mapping", "Churn Analysis"] },
+      { number: "03", title: "Run experiments", description: "Estimate impact and make causal claims carefully.", progress: 12, capabilities: ["Experiment Design", "A/B Testing", "Guardrail Metrics", "Result Interpretation"] },
+      { number: "04", title: "Shape product choices", description: "Bring evidence into planning and prioritization.", progress: 0, capabilities: ["Opportunity Analysis", "Portfolio Prioritization", "Data Storytelling", "Decision Memos"] },
+    ],
+  },
+  {
+    role: "Business Operations", domains: "Operations · Business · Analytics · Leadership", destination: "Business Operations Leader", progress: 21,
+    description: "Design operating systems that make strategy executable and improvement continuous.",
+    modules: [
+      { number: "01", title: "See the system", description: "Make work, constraints, and outcomes visible.", progress: 41, capabilities: ["Process Mapping", "Operating Models", "Operational Metrics", "Root Cause Analysis"] },
+      { number: "02", title: "Run the business", description: "Create effective cadences and decision flows.", progress: 27, capabilities: ["Operating Cadences", "Program Management", "Decision Rights", "Resource Allocation"] },
+      { number: "03", title: "Improve the system", description: "Remove friction and scale better practices.", progress: 10, capabilities: ["Workflow Automation", "Continuous Improvement", "AI Automation", "Benefits Realization"] },
+      { number: "04", title: "Lead change", description: "Build alignment and durable adoption.", progress: 0, capabilities: ["Change Strategy", "Stakeholder Readiness", "Facilitation", "Executive Presentations"] },
+    ],
+  },
+  {
+    role: "Growth Marketing", domains: "Marketing · Analytics · Customer · Product", destination: "Growth Marketing Leader", progress: 17,
+    description: "Build measurable acquisition, activation, retention, and expansion systems.",
+    modules: [
+      { number: "01", title: "Find growth insight", description: "Understand motivation, behavior, and friction.", progress: 35, capabilities: ["Needs Segmentation", "Customer Interviews", "Funnel Analysis", "Journey Mapping"] },
+      { number: "02", title: "Design growth loops", description: "Connect channels, product behavior, and value.", progress: 20, capabilities: ["Growth Loops", "Lifecycle Marketing", "Channel Strategy", "Value Proposition"] },
+      { number: "03", title: "Experiment rigorously", description: "Test changes with trustworthy measures.", progress: 12, capabilities: ["Conversion Optimization", "A/B Testing", "Guardrail Metrics", "Marketing Experiments"] },
+      { number: "04", title: "Scale investment", description: "Allocate spend using commercial evidence.", progress: 0, capabilities: ["CAC & LTV", "Attribution", "Campaign Measurement", "Scenario Models"] },
+    ],
+  },
+  {
+    role: "Customer Success", domains: "Customer · Leadership · Business · Operations", destination: "Customer Success Leader", progress: 23,
+    description: "Build systems that help customers realize, retain, and expand value.",
+    modules: [
+      { number: "01", title: "Define customer value", description: "Understand progress, needs, and success conditions.", progress: 45, capabilities: ["Jobs to Be Done", "Customer Interviews", "Journey Mapping", "Experience Measurement"] },
+      { number: "02", title: "Guide value realization", description: "Design onboarding and proactive support.", progress: 29, capabilities: ["Onboarding", "Service Blueprints", "Health Scores", "Feedback Programs"] },
+      { number: "03", title: "Protect retention", description: "Detect risk and improve the experience.", progress: 14, capabilities: ["Churn Analysis", "Closed-Loop Learning", "Root Cause Analysis", "Lifecycle Analysis"] },
+      { number: "04", title: "Grow accounts", description: "Connect customer outcomes to expansion.", progress: 0, capabilities: ["Expansion Strategy", "Unit Economics", "Stakeholder Management", "Executive Presentations"] },
+    ],
+  },
+  {
+    role: "Strategy & Operations", domains: "Strategy · Operations · Business · Analytics", destination: "Strategy and Operations Leader", progress: 26,
+    description: "Frame consequential choices and build the operating path to deliver them.",
+    modules: [
+      { number: "01", title: "Read the landscape", description: "Understand markets, trends, and strategic constraints.", progress: 48, capabilities: ["Market Sizing", "Competitive Analysis", "Trend Analysis", "Industry Structure"] },
+      { number: "02", title: "Frame the choice", description: "Compare options using clear decision logic.", progress: 31, capabilities: ["Opportunity Analysis", "Scenario Planning", "Business Cases", "Risk Analysis"] },
+      { number: "03", title: "Build the operating plan", description: "Translate choices into accountable execution.", progress: 17, capabilities: ["Strategic Goals", "Resource Allocation", "Program Management", "Operating Cadences"] },
+      { number: "04", title: "Drive alignment", description: "Move decisions through senior stakeholders.", progress: 0, capabilities: ["Decision Memos", "Stakeholder Management", "Facilitation", "Executive Presentations"] },
+    ],
+  },
 ];
 
 const PORTFOLIO = [
@@ -160,10 +262,30 @@ const PORTFOLIO = [
   { type: "Executive narrative", title: "New market recommendation", capability: "Market Sizing", status: "Planned", proof: "Model · memo · presentation" },
 ];
 
+const PROJECTS: Project[] = [
+  { id: "interview-sprint", title: "Customer interview sprint", stage: "Foundation", domain: "Customer", difficulty: "Guided", time: "2–3 hours", summary: "Plan and run two interviews, then turn raw notes into one useful product insight.", capabilities: ["Customer Interviews", "Research Planning", "Synthesis"], deliverables: ["Research plan", "Interview guide", "Insight summary"], steps: ["Choose a focused learning goal", "Write six neutral questions", "Run two practice interviews", "Group evidence into themes", "Write one decision implication"] },
+  { id: "kpi-audit", title: "KPI quality audit", stage: "Foundation", domain: "Analytics", difficulty: "Guided", time: "2 hours", summary: "Review a metric set and identify unclear definitions, missing owners, and misleading signals.", capabilities: ["KPI Design", "Metric Definitions", "Data Quality"], deliverables: ["Metric inventory", "Quality scorecard", "Recommended definitions"], steps: ["Inventory the current metrics", "Check each metric definition", "Identify behavior the metric may distort", "Assign owners and review rhythm", "Recommend a smaller core set"] },
+  { id: "positioning-teardown", title: "Positioning teardown", stage: "Foundation", domain: "Marketing", difficulty: "Guided", time: "2 hours", summary: "Compare three products and explain how each frames its audience, category, and difference.", capabilities: ["Positioning", "Competitive Positioning", "Differentiation"], deliverables: ["Comparison grid", "Positioning critique", "Rewritten statement"], steps: ["Select three alternatives", "Capture the claims each makes", "Identify the implied audience", "Compare proof and differentiation", "Rewrite the weakest position"] },
+  { id: "process-reset", title: "Process clarity reset", stage: "Foundation", domain: "Operations", difficulty: "Guided", time: "3 hours", summary: "Map a frustrating workflow and remove one source of delay, rework, or ambiguity.", capabilities: ["Process Mapping", "Root Cause Analysis", "Standard Work"], deliverables: ["Current-state map", "Root-cause note", "Future-state guide"], steps: ["Choose one recurring workflow", "Map steps and handoffs", "Mark waits and failure points", "Find the root cause", "Design and document the change"] },
+  { id: "decision-memo", title: "One-page decision memo", stage: "Foundation", domain: "Leadership", difficulty: "Guided", time: "2 hours", summary: "Turn a messy discussion into a clear decision, recommendation, tradeoff, and next step.", capabilities: ["Business Writing", "Decision Framing", "Stakeholder Management"], deliverables: ["Decision frame", "One-page memo", "Stakeholder review note"], steps: ["Name the exact decision", "Summarize the relevant context", "Compare two realistic options", "Make one recommendation", "Ask a stakeholder to challenge the logic"] },
+  { id: "market-sizing", title: "Market sizing range", stage: "Applied", domain: "Strategy", difficulty: "Independent", time: "3–4 days", summary: "Estimate an opportunity with top-down and bottom-up methods, then explain the uncertainty honestly.", capabilities: ["Market Sizing", "Market Research", "Sensitivity Analysis"], deliverables: ["Assumption sheet", "Sizing model", "Opportunity note"], steps: ["Define the market boundary", "Build a top-down estimate", "Build a bottom-up estimate", "Test the most sensitive assumptions", "Recommend a credible planning range"] },
+  { id: "opportunity-map", title: "Evidence-led opportunity map", stage: "Applied", domain: "Product", difficulty: "Independent", time: "1 week", summary: "Turn customer evidence into prioritized outcomes and testable solution opportunities.", capabilities: ["Opportunity Mapping", "Problem Validation", "Portfolio Prioritization"], deliverables: ["Evidence repository", "Opportunity tree", "Priority rationale"], steps: ["Collect at least eight evidence points", "Cluster needs and outcomes", "Write opportunity statements", "Score evidence and strategic fit", "Recommend the next discovery bet"] },
+  { id: "pricing-model", title: "Pricing and packaging model", stage: "Applied", domain: "Business", difficulty: "Independent", time: "1 week", summary: "Design three packaging options and compare value, willingness to pay, and unit economics.", capabilities: ["Pricing Strategy", "Packaging", "Unit Economics"], deliverables: ["Packaging architecture", "Scenario model", "Pricing recommendation"], steps: ["Define customer segments", "Map value to package boundaries", "Create three price scenarios", "Model unit economics", "Write a recommendation with risks"] },
+  { id: "growth-experiment", title: "Activation experiment", stage: "Applied", domain: "Marketing", difficulty: "Independent", time: "4–5 days", summary: "Diagnose one activation drop-off and design an experiment with clear success and guardrail metrics.", capabilities: ["Funnel Analysis", "Experiment Design", "Conversion Optimization"], deliverables: ["Funnel diagnosis", "Experiment brief", "Measurement plan"], steps: ["Choose one activation moment", "Quantify the drop-off", "Form one causal hypothesis", "Design treatment and control", "Define success and guardrails"] },
+  { id: "voc-system", title: "Voice of customer system", stage: "Applied", domain: "Customer", difficulty: "Independent", time: "1 week", summary: "Create a repeatable system that turns feedback from several channels into prioritized learning.", capabilities: ["Feedback Programs", "Research Repositories", "Insight Prioritization"], deliverables: ["Source map", "Tagging model", "Insight review cadence"], steps: ["Map feedback sources", "Create a simple taxonomy", "Define evidence standards", "Design a monthly synthesis", "Close the loop with teams"] },
+  { id: "launch-room", title: "Commercial launch decision room", stage: "Integrated", domain: "Product + Marketing + Business", difficulty: "Complex", time: "2 weeks", summary: "Make a go or no-go launch recommendation using readiness, positioning, economics, and customer evidence.", capabilities: ["Launch Readiness", "GTM Strategy", "Positioning", "Unit Economics"], deliverables: ["Readiness scorecard", "GTM brief", "Executive decision memo"], steps: ["Define the launch decision", "Gather cross-functional evidence", "Score product and market readiness", "Model upside and downside", "Facilitate the decision review"] },
+  { id: "retention-center", title: "Retention command center", stage: "Integrated", domain: "Customer + Analytics + Operations", difficulty: "Complex", time: "2 weeks", summary: "Combine journey evidence, behavioral metrics, and operating actions to reduce a retention risk.", capabilities: ["Churn Analysis", "Journey Mapping", "Health Scores", "Program Management"], deliverables: ["Retention diagnosis", "Health model", "90-day action plan"], steps: ["Choose a retention segment", "Combine qualitative and quantitative evidence", "Identify leading indicators", "Design intervention plays", "Set operating cadence and owners"] },
+  { id: "new-market-case", title: "New market business case", stage: "Integrated", domain: "Strategy + Business + Analytics", difficulty: "Complex", time: "2 weeks", summary: "Evaluate a market opportunity and recommend enter, wait, partner, or decline.", capabilities: ["Market Sizing", "Competitive Analysis", "Scenario Models", "Business Cases"], deliverables: ["Market model", "Competitive landscape", "Investment memo"], steps: ["Frame the strategic question", "Size the market with ranges", "Assess competition and advantage", "Model three scenarios", "Recommend a course with triggers"] },
+  { id: "zero-to-one", title: "Zero-to-one commercial launch", stage: "Capstone", domain: "Cross-domain", difficulty: "Senior proof", time: "4–6 weeks", summary: "Take an ambiguous customer problem from evidence through product strategy, economics, launch, and executive recommendation.", capabilities: ["Customer Interviews", "Product Vision", "Pricing Strategy", "GTM Strategy", "North Star Metrics", "Executive Presentations"], deliverables: ["Discovery evidence pack", "Product and commercial strategy", "Launch plan", "Executive presentation"], steps: ["Validate a meaningful customer problem", "Choose a product and market strategy", "Design solution and business model", "Build the go-to-market plan", "Define metrics and experiment plan", "Present and defend the full recommendation"] },
+  { id: "portfolio-turnaround", title: "Product portfolio turnaround", stage: "Capstone", domain: "Cross-domain", difficulty: "Senior proof", time: "4–6 weeks", summary: "Diagnose an underperforming portfolio and recommend where to invest, repair, partner, or exit.", capabilities: ["Portfolio Prioritization", "Lifecycle Analysis", "Unit Economics", "Resource Allocation", "Stakeholder Management"], deliverables: ["Portfolio diagnosis", "Investment thesis", "Operating roadmap", "Board-style narrative"], steps: ["Define portfolio goals", "Analyze product and financial performance", "Assess strategic fit", "Create investment scenarios", "Recommend a sequenced portfolio move", "Lead a simulated executive review"] },
+  { id: "ai-operating-model", title: "AI-enabled operating model", stage: "Capstone", domain: "Operations + Analytics + Leadership", difficulty: "Senior proof", time: "4 weeks", summary: "Redesign a commercial workflow with AI while protecting judgment, quality, adoption, and measurable value.", capabilities: ["AI Automation", "Operating Models", "Data Quality", "Change Strategy", "Benefits Realization"], deliverables: ["Current-state diagnosis", "AI workflow design", "Control and adoption plan", "Benefits case"], steps: ["Choose a high-friction workflow", "Separate judgment from repeatable work", "Design the human and AI handoffs", "Define quality and risk controls", "Plan adoption and measurement", "Defend the operating model"] },
+];
+
 const NAV: { id: View; label: string; short: string }[] = [
   { id: "home", label: "Home", short: "H" },
   { id: "path", label: "My path", short: "P" },
   { id: "map", label: "Knowledge map", short: "K" },
+  { id: "projects", label: "Projects", short: "B" },
   { id: "portfolio", label: "Portfolio", short: "E" },
 ];
 
@@ -212,15 +334,6 @@ function AppHeader({ title, eyebrow }: { title: string; eyebrow: string }) {
         <span className="avatar" aria-hidden="true">JD</span>
       </div>
     </header>
-  );
-}
-
-function ProgressBar({ value, label }: { value: number; label?: string }) {
-  return (
-    <div className="progress-wrap" aria-label={label ?? `${value}% complete`}>
-      <div className="progress-track"><span style={{ width: `${value}%` }} /></div>
-      {label ? <div className="progress-label"><span>{label}</span><strong>{value}%</strong></div> : null}
-    </div>
   );
 }
 
@@ -290,21 +403,28 @@ function HomeView({ onView, onDomain, onCapability }: { onView: (view: View) => 
   );
 }
 
-function PathView({ onCapability }: { onCapability: (name: string) => void }) {
+function PathView({ onCapability, selectedRole, onRole }: { onCapability: (name: string) => void; selectedRole: string; onRole: (role: string) => void }) {
+  const path = ROLE_PATHS.find((item) => item.role === selectedRole) ?? ROLE_PATHS[0];
   return (
     <>
-      <AppHeader eyebrow="Directed development" title="Your path to product leadership" />
+      <AppHeader eyebrow="Directed development" title={`Your ${path.role} path`} />
+      <FocusNotice label="Selected role lens">
+        <p><strong>{path.role}</strong> is now prioritizing the knowledge map below. Choose another role lens to rebuild this sequence instantly.</p>
+      </FocusNotice>
       <section className="path-intro card-shell">
-        <div><p className="section-kicker">Current destination</p><h2>Commercial Product Leader</h2><p>Build from customer truth to product direction, market activation, and senior-level influence.</p></div>
-        <div className="path-score"><strong>42%</strong><span>path complete</span><ProgressBar value={42} /></div>
+        <div><p className="section-kicker">Current destination</p><h2>{path.destination}</h2><p>{path.description}</p></div>
+        <div className="path-score"><strong>{path.progress}%</strong><span>Path complete</span><ProgressBar value={path.progress} /></div>
       </section>
       <section className="path-layout">
         <div className="module-list">
-          <div className="section-heading compact"><div><p className="eyebrow">Four connected modules</p><h2>Your directed path</h2></div></div>
-          {PATH_MODULES.map((module) => (
+          <SectionHeader compact eyebrow="Four connected modules" title="Your directed path" description="Work from top to bottom, or open the sub-concept that matches your immediate need." />
+          {path.modules.map((module) => (
             <article className="path-module" key={module.number}>
               <span className="module-number">{module.number}</span>
-              <div className="module-main"><h3>{module.title}</h3><p>{module.description}</p><div className="capability-chip-row">{module.capabilities.map((capability) => <button key={capability} onClick={() => onCapability(capability)}>{capability}</button>)}</div></div>
+              <div className="module-main">
+                <h3>{module.title}</h3><p>{module.description}</p>
+                <div className="subconcept-grid">{module.capabilities.map((capability, index) => <SubconceptCard key={capability} index={index} title={capability} status={module.progress > index * 25 ? "Ready to continue" : "Open concept"} onClick={() => onCapability(capability)} />)}</div>
+              </div>
               <div className="module-progress"><strong>{module.progress}%</strong><ProgressBar value={module.progress} /></div>
             </article>
           ))}
@@ -312,7 +432,7 @@ function PathView({ onCapability }: { onCapability: (name: string) => void }) {
         <aside className="career-panel card-shell">
           <p className="eyebrow">Role lenses</p><h2>One map, many careers</h2><p className="panel-copy">Each role changes the priority—not the underlying body of knowledge.</p>
           <div className="role-list">
-            {CAREER_PATHS.map((path) => <button className={path.fit === "Selected" ? "selected" : ""} key={path.role}><span><strong>{path.role}</strong><small>{path.domains}</small></span><em>{path.fit}</em></button>)}
+            {ROLE_PATHS.map((item) => <button className={item.role === path.role ? "selected" : ""} aria-pressed={item.role === path.role} key={item.role} onClick={() => onRole(item.role)}><span><strong>{item.role}</strong><small>{item.domains}</small></span><em>{item.role === path.role ? "Selected" : "Choose"}</em></button>)}
           </div>
         </aside>
       </section>
@@ -349,6 +469,130 @@ function MapView({ selectedDomain, onDomain, onCapability }: { selectedDomain: D
   );
 }
 
+function ProjectStudioView({ onProject }: { onProject: (project: Project) => void }) {
+  const [stage, setStage] = useState<string>("All stages");
+  const [domain, setDomain] = useState<string>("All domains");
+  const stages = ["All stages", "Foundation", "Applied", "Integrated", "Capstone"];
+  const domains = ["All domains", "Product", "Marketing", "Business", "Analytics", "Customer", "Strategy", "Operations", "Leadership", "Cross-domain"];
+  const visibleProjects = PROJECTS.filter((project) => (stage === "All stages" || project.stage === stage) && (domain === "All domains" || project.domain.includes(domain)));
+
+  return (
+    <>
+      <AppHeader eyebrow="Practice, build, integrate" title="Project studio" />
+      <FocusNotice label="Choose the right challenge">
+        <p>Start with one domain project. Move to integrated work when you can explain your choices. Use capstones to prove senior-level judgment across domains.</p>
+      </FocusNotice>
+      <Surface className="project-intro" corner="bottom-left">
+        <div><p className="section-kicker">Staged difficulty</p><h2>Build confidence in layers.</h2><p>Each stage asks you to combine more knowledge, manage more ambiguity, and produce stronger professional evidence.</p></div>
+        <ol className="stage-ladder">
+          {[
+            ["01", "Foundation", "Follow a clear scaffold"],
+            ["02", "Applied", "Work independently in one domain"],
+            ["03", "Integrated", "Connect several domains"],
+            ["04", "Capstone", "Defend a senior-level decision"],
+          ].map(([number, title, copy]) => <li key={title}><span>{number}</span><div><strong>{title}</strong><small>{copy}</small></div></li>)}
+        </ol>
+      </Surface>
+
+      <section className="project-library" aria-labelledby="project-library-title">
+        <SectionHeader eyebrow={`${visibleProjects.length} projects shown`} title="Project library" description="Use the filters to reduce choices and keep one level of challenge in view." />
+        <div className="project-filters" aria-label="Project filters">
+          <fieldset><legend>Difficulty stage</legend><div>{stages.map((item) => <button key={item} className={stage === item ? "selected" : ""} aria-pressed={stage === item} onClick={() => setStage(item)}>{item}</button>)}</div></fieldset>
+          <fieldset><legend>Knowledge domain</legend><div>{domains.map((item) => <button key={item} className={domain === item ? "selected" : ""} aria-pressed={domain === item} onClick={() => setDomain(item)}>{item}</button>)}</div></fieldset>
+        </div>
+        <div className="project-grid">
+          {visibleProjects.map((project, index) => (
+            <button className={`project-card stage-${project.stage.toLowerCase()}`} key={project.id} onClick={() => onProject(project)}>
+              <span className="project-index">{String(index + 1).padStart(2, "0")}</span>
+              <span className="project-stage">{project.stage} · {project.difficulty}</span>
+              <strong>{project.title}</strong>
+              <p>{project.summary}</p>
+              <span className="project-domain">{project.domain}</span>
+              <span className="project-time">{project.time}</span>
+              <b>Open project →</b>
+            </button>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ProjectWorkspace({ project, completedSteps, onToggleStep, onBack, onCapability }: { project: Project; completedSteps: string[]; onToggleStep: (projectId: string, step: string) => void; onBack: () => void; onCapability: (name: string) => void }) {
+  const doneCount = project.steps.filter((step) => completedSteps.includes(`${project.id}:${step}`)).length;
+  const progress = Math.round((doneCount / project.steps.length) * 100);
+  return (
+    <div className="focused-workspace">
+      <button className="back-button" onClick={onBack}>← Back to project studio</button>
+      <header className="workspace-hero project-workspace-hero">
+        <div><p className="eyebrow">{project.stage} project · {project.domain}</p><h1>{project.title}</h1><p>{project.summary}</p></div>
+        <Surface className="workspace-progress" corner="bottom-left"><span>Project progress</span><strong>{progress}%</strong><ProgressBar value={progress} /></Surface>
+      </header>
+      <FocusNotice label="Project goal"><p>Complete one step at a time. Keep your evidence in the deliverables listed below, then use the final review to defend your recommendation.</p></FocusNotice>
+      <section className="project-workspace-grid">
+        <main>
+          <Surface className="project-steps" corner="bottom-left">
+            <SectionHeader eyebrow={`${doneCount} of ${project.steps.length} steps complete`} title="Build sequence" description="Mark a step complete only when its evidence is saved in your project file." />
+            <ol>{project.steps.map((step, index) => { const key = `${project.id}:${step}`; const done = completedSteps.includes(key); return <li key={step} className={done ? "done" : ""}><button onClick={() => onToggleStep(project.id, step)}><span>{done ? "✓" : index + 1}</span><strong>{step}</strong><small>{done ? "Complete. Select to reopen." : "Select when evidence is complete."}</small></button></li>; })}</ol>
+          </Surface>
+          <Surface className="project-capabilities" corner="top-right">
+            <SectionHeader eyebrow="Knowledge connections" title="Capabilities used" description="Open a capability when you need a focused refresher." />
+            <div>{project.capabilities.map((capability, index) => <SubconceptCard key={capability} index={index} title={capability} status="Open capability" onClick={() => onCapability(capability)} />)}</div>
+          </Surface>
+        </main>
+        <aside>
+          <Surface className="deliverable-panel" corner="top-right"><p className="eyebrow">Evidence pack</p><h2>What you will produce</h2><ol>{project.deliverables.map((item, index) => <li key={item}><span>{index + 1}</span><strong>{item}</strong></li>)}</ol></Surface>
+          <Surface className="review-panel" corner="bottom-left"><p className="eyebrow">Final review</p><h2>Defend the work</h2><ul><li>Explain the context in plain language.</li><li>Show evidence behind the choice.</li><li>Name the strongest alternative.</li><li>Define success and the next learning step.</li></ul></Surface>
+        </aside>
+      </section>
+    </div>
+  );
+}
+
+function LessonWorkspace({ lesson, complete, onComplete, onBack }: { lesson: LessonSelection; complete: boolean; onComplete: () => void; onBack: () => void }) {
+  const [answer, setAnswer] = useState<string | null>(null);
+  const example = lesson.capability === "Customer Interviews"
+    ? "Instead of asking, ‘Would you use this?’ ask, ‘Tell me about the last time you tried to solve this problem.’"
+    : `Start with a real ${lesson.capability.toLowerCase()} decision. Separate what you know, what you assume, and what evidence would change your mind.`;
+  const correctAnswer = "Ask for evidence from a specific past event.";
+  const options = [correctAnswer, "Ask whether the customer likes the proposed idea.", "Explain the solution before asking a question."];
+
+  return (
+    <div className="focused-workspace lesson-workspace">
+      <button className="back-button" onClick={onBack}>← Back to {lesson.capability}</button>
+      <header className="workspace-hero lesson-hero">
+        <div><p className="eyebrow">Lesson {lesson.index + 1} · {lesson.capability}</p><h1>{lesson.title}</h1><p>A short, focused lesson. Read one section, try the example, then check your understanding.</p></div>
+        <div className={`lesson-status ${complete ? "complete" : ""}`}><span>{complete ? "✓" : lesson.index + 1}</span><strong>{complete ? "Complete" : "About 12 minutes"}</strong></div>
+      </header>
+      <FocusNotice label="Learning objective"><p>By the end, you can explain the idea in your own words and use it in one realistic product decision.</p></FocusNotice>
+      <section className="lesson-layout">
+        <main>
+          <Surface className="lesson-reading" corner="bottom-left">
+            <p className="eyebrow">Part 1 · Understand</p><h2>The core idea</h2>
+            <p>Good professional judgment starts with evidence that matches the decision. A strong question or method does not merely produce information. It reduces a specific uncertainty.</p>
+            <p>Before using a technique, write down the choice you are trying to make. Then ask what evidence would make you change direction.</p>
+            <div className="lesson-example"><strong>Example</strong><p>{example}</p></div>
+          </Surface>
+          <Surface className="lesson-practice" corner="top-right">
+            <p className="eyebrow">Part 2 · Try it</p><h2>Practice in five minutes</h2>
+            <ol><li><span>1</span><p>Choose one current product or business question.</p></li><li><span>2</span><p>Write the decision that depends on the answer.</p></li><li><span>3</span><p>Write one weak prompt and rewrite it to request observable evidence.</p></li></ol>
+            <label htmlFor="practice-note">Your practice note</label><textarea id="practice-note" rows={5} placeholder="Write one decision and one evidence-seeking prompt…" />
+          </Surface>
+        </main>
+        <aside>
+          <Surface className="knowledge-check" corner="top-right">
+            <p className="eyebrow">Part 3 · Check</p><h2>Which prompt creates the strongest evidence?</h2>
+            <div>{options.map((option) => <button key={option} className={answer === option ? "selected" : ""} aria-pressed={answer === option} onClick={() => setAnswer(option)}>{option}</button>)}</div>
+            {answer ? <p className={`answer-feedback ${answer === correctAnswer ? "correct" : "retry"}`} role="status">{answer === correctAnswer ? "Correct. Specific past behavior is stronger evidence than a future claim." : "Try again. Look for the option grounded in a real past event."}</p> : null}
+          </Surface>
+          <button className="lesson-complete-button" onClick={onComplete}>{complete ? "Mark lesson incomplete" : "Complete lesson"}<span>→</span></button>
+          <Surface className="lesson-summary" corner="bottom-left"><p className="eyebrow">Remember</p><ul><li>Start with the decision.</li><li>Prefer behavior over opinion.</li><li>Name uncertainty clearly.</li><li>Record what would change your mind.</li></ul></Surface>
+        </aside>
+      </section>
+    </div>
+  );
+}
+
 function PortfolioView({ onCapability }: { onCapability: (name: string) => void }) {
   return (
     <>
@@ -376,8 +620,9 @@ function PortfolioView({ onCapability }: { onCapability: (name: string) => void 
   );
 }
 
-function CapabilityWorkspace({ name, completed, onToggle, onBack }: { name: string; completed: string[]; onToggle: (step: string) => void; onBack: () => void }) {
+function CapabilityWorkspace({ name, completed, onToggle, onBack, onLesson, onProject }: { name: string; completed: string[]; onToggle: (step: string) => void; onBack: () => void; onLesson: (lesson: LessonSelection) => void; onProject: (project: Project) => void }) {
   const content = capabilityContent(name);
+  const relatedProject = PROJECTS.find((project) => project.capabilities.includes(name)) ?? PROJECTS[0];
   const currentIndex = WORKFLOW.findIndex((step) => !completed.includes(`${name}:${step}`));
   const activeIndex = currentIndex === -1 ? WORKFLOW.length - 1 : currentIndex;
   const progress = Math.round((completed.filter((item) => item.startsWith(`${name}:`)).length / WORKFLOW.length) * 100);
@@ -394,10 +639,10 @@ function CapabilityWorkspace({ name, completed, onToggle, onBack }: { name: stri
       <section className="capability-body">
         <main>
           <article className="learning-brief card-shell"><p className="section-kicker">Learning brief</p><h2>What good looks like</h2><p className="outcome">{content.outcome}</p><div className="brief-grid"><div><h3>Theory & concepts</h3>{content.concepts.map((item) => <span key={item}>{item}</span>)}</div><div><h3>Methods</h3>{content.methods.map((item) => <span key={item}>{item}</span>)}</div><div><h3>Tools</h3>{content.tools.map((item) => <span key={item}>{item}</span>)}</div></div></article>
-          <article className="lesson-panel card-shell"><div className="section-heading compact"><div><p className="eyebrow">Learn</p><h2>Four focused lessons</h2></div><span className="time-badge">48 min total</span></div><ol>{content.lessons.map((lesson, index) => <li key={lesson}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{lesson}</strong><small>{10 + index * 2} min · Lesson</small></div><button aria-label={`Open ${lesson}`}>→</button></li>)}</ol></article>
+          <article className="lesson-panel card-shell"><div className="section-heading compact"><div><p className="eyebrow">Learn</p><h2>Four focused lessons</h2></div><span className="time-badge">48 min total</span></div><ol>{content.lessons.map((lesson, index) => <li key={lesson}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{lesson}</strong><small>{10 + index * 2} min · Interactive lesson</small></div><button onClick={() => onLesson({ capability: name, title: lesson, index })} aria-label={`Open ${lesson}`}>→</button></li>)}</ol></article>
         </main>
         <aside>
-          <article className="build-panel"><p className="eyebrow">Build</p><h2>Your evidence pack</h2><p>Turn learning into work a hiring manager or executive could inspect.</p>{content.deliverables.map((deliverable, index) => <button key={deliverable}><span>{index + 1}</span><strong>{deliverable}</strong><small>{index === 0 ? "In progress" : "Not started"}</small></button>)}</article>
+          <article className="build-panel"><p className="eyebrow">Build</p><h2>Your evidence pack</h2><p>Turn learning into work a hiring manager or executive could inspect.</p>{content.deliverables.map((deliverable, index) => <div className="deliverable-row" key={deliverable}><span>{index + 1}</span><strong>{deliverable}</strong><small>{index === 0 ? "In progress" : "Not started"}</small></div>)}<button className="build-project-button" onClick={() => onProject(relatedProject)}>Open recommended project <span>→</span></button></article>
           <article className="validation-panel card-shell"><p className="eyebrow">Validate</p><h2>Eight ways to prove mastery</h2><div>{["Explain it", "Apply it", "Analyze it", "Build it", "Measure it", "Improve it", "Communicate it", "Teach it"].map((lens, index) => <span className={index < 2 ? "active" : ""} key={lens}>{index < 2 ? "✓" : "○"} {lens}</span>)}</div></article>
         </aside>
       </section>
@@ -408,15 +653,26 @@ function CapabilityWorkspace({ name, completed, onToggle, onBack }: { name: stri
 export default function Home() {
   const [view, setView] = useState<View>("home");
   const [selectedDomainId, setSelectedDomainId] = useState("product");
+  const [selectedRole, setSelectedRole] = useState("Product Management");
   const [selectedCapability, setSelectedCapability] = useState<string | null>(null);
+  const [selectedLesson, setSelectedLesson] = useState<LessonSelection | null>(null);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [completed, setCompleted] = useState<string[]>(["Customer Interviews:Learn", "Customer Interviews:Understand"]);
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [completedProjectSteps, setCompletedProjectSteps] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      const saved = window.localStorage.getItem("jada-mastery-progress");
+      const saved = window.localStorage.getItem("jada-learning-state");
       if (saved) {
-        try { setCompleted(JSON.parse(saved)); } catch { /* use the starter progress */ }
+        try {
+          const state = JSON.parse(saved);
+          if (Array.isArray(state.completed)) setCompleted(state.completed);
+          if (Array.isArray(state.completedLessons)) setCompletedLessons(state.completedLessons);
+          if (Array.isArray(state.completedProjectSteps)) setCompletedProjectSteps(state.completedProjectSteps);
+          if (typeof state.selectedRole === "string") setSelectedRole(state.selectedRole);
+        } catch { /* use the starter progress */ }
       }
       setReady(true);
     }, 0);
@@ -424,19 +680,37 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (ready) window.localStorage.setItem("jada-mastery-progress", JSON.stringify(completed));
-  }, [completed, ready]);
+    if (ready) window.localStorage.setItem("jada-learning-state", JSON.stringify({ completed, completedLessons, completedProjectSteps, selectedRole }));
+  }, [completed, completedLessons, completedProjectSteps, selectedRole, ready]);
 
   const selectedDomain = useMemo(() => DOMAINS.find((domain) => domain.id === selectedDomainId) ?? DOMAINS[0], [selectedDomainId]);
 
   function openDomain(domain: Domain) {
     setSelectedDomainId(domain.id);
     setSelectedCapability(null);
+    setSelectedLesson(null);
+    setSelectedProject(null);
     setView("map");
+  }
+
+  function openCapability(name: string) {
+    setSelectedProject(null);
+    setSelectedLesson(null);
+    setSelectedCapability(name);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function openProject(project: Project) {
+    setSelectedCapability(null);
+    setSelectedLesson(null);
+    setSelectedProject(project);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function navigate(next: View) {
     setSelectedCapability(null);
+    setSelectedLesson(null);
+    setSelectedProject(null);
     setView(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -447,8 +721,28 @@ export default function Home() {
     setCompleted((items) => items.includes(key) ? items.filter((item) => item !== key) : [...items, key]);
   }
 
+  function toggleLesson() {
+    if (!selectedLesson) return;
+    const key = `${selectedLesson.capability}:${selectedLesson.title}`;
+    setCompletedLessons((items) => items.includes(key) ? items.filter((item) => item !== key) : [...items, key]);
+  }
+
+  function toggleProjectStep(projectId: string, step: string) {
+    const key = `${projectId}:${step}`;
+    setCompletedProjectSteps((items) => items.includes(key) ? items.filter((item) => item !== key) : [...items, key]);
+  }
+
+  if (selectedLesson) {
+    const lessonKey = `${selectedLesson.capability}:${selectedLesson.title}`;
+    return <LessonWorkspace lesson={selectedLesson} complete={completedLessons.includes(lessonKey)} onComplete={toggleLesson} onBack={() => setSelectedLesson(null)} />;
+  }
+
+  if (selectedProject) {
+    return <ProjectWorkspace project={selectedProject} completedSteps={completedProjectSteps} onToggleStep={toggleProjectStep} onBack={() => { setSelectedProject(null); setView("projects"); }} onCapability={openCapability} />;
+  }
+
   if (selectedCapability) {
-    return <CapabilityWorkspace name={selectedCapability} completed={completed} onToggle={toggleWorkflow} onBack={() => setSelectedCapability(null)} />;
+    return <CapabilityWorkspace name={selectedCapability} completed={completed} onToggle={toggleWorkflow} onBack={() => setSelectedCapability(null)} onLesson={setSelectedLesson} onProject={openProject} />;
   }
 
   return (
@@ -462,10 +756,11 @@ export default function Home() {
         <div className="sidebar-note"><span className="note-spark">✦</span><div><strong>One idea at a time.</strong><p>The map holds the complexity so you can focus on the next meaningful step.</p></div></div>
       </aside>
       <main className="main-content">
-        {view === "home" && <HomeView onView={navigate} onDomain={openDomain} onCapability={setSelectedCapability} />}
-        {view === "path" && <PathView onCapability={setSelectedCapability} />}
-        {view === "map" && <MapView selectedDomain={selectedDomain} onDomain={setSelectedDomainId} onCapability={setSelectedCapability} />}
-        {view === "portfolio" && <PortfolioView onCapability={setSelectedCapability} />}
+        {view === "home" && <HomeView onView={navigate} onDomain={openDomain} onCapability={openCapability} />}
+        {view === "path" && <PathView onCapability={openCapability} selectedRole={selectedRole} onRole={setSelectedRole} />}
+        {view === "map" && <MapView selectedDomain={selectedDomain} onDomain={setSelectedDomainId} onCapability={openCapability} />}
+        {view === "projects" && <ProjectStudioView onProject={openProject} />}
+        {view === "portfolio" && <PortfolioView onCapability={openCapability} />}
       </main>
     </div>
   );
