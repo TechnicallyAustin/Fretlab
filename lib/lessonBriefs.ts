@@ -204,6 +204,11 @@ const CAPABILITY_DEFINITIONS: Record<string, string> = {
   "Talent Development": "Talent development identifies future capability needs and creates experiences, support, feedback, and opportunities that help people grow toward them.",
 };
 
+export function getCapabilityDefinition(capability: string) {
+  return CAPABILITY_DEFINITIONS[capability]
+    ?? `${capability} is a structured professional practice used to improve a specific decision, make reasoning visible, and create evidence that another person can inspect.`;
+}
+
 const DOMAIN_CUES: Record<string, { decision: string; evidence: string; scenario: string; commonTrap: string; quality: string }> = {
   Product: {
     decision: "choose which customer problem, product direction, or delivery bet deserves commitment",
@@ -279,8 +284,7 @@ function contextPhrase(context: LessonContext) {
 
 export function buildLessonBrief(context: LessonContext): LessonBrief {
   const cue = DOMAIN_CUES[context.domain] ?? DOMAIN_CUES.General;
-  const definition = CAPABILITY_DEFINITIONS[context.capability]
-    ?? `${context.capability} is a structured professional practice used to improve a specific decision, make reasoning visible, and create evidence that another person can inspect.`;
+  const definition = getCapabilityDefinition(context.capability);
   const competencyContext = contextPhrase(context);
   const usefulWhen = `It is most useful when Jada needs to ${cue.decision} and can work with ${cue.evidence}.`;
   const correctFoundation = definition;

@@ -134,3 +134,26 @@ test("gives every lesson a concept-specific teaching brief", async () => {
   const missingDefinitions = [...capabilityNames].filter((name) => !briefs.includes(`"${name}":`));
   assert.deepEqual(missingDefinitions, [], `Missing concept definitions: ${missingDefinitions.join(", ")}`);
 });
+
+test("organizes each capability as one coherent research-guided teaching packet", async () => {
+  const [page, css, engine] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../lib/capabilityEngine.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /getCapabilityEngine/);
+  assert.match(page, /className="engine-question-list"/);
+  assert.match(page, /className="engine-guided-path"/);
+  assert.match(page, /className="engine-evidence-card"/);
+  assert.match(page, /className="engine-lens-grid"/);
+  assert.match(page, /setActiveLensIndex/);
+  assert.match(css, /Unified capability content engine/);
+  assert.match(css, /\.capability-engine-layout/);
+  assert.match(engine, /guidingQuestions:/);
+  assert.match(engine, /guidedPath:/);
+  assert.match(engine, /completion:/);
+  assert.match(engine, /validation:/);
+  assert.match(engine, /Research requirement: two credible sources and one limitation/);
+  assert.match(engine, /without receiving a prewritten answer/);
+});

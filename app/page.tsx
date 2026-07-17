@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FocusNotice, ProgressBar, ProgressValue, SectionHeader, SubconceptCard, Surface } from "@/components/design-system";
 import { DomainTutorPrompt } from "@/components/learning/DomainTutorPrompt";
+import { getCapabilityEngine } from "@/lib/capabilityEngine";
 import { buildLessonBrief } from "@/lib/lessonBriefs";
 
 type View = "home" | "path" | "map" | "projects" | "portfolio";
@@ -663,7 +664,10 @@ function PortfolioView({ onCapability }: { onCapability: (name: string) => void 
 
 function CapabilityWorkspace({ name, completed, onToggle, onBack, onLesson, onProject }: { name: string; completed: string[]; onToggle: (step: string) => void; onBack: () => void; onLesson: (lesson: LessonSelection) => void; onProject: (project: Project) => void }) {
   const content = capabilityContent(name);
+  const learningContext = capabilityLearningContext(name);
+  const engine = getCapabilityEngine({ capability: name, ...learningContext });
   const relatedProject = PROJECTS.find((project) => project.capabilities.includes(name)) ?? PROJECTS[0];
+  const [activeLensIndex, setActiveLensIndex] = useState(0);
   const currentIndex = WORKFLOW.findIndex((step) => !completed.includes(`${name}:${step}`));
   const activeIndex = currentIndex === -1 ? WORKFLOW.length - 1 : currentIndex;
   const progress = Math.round((completed.filter((item) => item.startsWith(`${name}:`)).length / WORKFLOW.length) * 100);
@@ -677,14 +681,39 @@ function CapabilityWorkspace({ name, completed, onToggle, onBack, onLesson, onPr
       <nav className="capability-workflow" aria-label="Mastery workflow">
         {WORKFLOW.map((step, index) => { const done = completed.includes(`${name}:${step}`); return <button key={step} className={done ? "done" : index === activeIndex ? "current" : ""} onClick={() => onToggle(step)}><span>{done ? "✓" : index + 1}</span><strong>{step}</strong><small>{done ? "Complete" : index === activeIndex ? "Up next" : "Not started"}</small></button>; })}
       </nav>
-      <section className="capability-body">
-        <main>
-          <article className="learning-brief card-shell"><p className="section-kicker">Learning brief</p><h2>What good looks like</h2><p className="outcome">{content.outcome}</p><div className="brief-grid"><div><h3>Theory & concepts</h3>{content.concepts.map((item) => <span key={item}>{item}</span>)}</div><div><h3>Methods</h3>{content.methods.map((item) => <span key={item}>{item}</span>)}</div><div><h3>Tools</h3>{content.tools.map((item) => <span key={item}>{item}</span>)}</div></div></article>
-          <article className="lesson-panel card-shell"><div className="section-heading compact"><div><p className="eyebrow">Learn</p><h2>Four focused lessons</h2></div><span className="time-badge">48 min total</span></div><ol>{content.lessons.map((lesson, index) => <li key={lesson}><button className="lesson-row-button" onClick={() => onLesson({ capability: name, title: lesson, index })} aria-label={`Open ${lesson}`}><span>{String(index + 1).padStart(2, "0")}</span><span className="lesson-row-copy"><strong>{lesson}</strong><small>{10 + index * 2} min · Interactive lesson</small></span><b aria-hidden="true">→</b></button></li>)}</ol></article>
-        </main>
-        <aside>
-          <article className="build-panel"><p className="eyebrow">Build</p><h2>Your evidence pack</h2><p>Turn learning into work a hiring manager or executive could inspect.</p>{content.deliverables.map((deliverable, index) => <div className="deliverable-row" key={deliverable}><span>{index + 1}</span><strong>{deliverable}</strong><small>{index === 0 ? "In progress" : "Not started"}</small></div>)}<button className="build-project-button" onClick={() => onProject(relatedProject)}>Open recommended project <span>→</span></button></article>
-          <article className="validation-panel card-shell"><p className="eyebrow">Validate</p><h2>Eight ways to prove mastery</h2><div>{["Explain it", "Apply it", "Analyze it", "Build it", "Measure it", "Improve it", "Communicate it", "Teach it"].map((lens, index) => <span className={index < 2 ? "active" : ""} key={lens}>{index < 2 ? "✓" : "○"} {lens}</span>)}</div></article>
+      <section className="capability-engine-layout">
+        <div className="capability-engine-primary">
+          <Surface className="engine-brief" corner="bottom-left">
+            <p className="section-kicker">Lesson brief</p>
+            <h2>Understand {name}</h2>
+            <p className="engine-concept-description">{engine.description}</p>
+            <div className="engine-context-grid">
+              <article><small>Where it fits</small><p>{engine.position}</p></article>
+              <article><small>A useful mental model</small><p>{engine.mentalModel}</p></article>
+            </div>
+            <blockquote><strong>Target outcome</strong><p>{engine.outcome}</p></blockquote>
+
+            <section className="engine-guidance-section">
+              <header><p className="eyebrow">Reason before building</p><h3>Questions that guide Jada toward the solution</h3><p>Answer these in research notes first. They prompt reasoning; they are not hidden answers.</p></header>
+              <ol className="engine-question-list">{engine.guidingQuestions.map((question, index) => <li key={question}><span>{index + 1}</span><p>{question}</p></li>)}</ol>
+            </section>
+
+            <section className="engine-guidance-section">
+              <header><p className="eyebrow">Work the concept</p><h3>A start-to-finish path</h3></header>
+              <div className="engine-guided-path">{engine.guidedPath.map((step, index) => <article key={step.title}><span>{String(index + 1).padStart(2, "0")}</span><div><h4>{step.title}</h4><p>{step.body}</p></div></article>)}</div>
+              <div className="engine-finish-line"><strong>Finish line</strong><p>{engine.completion}</p></div>
+            </section>
+
+            <div className="engine-list-grid">{[["Concept details", engine.concepts], ["Methods", engine.methods], ["Tools", engine.tools]].map(([title, items]) => <article key={title as string}><h3>{title as string}</h3>{(items as string[]).map((item) => <span key={item}>{item}</span>)}</article>)}</div>
+          </Surface>
+
+          <article className="lesson-panel card-shell"><div className="section-heading compact"><div><p className="eyebrow">Learn</p><h2>Four focused lessons</h2></div><span className="time-badge">48 min total</span></div><ol>{content.lessons.map((lesson, index) => <li key={lesson}><button className="lesson-row-button" onClick={() => onLesson({ capability: name, title: lesson, index })} aria-label={`Open ${lesson}`}><span>{String(index + 1).padStart(2, "0")}</span><span className="lesson-row-copy"><strong>{lesson}</strong><small>{10 + index * 2} min · Research-guided lesson</small></span><b aria-hidden="true">→</b></button></li>)}</ol></article>
+        </div>
+
+        <aside className="capability-engine-support">
+          <article className="engine-evidence-card"><p className="eyebrow">Build</p><h2>Your evidence pack</h2><p>Everything below is mapped directly to {name}.</p><div className="engine-toolkit"><small>Tools for this concept</small><p>{engine.tools.map((tool) => <span key={tool}>{tool}</span>)}</p><small>Signals to capture</small><p>{engine.signals.map((signal) => <span key={signal}>{signal}</span>)}</p></div><div className="engine-evidence-list">{engine.evidence.map((evidence, index) => <article key={evidence.title}><span>{index + 1}</span><div><strong>{evidence.title}</strong><small>{index === 0 ? "Up next" : "Not started"}</small><p>{evidence.description}</p></div></article>)}</div><button className="engine-project-button" onClick={() => onProject(relatedProject)}>Open recommended project <span>→</span></button></article>
+
+          <Surface className="engine-validation" corner="top-right"><p className="eyebrow">Validate</p><h2>Eight ways to prove mastery</h2><div className="engine-lens-grid">{engine.validation.map((lens, index) => <button className={activeLensIndex === index ? "selected" : ""} aria-pressed={activeLensIndex === index} onClick={() => setActiveLensIndex(index)} key={lens.title}>○ {lens.title}</button>)}</div><div className="engine-lens-detail"><strong>{engine.validation[activeLensIndex].title}</strong><p>{engine.validation[activeLensIndex].instruction}</p><small><b>Evidence:</b> {engine.validation[activeLensIndex].evidence}</small></div></Surface>
         </aside>
       </section>
     </div>
