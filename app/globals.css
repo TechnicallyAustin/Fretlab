@@ -655,6 +655,9 @@ small { font-size: 13px !important; line-height: 1.5; }
 .lesson-example { margin-top: 28px; padding: 22px; border-left: 5px solid var(--coral); border-radius: 0 14px 14px 0; background: var(--coral-soft); }
 .lesson-example strong { font-size: 15px; }
 .lesson-example p { margin: 8px 0 0; color: #5b302a; font-size: 16px; line-height: 1.75; }
+.concept-definition { margin: 19px 0 22px; padding: 20px 22px; border: 2px solid #cfd2ff; border-radius: 16px 16px 6px 16px; background: #f0f1ff; }
+.concept-definition strong { display: block; margin-bottom: 8px; color: var(--indigo-dark); font-size: 15px; }
+.concept-definition p { margin: 0; color: #252c4c; font-size: 18px; line-height: 1.75; }
 .lesson-practice ol { margin: 24px 0; padding: 0; list-style: none; display: grid; gap: 12px; }
 .lesson-practice li { display: grid; grid-template-columns: 42px 1fr; gap: 14px; align-items: start; }
 .lesson-practice li span { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 11px; background: var(--indigo-soft); color: var(--indigo-dark); font-weight: 800; }

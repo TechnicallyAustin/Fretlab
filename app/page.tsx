@@ -609,6 +609,7 @@ function LessonWorkspace({ lesson, complete, onComplete, onBack }: { lesson: Les
         <main>
           <Surface className="lesson-reading" corner="bottom-left">
             <p className="eyebrow">{brief.partLabel}</p><h2>{brief.sectionTitle}</h2>
+            <div className="concept-definition"><strong>{lesson.capability} in plain language</strong><p>{brief.conceptDefinition}</p></div>
             {brief.explanation.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
             <div className="lesson-example"><strong>{brief.exampleLabel}</strong><p>{brief.example}</p></div>
           </Surface>

@@ -1,6 +1,7 @@
 export type LessonBrief = {
   goal: string;
   objective: string;
+  conceptDefinition: string;
   partLabel: string;
   sectionTitle: string;
   explanation: string[];
@@ -268,8 +269,10 @@ const DOMAIN_CUES: Record<string, { decision: string; evidence: string; scenario
 };
 
 function contextPhrase(context: LessonContext) {
-  if (context.competency && context.competency !== context.domain) return `Within ${context.competency}, ${context.competencyDescription}`;
-  return context.competencyDescription;
+  const focus = context.competencyDescription.replace(/[.]$/, "");
+  const plainFocus = focus ? `${focus.charAt(0).toLowerCase()}${focus.slice(1)}` : "connect this concept to a real decision";
+  if (context.competency && context.competency !== context.domain) return `${context.capability} belongs to ${context.competency}. Here, Jada works to ${plainFocus}.`;
+  return `In this domain, Jada works to ${plainFocus}.`;
 }
 
 export function buildLessonBrief(context: LessonContext): LessonBrief {
@@ -287,9 +290,10 @@ export function buildLessonBrief(context: LessonContext): LessonBrief {
     return {
       goal: `Understand what ${context.capability} means, why it matters, and what it is meant to change.`,
       objective: `Explain ${context.capability} in your own words, connect it to one real decision, and identify the evidence that would make it useful.`,
+      conceptDefinition: definition,
       partLabel: "Part 1 · Build the concept",
-      sectionTitle: `What ${context.capability} actually means`,
-      explanation: [definition, `${competencyContext} ${usefulWhen}`],
+      sectionTitle: "The core idea",
+      explanation: [`${competencyContext} ${usefulWhen}`, `${context.capability} is not a request to ${cue.commonTrap}. It is a way to make one part of the decision clearer, testable, and open to revision.`],
       exampleLabel: "See the concept in context",
       example: `${cue.scenario} Jada uses ${context.capability} to make the decision and its assumptions visible. She avoids ${cue.commonTrap}; instead, she asks what evidence would change the choice.`,
       practice: [
@@ -311,9 +315,10 @@ export function buildLessonBrief(context: LessonContext): LessonBrief {
     return {
       goal: `Recognize when ${context.capability} is the right approach and when another method would be more useful.`,
       objective: `Match ${context.capability} to the decision, evidence, constraints, and stage of learning instead of using it by habit.`,
+      conceptDefinition: definition,
       partLabel: "Part 1 · Choose deliberately",
       sectionTitle: `When to use ${context.capability}`,
-      explanation: [definition, `${usefulWhen} The choice of approach should follow the uncertainty: first name what is unknown, then select the lightest method capable of producing credible evidence.`],
+      explanation: [`${usefulWhen} The choice of approach should follow the uncertainty: first name what is unknown, then select the lightest method capable of producing credible evidence.`, `${context.capability} is a poor fit when the decision is already fixed, the needed evidence is unavailable, or a lighter method could answer the question credibly.`],
       exampleLabel: "Compare the approaches",
       example: `${cue.scenario} Before beginning, Jada asks whether ${context.capability} can produce ${cue.evidence}. If it cannot, she selects a different method or combines approaches instead of forcing the work into a familiar template.`,
       practice: [
@@ -335,9 +340,10 @@ export function buildLessonBrief(context: LessonContext): LessonBrief {
     return {
       goal: `Apply ${context.capability} to a real decision through a small, evidence-seeking sequence.`,
       objective: `Create a first working draft while keeping the decision, assumptions, evidence, and next question visible.`,
+      conceptDefinition: definition,
       partLabel: "Part 1 · Apply the method",
       sectionTitle: `A guided ${context.capability} sequence`,
-      explanation: [definition, `Application has three passes: frame the decision, build the smallest useful ${context.capability} artifact, then review what the evidence changes. The goal is not to finish everything at once; it is to create the next trustworthy step.`],
+      explanation: [`Application has three passes: frame the decision, build the smallest useful ${context.capability} artifact, then review what the evidence changes. The goal is not to finish everything at once; it is to create the next trustworthy step.`, `Keep facts, assumptions, and interpretations visibly separate. That separation helps Jada see where more learning is needed instead of allowing a polished draft to hide uncertainty.`],
       exampleLabel: "Work one pass at a time",
       example: `${cue.scenario} Jada writes the decision first, marks assumptions separately from facts, and creates a small ${context.capability} draft. She asks a reviewer to challenge the evidence before expanding the work.`,
       practice: [
@@ -359,9 +365,10 @@ export function buildLessonBrief(context: LessonContext): LessonBrief {
   return {
     goal: `Evaluate the quality of ${context.capability} and improve the reasoning without taking the work away from its author.`,
     objective: `Use a decision-centered review to find weak evidence, hidden assumptions, missing tradeoffs, and the most valuable revision.`,
+    conceptDefinition: definition,
     partLabel: "Part 1 · Review quality",
     sectionTitle: `What strong ${context.capability} work looks like`,
-    explanation: [definition, `A strong result is not the longest or most polished. It is strong when ${cue.quality}. Review the chain from decision to evidence to reasoning to action; a weakness anywhere in that chain deserves a focused revision.`],
+    explanation: [`A strong result is not the longest or most polished. It is strong when ${cue.quality}. Review the chain from decision to evidence to reasoning to action; a weakness anywhere in that chain deserves a focused revision.`, `The reviewer should ask questions that help the author inspect the work. The goal is to expose the next improvement—not to replace Jada’s judgment with a completed answer.`],
     exampleLabel: "Review the reasoning, not the person",
     example: `${cue.scenario} Jada reviews a ${context.capability} draft by asking what decision it supports, where each claim came from, which alternative was considered, and what new evidence would change the recommendation.`,
     practice: [

@@ -107,6 +107,8 @@ test("gives every lesson a concept-specific teaching brief", async () => {
 
   assert.match(page, /buildLessonBrief/);
   assert.match(page, /brief\.explanation\.map/);
+  assert.match(page, /brief\.conceptDefinition/);
+  assert.match(page, /className="concept-definition"/);
   assert.match(page, /brief\.practice\.map/);
   assert.match(page, /brief\.checkQuestion/);
   assert.doesNotMatch(page, /Good professional judgment starts with evidence that matches the decision/);
@@ -118,6 +120,7 @@ test("gives every lesson a concept-specific teaching brief", async () => {
   assert.match(briefs, /context\.lessonIndex === 1/);
   assert.match(briefs, /context\.lessonIndex === 2/);
   assert.match(briefs, /Review the reasoning, not the person/);
+  assert.match(briefs, /sectionTitle: "The core idea"/);
 
   const capabilityNames = new Set();
   for (const list of page.matchAll(/capabilities:\s*\[([^\]]*)\]/g)) {
