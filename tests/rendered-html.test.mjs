@@ -82,3 +82,17 @@ test("uses progressive colors for progress and My Path accents", async () => {
   assert.match(subconcept, /tone\?: "indigo" \| "aqua" \| "butter" \| "coral"/);
   assert.match(page, /path-module-\$\{moduleIndex \+ 1\}/);
 });
+
+test("provides durable routes for every interactive workspace", async () => {
+  const [page, catchAll] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/[...slug]/page.tsx", import.meta.url), "utf8"),
+  ]);
+
+  for (const route of ["/my-path", "/knowledge-map", "/projects", "/portfolio", "/capabilities/"]) {
+    assert.match(page, new RegExp(route.replace("/", "\\/")));
+  }
+  assert.match(page, /window\.history\.pushState/);
+  assert.match(page, /popstate/);
+  assert.match(catchAll, /export \{ default \} from "\.\.\/page"/);
+});

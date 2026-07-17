@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FocusNotice, ProgressBar, ProgressValue, SectionHeader, SubconceptCard, Surface } from "@/components/design-system";
 import { DomainTutorPrompt } from "@/components/learning/DomainTutorPrompt";
 
@@ -289,6 +289,27 @@ const NAV: { id: View; label: string; short: string }[] = [
   { id: "projects", label: "Projects", short: "B" },
   { id: "portfolio", label: "Portfolio", short: "E" },
 ];
+
+const VIEW_PATHS: Record<View, string> = {
+  home: "/",
+  path: "/my-path",
+  map: "/knowledge-map",
+  projects: "/projects",
+  portfolio: "/portfolio",
+};
+
+function routeSlug(value: string) {
+  return value.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function capabilityFromSlug(slug: string) {
+  const names = new Set<string>();
+  DOMAINS.forEach((domain) => domain.competencies.forEach((competency) => competency.capabilities.forEach((capability) => names.add(capability))));
+  ROLE_PATHS.forEach((path) => path.modules.forEach((module) => module.capabilities.forEach((capability) => names.add(capability))));
+  PROJECTS.forEach((project) => project.capabilities.forEach((capability) => names.add(capability)));
+  PORTFOLIO.forEach((artifact) => names.add(artifact.capability));
+  return [...names].find((name) => routeSlug(name) === slug) ?? null;
+}
 
 const CAPABILITY_CONTENT: Record<string, { summary: string; outcome: string; lessons: string[]; concepts: string[]; methods: string[]; tools: string[]; deliverables: string[] }> = {
   "Customer Interviews": {
@@ -687,34 +708,83 @@ export default function Home() {
 
   const selectedDomain = useMemo(() => DOMAINS.find((domain) => domain.id === selectedDomainId) ?? DOMAINS[0], [selectedDomainId]);
 
-  function openDomain(domain: Domain) {
-    setSelectedDomainId(domain.id);
+  const applyRoute = useCallback((pathname: string) => {
+    const segments = pathname.split("/").filter(Boolean);
+    const [section, item, subsection, detail] = segments;
+
     setSelectedCapability(null);
     setSelectedLesson(null);
     setSelectedProject(null);
-    setView("map");
+
+    if (!section) {
+      setView("home");
+      return;
+    }
+    if (section === "my-path") {
+      setView("path");
+      return;
+    }
+    if (section === "knowledge-map") {
+      setView("map");
+      if (item && DOMAINS.some((domain) => domain.id === item)) setSelectedDomainId(item);
+      return;
+    }
+    if (section === "projects") {
+      setView("projects");
+      if (item) setSelectedProject(PROJECTS.find((project) => project.id === item) ?? null);
+      return;
+    }
+    if (section === "portfolio") {
+      setView("portfolio");
+      return;
+    }
+    if (section === "capabilities" && item) {
+      const capability = capabilityFromSlug(item);
+      setView("map");
+      setSelectedCapability(capability);
+      if (capability && subsection === "lessons" && detail) {
+        const lessonIndex = Number(detail);
+        const lessons = capabilityContent(capability).lessons;
+        if (Number.isInteger(lessonIndex) && lessons[lessonIndex]) {
+          setSelectedLesson({ capability, title: lessons[lessonIndex], index: lessonIndex });
+        }
+      }
+      return;
+    }
+    setView("home");
+  }, []);
+
+  useEffect(() => {
+    const syncRoute = () => applyRoute(window.location.pathname);
+    syncRoute();
+    window.addEventListener("popstate", syncRoute);
+    return () => window.removeEventListener("popstate", syncRoute);
+  }, [applyRoute]);
+
+  function go(pathname: string) {
+    if (window.location.pathname !== pathname) window.history.pushState({}, "", pathname);
+    applyRoute(pathname);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function openDomain(domain: Domain) {
+    go(`/knowledge-map/${domain.id}`);
   }
 
   function openCapability(name: string) {
-    setSelectedProject(null);
-    setSelectedLesson(null);
-    setSelectedCapability(name);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    go(`/capabilities/${routeSlug(name)}`);
   }
 
   function openProject(project: Project) {
-    setSelectedCapability(null);
-    setSelectedLesson(null);
-    setSelectedProject(project);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    go(`/projects/${project.id}`);
   }
 
   function navigate(next: View) {
-    setSelectedCapability(null);
-    setSelectedLesson(null);
-    setSelectedProject(null);
-    setView(next);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    go(VIEW_PATHS[next]);
+  }
+
+  function openLesson(lesson: LessonSelection) {
+    go(`/capabilities/${routeSlug(lesson.capability)}/lessons/${lesson.index}`);
   }
 
   function toggleWorkflow(step: string) {
@@ -736,15 +806,15 @@ export default function Home() {
 
   if (selectedLesson) {
     const lessonKey = `${selectedLesson.capability}:${selectedLesson.title}`;
-    return <LessonWorkspace lesson={selectedLesson} complete={completedLessons.includes(lessonKey)} onComplete={toggleLesson} onBack={() => setSelectedLesson(null)} />;
+    return <LessonWorkspace lesson={selectedLesson} complete={completedLessons.includes(lessonKey)} onComplete={toggleLesson} onBack={() => openCapability(selectedLesson.capability)} />;
   }
 
   if (selectedProject) {
-    return <ProjectWorkspace project={selectedProject} completedSteps={completedProjectSteps} onToggleStep={toggleProjectStep} onBack={() => { setSelectedProject(null); setView("projects"); }} onCapability={openCapability} />;
+    return <ProjectWorkspace project={selectedProject} completedSteps={completedProjectSteps} onToggleStep={toggleProjectStep} onBack={() => navigate("projects")} onCapability={openCapability} />;
   }
 
   if (selectedCapability) {
-    return <CapabilityWorkspace name={selectedCapability} completed={completed} onToggle={toggleWorkflow} onBack={() => setSelectedCapability(null)} onLesson={setSelectedLesson} onProject={openProject} />;
+    return <CapabilityWorkspace name={selectedCapability} completed={completed} onToggle={toggleWorkflow} onBack={() => navigate("map")} onLesson={openLesson} onProject={openProject} />;
   }
 
   return (
@@ -760,7 +830,7 @@ export default function Home() {
       <main className="main-content">
         {view === "home" && <HomeView onView={navigate} onDomain={openDomain} onCapability={openCapability} />}
         {view === "path" && <PathView onCapability={openCapability} selectedRole={selectedRole} onRole={setSelectedRole} />}
-        {view === "map" && <MapView selectedDomain={selectedDomain} onDomain={setSelectedDomainId} onCapability={openCapability} />}
+        {view === "map" && <MapView selectedDomain={selectedDomain} onDomain={openDomain} onCapability={openCapability} />}
         {view === "projects" && <ProjectStudioView onProject={openProject} />}
         {view === "portfolio" && <PortfolioView onCapability={openCapability} />}
       </main>
