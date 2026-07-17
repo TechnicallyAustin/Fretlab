@@ -275,12 +275,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid #a9adff; outline-offs
 .brief-grid span { display: block; padding: 7px 0; border-top: 1px solid #e7e8ef; color: #596078; font-size: 10px; }
 .time-badge { padding: 7px 9px; border-radius: 8px; background: var(--indigo-soft); color: var(--indigo); font-size: 8px; font-weight: 800; }
 .lesson-panel ol { margin: 0; padding: 0; list-style: none; }
-.lesson-panel li { display: grid; grid-template-columns: 35px 1fr 35px; gap: 11px; align-items: center; padding: 13px 0; border-top: 1px solid var(--line); }
-.lesson-panel li > span { color: var(--quiet); font-size: 9px; font-weight: 850; }
+.lesson-panel li { border-top: 1px solid var(--line); }
+.lesson-row-button { width: 100%; min-height: 74px; display: grid; grid-template-columns: 35px minmax(0, 1fr) 35px; gap: 11px; align-items: center; padding: 13px 8px; border: 0; border-radius: 13px; background: transparent; cursor: pointer; text-align: left; transition: background .2s ease, color .2s ease, transform .2s ease; }
+.lesson-row-button:hover { background: var(--indigo-soft); color: var(--indigo-dark); transform: translateX(2px); }
+.lesson-row-button > span:first-child { color: var(--quiet); font-size: 9px; font-weight: 850; }
 .lesson-panel li strong, .lesson-panel li small { display: block; }
 .lesson-panel li strong { font-size: 11px; }
 .lesson-panel li small { margin-top: 3px; color: var(--muted); font-size: 8px; }
-.lesson-panel li button { width: 31px; height: 31px; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); color: var(--indigo); cursor: pointer; }
+.lesson-row-button b { width: 31px; height: 31px; display: grid; place-items: center; justify-self: end; border: 1px solid var(--line); border-radius: 9px; background: var(--paper); color: var(--indigo); font-size: 16px; }
 .build-panel { padding: 30px; border-radius: 24px 8px 24px 24px; background: var(--indigo); color: white; box-shadow: var(--shadow); }
 .build-panel .eyebrow { color: #c8caff; }
 .build-panel > p:not(.eyebrow) { margin: 10px 0 22px; color: #d9daf5; font-size: 11px; line-height: 1.55; }
@@ -682,10 +684,10 @@ small { font-size: 13px !important; line-height: 1.5; }
 .brief-grid h3 { font-size: 15px; text-transform: none; letter-spacing: .02em; }
 .brief-grid span { padding: 11px 0; font-size: 15px; line-height: 1.5; }
 .time-badge { padding: 10px 12px; font-size: 13px; }
-.lesson-panel li { min-height: 78px; grid-template-columns: 42px 1fr 48px; gap: 14px; padding: 15px 0; }
-.lesson-panel li > span { font-size: 13px; }
+.lesson-row-button { min-height: 78px; grid-template-columns: 42px minmax(0, 1fr) 48px; gap: 14px; padding: 15px 10px; }
+.lesson-row-button > span:first-child { font-size: 13px; }
 .lesson-panel li strong { font-size: 16px; line-height: 1.45; }
-.lesson-panel li button { width: 46px; height: 46px; }
+.lesson-row-button b { width: 46px; height: 46px; }
 .build-panel > p:not(.eyebrow) { font-size: 15px; line-height: 1.7; }
 .deliverable-row { width: 100%; display: grid; grid-template-columns: 36px 1fr; grid-template-rows: auto auto; column-gap: 12px; padding: 16px 0; border-top: 1px solid rgba(255,255,255,.18); }
 .deliverable-row > span { grid-row: 1 / 3; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; background: rgba(255,255,255,.12); font-size: 13px; }

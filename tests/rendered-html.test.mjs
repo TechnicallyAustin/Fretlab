@@ -35,6 +35,8 @@ test("keeps paths, lessons, projects, and the design system wired", async () => 
   assert.match(page, /function PathView/);
   assert.match(page, /onClick=\{\(\) => onRole\(item\.role\)\}/);
   assert.match(page, /function LessonWorkspace/);
+  assert.match(page, /className="lesson-row-button"/);
+  assert.match(page, /aria-label=\{`Open \$\{lesson\}`\}/);
   assert.match(page, /function ProjectStudioView/);
   assert.match(page, /"Foundation" \| "Applied" \| "Integrated" \| "Capstone"/);
   assert.match(page, /jada-learning-state/);
