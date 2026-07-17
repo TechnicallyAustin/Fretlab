@@ -611,6 +611,7 @@ function LessonWorkspace({ lesson, complete, onComplete, onBack }: { lesson: Les
             <p className="eyebrow">{brief.partLabel}</p><h2>{brief.sectionTitle}</h2>
             <div className="concept-definition"><strong>{lesson.capability} in plain language</strong><p>{brief.conceptDefinition}</p></div>
             {brief.explanation.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            <div className="research-quest"><p className="eyebrow">Research required</p><h3>{brief.researchTitle}</h3><ol>{brief.researchSteps.map((step, index) => <li key={step}><span>{index + 1}</span><p>{step}</p></li>)}</ol><p className="research-rule">Save your sources. Do not complete the practice from this brief alone.</p></div>
             <div className="lesson-example"><strong>{brief.exampleLabel}</strong><p>{brief.example}</p></div>
           </Surface>
           <Surface className="lesson-practice" corner="top-right">

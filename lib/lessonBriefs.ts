@@ -5,6 +5,8 @@ export type LessonBrief = {
   partLabel: string;
   sectionTitle: string;
   explanation: string[];
+  researchTitle: string;
+  researchSteps: string[];
   exampleLabel: string;
   example: string;
   practice: string[];
@@ -289,19 +291,25 @@ export function buildLessonBrief(context: LessonContext): LessonBrief {
   if (context.lessonIndex === 0) {
     return {
       goal: `Understand what ${context.capability} means, why it matters, and what it is meant to change.`,
-      objective: `Explain ${context.capability} in your own words, connect it to one real decision, and identify the evidence that would make it useful.`,
+      objective: `Research how credible practitioners define ${context.capability}, compare their views, and form your own explanation before applying it.`,
       conceptDefinition: definition,
       partLabel: "Part 1 · Build the concept",
       sectionTitle: "The core idea",
-      explanation: [`${competencyContext} ${usefulWhen}`, `${context.capability} is not a request to ${cue.commonTrap}. It is a way to make one part of the decision clearer, testable, and open to revision.`],
+      explanation: [`${competencyContext} The brief definition is only an orientation; Jada must research how the concept is used, debated, and limited before completing the task.`],
+      researchTitle: `Investigate ${context.capability} before applying it`,
+      researchSteps: [
+        `Find two credible sources that define ${context.capability}. Save each title, author or organization, date, and link.`,
+        "Write one point where the sources agree and one place where their emphasis differs.",
+        `Find one real example or case. Explain what makes it an example of ${context.capability} using evidence from your sources.`,
+      ],
       exampleLabel: "See the concept in context",
       example: `${cue.scenario} Jada uses ${context.capability} to make the decision and its assumptions visible. She avoids ${cue.commonTrap}; instead, she asks what evidence would change the choice.`,
       practice: [
-        `Write one sentence explaining ${context.capability} without using the capability name in the definition.`,
-        `Name a real decision where ${context.capability} could reduce uncertainty.`,
-        `List one piece of ${cue.evidence} you would need before acting.`,
+        `Write your own two-sentence explanation of ${context.capability} without copying either source.`,
+        `Name a real decision where the concept might help, and cite which source supports that use.`,
+        "Write one question your research has not answered yet and identify where you will look next.",
       ],
-      notePrompt: `In my own words, ${context.capability} is… It would help me decide… The evidence I need is…`,
+      notePrompt: `Source 1… Source 2… They agree that… They differ on… In my own words… My unanswered question…`,
       checkQuestion: `Which explanation best captures ${context.capability}?`,
       options: [correctFoundation, `It is a polished document that proves the team has completed the ${context.competency.toLowerCase()} process.`, `It is a way to remove uncertainty so leaders can approve a decision without revisiting it.`],
       correctAnswer: correctFoundation,
@@ -314,19 +322,25 @@ export function buildLessonBrief(context: LessonContext): LessonBrief {
   if (context.lessonIndex === 1) {
     return {
       goal: `Recognize when ${context.capability} is the right approach and when another method would be more useful.`,
-      objective: `Match ${context.capability} to the decision, evidence, constraints, and stage of learning instead of using it by habit.`,
+      objective: `Research when practitioners recommend ${context.capability}, find a meaningful limitation, and decide whether it fits a real situation.`,
       conceptDefinition: definition,
       partLabel: "Part 1 · Choose deliberately",
       sectionTitle: `When to use ${context.capability}`,
-      explanation: [`${usefulWhen} The choice of approach should follow the uncertainty: first name what is unknown, then select the lightest method capable of producing credible evidence.`, `${context.capability} is a poor fit when the decision is already fixed, the needed evidence is unavailable, or a lighter method could answer the question credibly.`],
+      explanation: [`${usefulWhen} This is a starting hypothesis, not a rule. Research should determine when the approach fits and where another method is stronger.`],
+      researchTitle: `Find the boundaries of ${context.capability}`,
+      researchSteps: [
+        `Find one credible source explaining when to use ${context.capability} and one source describing a limitation, criticism, or common misuse.`,
+        "Compare the evidence each source uses. Note whether the guidance is based on research, experience, a case study, or opinion.",
+        `Find an alternative method that could address a similar decision. Record what that alternative does better than ${context.capability}.`,
+      ],
       exampleLabel: "Compare the approaches",
       example: `${cue.scenario} Before beginning, Jada asks whether ${context.capability} can produce ${cue.evidence}. If it cannot, she selects a different method or combines approaches instead of forcing the work into a familiar template.`,
       practice: [
         "Write the decision and the single uncertainty blocking progress.",
-        `Explain why ${context.capability} is—or is not—the right tool for that uncertainty.`,
-        "Name one lighter alternative and one complementary method you could use.",
+        `Use your sources to argue why ${context.capability} is—or is not—the right tool for that uncertainty.`,
+        "Name the strongest alternative and describe what new evidence would make you change your method choice.",
       ],
-      notePrompt: `The decision is… The uncertainty is… ${context.capability} fits because… An alternative would be…`,
+      notePrompt: `Use-case source… Limitation source… Alternative method… My decision… My method choice and evidence…`,
       checkQuestion: `When is ${context.capability} the strongest choice?`,
       options: [correctChoice, `Whenever a stakeholder requests a ${context.capability} deliverable, even if the decision is unclear.`, `Only after the team has already chosen an answer and needs evidence to support it.`],
       correctAnswer: correctChoice,
@@ -339,20 +353,26 @@ export function buildLessonBrief(context: LessonContext): LessonBrief {
   if (context.lessonIndex === 2) {
     return {
       goal: `Apply ${context.capability} to a real decision through a small, evidence-seeking sequence.`,
-      objective: `Create a first working draft while keeping the decision, assumptions, evidence, and next question visible.`,
+      objective: `Research a credible method and a real example, then adapt what you learn into a first draft for your own decision.`,
       conceptDefinition: definition,
       partLabel: "Part 1 · Apply the method",
       sectionTitle: `A guided ${context.capability} sequence`,
-      explanation: [`Application has three passes: frame the decision, build the smallest useful ${context.capability} artifact, then review what the evidence changes. The goal is not to finish everything at once; it is to create the next trustworthy step.`, `Keep facts, assumptions, and interpretations visibly separate. That separation helps Jada see where more learning is needed instead of allowing a polished draft to hide uncertainty.`],
+      explanation: [`Application should be adapted from evidence, not copied from a template. Jada must investigate how the method works in practice before choosing her own sequence.`],
+      researchTitle: `Research how ${context.capability} is practiced`,
+      researchSteps: [
+        `Find one credible method, framework, or working guide for ${context.capability}. Record its steps and the assumptions behind them.`,
+        "Find a case study or public example. Identify what the practitioner changed to fit the situation.",
+        "Locate one caution about using the method poorly. Turn that caution into a check for your own draft.",
+      ],
       exampleLabel: "Work one pass at a time",
       example: `${cue.scenario} Jada writes the decision first, marks assumptions separately from facts, and creates a small ${context.capability} draft. She asks a reviewer to challenge the evidence before expanding the work.`,
       practice: [
         "Frame the decision in one sentence, including who decides and by when.",
-        `Create the smallest ${context.capability} draft that could expose a weak assumption.`,
-        `Add two pieces of ${cue.evidence} and label what remains unknown.`,
-        "Write the next action the evidence supports—without jumping to a final answer.",
+        `Adapt the researched method into the smallest ${context.capability} draft that could expose a weak assumption.`,
+        "Annotate which parts came from research, which parts you adapted, and why.",
+        "Ask a question that would test the draft before treating it as a recommendation.",
       ],
-      notePrompt: `Decision… Assumptions… Evidence… My first ${context.capability} draft should reveal… Next question…`,
+      notePrompt: `Method source… Case source… What I adapted… Why it fits my decision… Assumption to test…`,
       checkQuestion: `What should Jada do first when applying ${context.capability}?`,
       options: [correctApplication, `Complete the final artifact before showing it to anyone so early uncertainty does not distract stakeholders.`, `Choose the most sophisticated available framework and fill in every section.`],
       correctAnswer: correctApplication,
@@ -364,20 +384,26 @@ export function buildLessonBrief(context: LessonContext): LessonBrief {
 
   return {
     goal: `Evaluate the quality of ${context.capability} and improve the reasoning without taking the work away from its author.`,
-    objective: `Use a decision-centered review to find weak evidence, hidden assumptions, missing tradeoffs, and the most valuable revision.`,
+    objective: `Research quality standards and contrasting examples, then use them to critique a draft and choose the most valuable revision.`,
     conceptDefinition: definition,
     partLabel: "Part 1 · Review quality",
     sectionTitle: `What strong ${context.capability} work looks like`,
-    explanation: [`A strong result is not the longest or most polished. It is strong when ${cue.quality}. Review the chain from decision to evidence to reasoning to action; a weakness anywhere in that chain deserves a focused revision.`, `The reviewer should ask questions that help the author inspect the work. The goal is to expose the next improvement—not to replace Jada’s judgment with a completed answer.`],
+    explanation: [`A strong result is not simply polished. Jada must research what credible sources consider high-quality ${context.capability} work, then defend the review criteria she chooses.`],
+    researchTitle: `Build an evidence-based review standard`,
+    researchSteps: [
+      `Find two credible sources that describe quality criteria for ${context.capability}. Record where their criteria overlap and differ.`,
+      "Find one strong or weak public example. Evaluate it against both sources rather than relying on first impressions.",
+      "Find one criticism or limitation of the common review standard and decide whether your rubric should account for it.",
+    ],
     exampleLabel: "Review the reasoning, not the person",
     example: `${cue.scenario} Jada reviews a ${context.capability} draft by asking what decision it supports, where each claim came from, which alternative was considered, and what new evidence would change the recommendation.`,
     practice: [
-      `Choose one ${context.capability} draft—your own or a realistic example.`,
-      "Underline claims and mark the evidence supporting each one.",
-      "Circle one hidden assumption and name the strongest alternative.",
-      "Choose one revision that would most improve the decision, then explain why.",
+      `Choose one ${context.capability} draft—your own or a public example.`,
+      "Create a short rubric from your research and cite the source behind each criterion.",
+      "Use the rubric to identify one strength, one weak assumption, and one missing alternative.",
+      "Choose one revision that would most improve the decision and defend it with research.",
     ],
-    notePrompt: `The decision is… The strongest evidence is… The weakest assumption is… The most useful revision is…`,
+    notePrompt: `Quality source 1… Quality source 2… My rubric… Evidence from the example… Revision and research-based rationale…`,
     checkQuestion: `Which review question best tests the quality of ${context.capability}?`,
     options: [correctReview, `Does the artifact use every section of the recommended template and look ready for executives?`, `Will the reviewer agree with the recommendation without asking for more information?`],
     correctAnswer: correctReview,
