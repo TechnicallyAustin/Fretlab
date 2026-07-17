@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FocusNotice, ProgressBar, ProgressValue, SectionHeader, SubconceptCard, Surface } from "@/components/design-system";
 import { DomainTutorPrompt } from "@/components/learning/DomainTutorPrompt";
+import { buildLessonBrief } from "@/lib/lessonBriefs";
 
 type View = "home" | "path" | "map" | "projects" | "portfolio";
 
@@ -335,6 +336,20 @@ function capabilityContent(name: string) {
   };
 }
 
+function capabilityLearningContext(name: string) {
+  for (const domain of DOMAINS) {
+    for (const competency of domain.competencies) {
+      if (competency.capabilities.includes(name)) {
+        return { domain: domain.name, competency: competency.name, competencyDescription: competency.description };
+      }
+    }
+  }
+  if (name === "Positioning") {
+    return { domain: "Marketing", competency: "Positioning", competencyDescription: "Frame the product around a valuable market truth." };
+  }
+  return { domain: "General", competency: "Commercial Product Leadership", competencyDescription: "Connect evidence, judgment, and action across a consequential commercial product decision." };
+}
+
 function Logo() {
   return (
     <div className="brand" aria-label="Jada home">
@@ -574,42 +589,43 @@ function ProjectWorkspace({ project, completedSteps, onToggleStep, onBack, onCap
 
 function LessonWorkspace({ lesson, complete, onComplete, onBack }: { lesson: LessonSelection; complete: boolean; onComplete: () => void; onBack: () => void }) {
   const [answer, setAnswer] = useState<string | null>(null);
-  const example = lesson.capability === "Customer Interviews"
-    ? "Instead of asking, ‘Would you use this?’ ask, ‘Tell me about the last time you tried to solve this problem.’"
-    : `Start with a real ${lesson.capability.toLowerCase()} decision. Separate what you know, what you assume, and what evidence would change your mind.`;
-  const correctAnswer = "Ask for evidence from a specific past event.";
-  const options = [correctAnswer, "Ask whether the customer likes the proposed idea.", "Explain the solution before asking a question."];
+  const learningContext = capabilityLearningContext(lesson.capability);
+  const brief = buildLessonBrief({
+    capability: lesson.capability,
+    lessonTitle: lesson.title,
+    lessonIndex: lesson.index,
+    ...learningContext,
+  });
 
   return (
     <div className="focused-workspace lesson-workspace">
       <button className="back-button" onClick={onBack}>← Back to {lesson.capability}</button>
       <header className="workspace-hero lesson-hero">
-        <div><p className="eyebrow">Lesson {lesson.index + 1} · {lesson.capability}</p><h1>{lesson.title}</h1><p>A short, focused lesson. Read one section, try the example, then check your understanding.</p></div>
+        <div><p className="eyebrow">Lesson {lesson.index + 1} · {lesson.capability}</p><h1>{lesson.title}</h1><p>{brief.goal}</p></div>
         <div className={`lesson-status ${complete ? "complete" : ""}`}><span>{complete ? "✓" : lesson.index + 1}</span><strong>{complete ? "Complete" : "About 12 minutes"}</strong></div>
       </header>
-      <FocusNotice label="Learning objective"><p>By the end, you can explain the idea in your own words and use it in one realistic product decision.</p></FocusNotice>
+      <FocusNotice label="Learning objective"><p>{brief.objective}</p></FocusNotice>
       <section className="lesson-layout">
         <main>
           <Surface className="lesson-reading" corner="bottom-left">
-            <p className="eyebrow">Part 1 · Understand</p><h2>The core idea</h2>
-            <p>Good professional judgment starts with evidence that matches the decision. A strong question or method does not merely produce information. It reduces a specific uncertainty.</p>
-            <p>Before using a technique, write down the choice you are trying to make. Then ask what evidence would make you change direction.</p>
-            <div className="lesson-example"><strong>Example</strong><p>{example}</p></div>
+            <p className="eyebrow">{brief.partLabel}</p><h2>{brief.sectionTitle}</h2>
+            {brief.explanation.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            <div className="lesson-example"><strong>{brief.exampleLabel}</strong><p>{brief.example}</p></div>
           </Surface>
           <Surface className="lesson-practice" corner="top-right">
             <p className="eyebrow">Part 2 · Try it</p><h2>Practice in five minutes</h2>
-            <ol><li><span>1</span><p>Choose one current product or business question.</p></li><li><span>2</span><p>Write the decision that depends on the answer.</p></li><li><span>3</span><p>Write one weak prompt and rewrite it to request observable evidence.</p></li></ol>
-            <label htmlFor="practice-note">Your practice note</label><textarea id="practice-note" rows={5} placeholder="Write one decision and one evidence-seeking prompt…" />
+            <ol>{brief.practice.map((step, index) => <li key={step}><span>{index + 1}</span><p>{step}</p></li>)}</ol>
+            <label htmlFor="practice-note">Your practice note</label><textarea id="practice-note" rows={6} placeholder={brief.notePrompt} />
           </Surface>
         </main>
         <aside>
           <Surface className="knowledge-check" corner="top-right">
-            <p className="eyebrow">Part 3 · Check</p><h2>Which prompt creates the strongest evidence?</h2>
-            <div>{options.map((option) => <button key={option} className={answer === option ? "selected" : ""} aria-pressed={answer === option} onClick={() => setAnswer(option)}>{option}</button>)}</div>
-            {answer ? <p className={`answer-feedback ${answer === correctAnswer ? "correct" : "retry"}`} role="status">{answer === correctAnswer ? "Correct. Specific past behavior is stronger evidence than a future claim." : "Try again. Look for the option grounded in a real past event."}</p> : null}
+            <p className="eyebrow">Part 3 · Check</p><h2>{brief.checkQuestion}</h2>
+            <div>{brief.options.map((option) => <button key={option} className={answer === option ? "selected" : ""} aria-pressed={answer === option} onClick={() => setAnswer(option)}>{option}</button>)}</div>
+            {answer ? <p className={`answer-feedback ${answer === brief.correctAnswer ? "correct" : "retry"}`} role="status">{answer === brief.correctAnswer ? brief.correctFeedback : brief.retryFeedback}</p> : null}
           </Surface>
           <button className="lesson-complete-button" onClick={onComplete}>{complete ? "Mark lesson incomplete" : "Complete lesson"}<span>→</span></button>
-          <Surface className="lesson-summary" corner="bottom-left"><p className="eyebrow">Remember</p><ul><li>Start with the decision.</li><li>Prefer behavior over opinion.</li><li>Name uncertainty clearly.</li><li>Record what would change your mind.</li></ul></Surface>
+          <Surface className="lesson-summary" corner="bottom-left"><p className="eyebrow">Remember</p><ul>{brief.remember.map((item) => <li key={item}>{item}</li>)}</ul></Surface>
         </aside>
       </section>
     </div>

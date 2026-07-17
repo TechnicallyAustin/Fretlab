@@ -98,3 +98,31 @@ test("provides durable routes for every interactive workspace", async () => {
   assert.match(page, /popstate/);
   assert.match(catchAll, /export \{ default \} from "\.\.\/page"/);
 });
+
+test("gives every lesson a concept-specific teaching brief", async () => {
+  const [page, briefs] = await Promise.all([
+    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/lessonBriefs.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(page, /buildLessonBrief/);
+  assert.match(page, /brief\.explanation\.map/);
+  assert.match(page, /brief\.practice\.map/);
+  assert.match(page, /brief\.checkQuestion/);
+  assert.doesNotMatch(page, /Good professional judgment starts with evidence that matches the decision/);
+  assert.match(briefs, /"Product Vision": "A product vision describes/);
+  assert.match(briefs, /"Customer Interviews": "Customer interviews are structured/);
+  assert.match(briefs, /"Unit Economics": "Unit economics measures/);
+  assert.match(briefs, /"Executive Presentations": "Executive presentations compress/);
+  assert.match(briefs, /context\.lessonIndex === 0/);
+  assert.match(briefs, /context\.lessonIndex === 1/);
+  assert.match(briefs, /context\.lessonIndex === 2/);
+  assert.match(briefs, /Review the reasoning, not the person/);
+
+  const capabilityNames = new Set();
+  for (const list of page.matchAll(/capabilities:\s*\[([^\]]*)\]/g)) {
+    for (const name of list[1].matchAll(/"([^"]+)"/g)) capabilityNames.add(name[1]);
+  }
+  const missingDefinitions = [...capabilityNames].filter((name) => !briefs.includes(`"${name}":`));
+  assert.deepEqual(missingDefinitions, [], `Missing concept definitions: ${missingDefinitions.join(", ")}`);
+});
