@@ -49,6 +49,29 @@ test("includes visual theory, piano comparison, and drill history systems", asyn
   assert.match(css,/\.view-drill-detail \.drill-detail-screen\.tab-practice/);
 });
 
+test("ships modular training, playable libraries, and a dedicated theory hub", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /const TRAINING_MODULES/);
+  assert.match(page, /Note locator/);
+  assert.match(page, /Chord tones/);
+  assert.match(page, /function playTones/);
+  assert.match(page, /Hear chord/);
+  assert.match(page, /Hear scale/);
+  assert.match(page, /function TheoryHub/);
+  assert.match(page, /Fretboard foundations/);
+  assert.match(page, /Rhythm & phrasing/);
+  assert.match(page, /level:"Advanced"/);
+});
+
+test("renders detailed pitch-colored fretboards", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(page, /const PC_KEY/);
+  assert.match(page, /noteAccent/);
+  assert.match(page, /linearGradient/);
+  assert.match(page, /\[3,5,7,9\]/);
+  assert.match(page, /strokeWidth=\{\.55\+string\*\.13\}/);
+});
+
 test("uses the paper theme and key-color token system", async () => {
   const [page, css, layout] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8"), readFile(new URL("../app/layout.tsx", import.meta.url), "utf8")]);
   assert.match(page, /oklch\(0\.58 0\.155/);
