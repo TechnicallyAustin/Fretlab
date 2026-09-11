@@ -39,6 +39,16 @@ test("ships complete chord, scale, and song library flows", async () => {
   assert.match(page, /function intervalShape/);
 });
 
+test("includes visual theory, piano comparison, and drill history systems", async () => {
+  const [page,css] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),readFile(new URL("../app/globals.css", import.meta.url), "utf8")]);
+  assert.match(page,/function PianoMap/);
+  assert.match(page,/function TheoryLesson/);
+  assert.match(page,/function DrillHistory/);
+  assert.match(page,/Same notes on a piano/);
+  assert.match(css,/\.drill-card \.fretboard\.mini/);
+  assert.match(css,/\.view-drill-detail \.drill-detail-screen\.tab-practice/);
+});
+
 test("uses the paper theme and key-color token system", async () => {
   const [page, css, layout] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8"), readFile(new URL("../app/layout.tsx", import.meta.url), "utf8")]);
   assert.match(page, /oklch\(0\.58 0\.155/);
