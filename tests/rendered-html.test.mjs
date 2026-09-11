@@ -72,6 +72,21 @@ test("renders detailed pitch-colored fretboards", async () => {
   assert.match(page, /strokeWidth=\{\.55\+string\*\.13\}/);
 });
 
+test("keeps one global key across guided drills, routines, and harmony", async () => {
+  const [page, css] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8")]);
+  assert.match(page, /function KeySelectorModal/);
+  assert.match(page, /Global key/);
+  assert.match(page, /const \[selectedKey,setSelectedKey\]/);
+  assert.match(page, /const \[selectedDrill,setSelectedDrill\]/);
+  assert.match(page, /function drillNotes/);
+  assert.match(page, /Why this drill/);
+  assert.match(page, /Scale → chord → music/);
+  assert.match(page, /A scale is the source; chords are selected stacks/);
+  assert.match(page, /practice routines/);
+  assert.match(css, /\.drill-board-stage/);
+  assert.match(css, /\.key-modal-backdrop/);
+});
+
 test("uses the paper theme and key-color token system", async () => {
   const [page, css, layout] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8"), readFile(new URL("../app/layout.tsx", import.meta.url), "utf8")]);
   assert.match(page, /oklch\(0\.58 0\.155/);
