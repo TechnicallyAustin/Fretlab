@@ -9,18 +9,18 @@ export async function generateMetadata(): Promise<Metadata> {
   const imageUrl = `${protocol}://${host}/og.png`;
 
   return {
-    title: "Jada — Commercial Product Leadership",
-    description: "A personalized Knowledge OS for building commercial product leadership judgment through learning, practice, evidence, and reflection.",
+    title: "FretLab — Practice one key. Know the whole neck.",
+    description: "A focused guitar practice app for daily sessions, fretboard drills, key theory, routines, and progress.",
     openGraph: {
-      title: "Jada — Commercial Product Leadership",
-      description: "Build the judgment to lead products.",
+      title: "FretLab — Practice one key. Know the whole neck.",
+      description: "Daily guitar practice that connects fretboard shapes, keys, theory, and timing.",
       type: "website",
-      images: [{ url: imageUrl, width: 1536, height: 1024, alt: "Jada — Build the judgment to lead products." }],
+      images: [{ url: imageUrl, width: 1536, height: 1024, alt: "FretLab — Practice one key. Know the whole neck." }],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Jada — Commercial Product Leadership",
-      description: "Build the judgment to lead products.",
+      title: "FretLab — Practice one key. Know the whole neck.",
+      description: "Daily guitar practice that connects fretboard shapes, keys, theory, and timing.",
       images: [imageUrl],
     },
   };
