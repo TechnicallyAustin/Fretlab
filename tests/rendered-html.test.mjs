@@ -87,6 +87,18 @@ test("keeps one global key across guided drills, routines, and harmony", async (
   assert.match(css, /\.key-modal-backdrop/);
 });
 
+test("clarifies practice studio, keeps one key button, and tracks consistency", async () => {
+  const [page, css] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8")]);
+  assert.match(page, /Choose practice studio lesson/);
+  assert.match(page, /Goal · find all/);
+  assert.match(page, /Circle of fifths/);
+  assert.doesNotMatch(page, /global-key-select/);
+  assert.match(page, /Practice consistency/);
+  assert.match(page, /commit-graph/);
+  assert.match(css, /@media \(max-width:899px\)/);
+  assert.match(css, /\.drill-filter-stack \.segment-tabs/);
+});
+
 test("uses the paper theme and key-color token system", async () => {
   const [page, css, layout] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8"), readFile(new URL("../app/layout.tsx", import.meta.url), "utf8")]);
   assert.match(page, /oklch\(0\.58 0\.155/);
