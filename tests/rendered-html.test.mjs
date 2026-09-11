@@ -29,6 +29,16 @@ test("ships every handoff screen and computed music logic", async () => {
   assert.match(page, /localStorage\.setItem\("fretlab-key"/);
 });
 
+test("ships complete chord, scale, and song library flows", async () => {
+  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  for (const view of ["chords","chord-detail","scales","scale-library-detail","songs","song-detail"]) assert.match(page, new RegExp(`\\"${view}\\"`));
+  for (const component of ["ChordLibrary","ChordDetail","ScaleLibrary","ScaleLibraryDetail","SongLibrary","SongDetail"]) assert.match(page, new RegExp(`function ${component}`));
+  assert.match(page, /const CHORDS/);
+  assert.match(page, /const SCALES/);
+  assert.match(page, /const SONGS/);
+  assert.match(page, /function intervalShape/);
+});
+
 test("uses the paper theme and key-color token system", async () => {
   const [page, css, layout] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8"), readFile(new URL("../app/layout.tsx", import.meta.url), "utf8")]);
   assert.match(page, /oklch\(0\.58 0\.155/);
