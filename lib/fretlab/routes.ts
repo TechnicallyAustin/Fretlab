@@ -24,6 +24,7 @@ export const VIEW_PATHS: Record<View, string> = {
   "drill-detail": "/drills/:id",
   train: "/train",
   keys: "/keys",
+  library: "/library",
   "key-detail": "/keys/current",
   theory: "/theory",
   chords: "/chords",
@@ -110,6 +111,7 @@ export function viewForPath(pathname: string): View {
 export function primaryViewFor(view: View): View {
   if (view === "today") return "today";
   if (view === "theory") return "theory";
+  if (view === "library" || view === "keys" || view.includes("key") || view.includes("scale") || view.includes("chord") || view.includes("song")) return "library";
   // The tuner belongs with practice: it is what you do before a session, not
   // something you browse.
   if (
@@ -124,12 +126,7 @@ export function primaryViewFor(view: View): View {
   if (
     view === "drills" ||
     view === "grouped" ||
-    view.includes("drill") ||
-    view === "keys" ||
-    view.includes("key") ||
-    view.includes("scale") ||
-    view.includes("chord") ||
-    view.includes("song")
+    view.includes("drill")
   ) {
     return "drills";
   }

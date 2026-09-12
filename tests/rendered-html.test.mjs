@@ -209,6 +209,19 @@ test("every view has its own route and renders there", async () => {
   }
 });
 
+test("mobile Library exposes every top-level library route within two taps", async () => {
+  const source = await readProjectFile("components/fretlab/BottomNav.tsx");
+  const library = await readProjectFile("app/_screens/Library.tsx");
+  const launchpad = await readProjectFile("app/_sections/LibraryLaunchpad.tsx");
+  assert.match(source, /label: "Library", view: "library"/);
+  for (const view of ["keys", "chords", "scales", "songs"]) {
+    assert.match(launchpad, new RegExp(`view: "${view}"`));
+  }
+  assert.match(library, /LibraryLaunchpad/);
+  assert.doesNotMatch(source, /label: "Learn"/);
+  assert.doesNotMatch(source, /label: "Theory"/);
+});
+
 test("detail routes render the entity named in the URL", async () => {
   const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   for (const [path, expected] of [

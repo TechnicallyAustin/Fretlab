@@ -12,9 +12,9 @@ import { FIFTHS } from "@/lib/fretlab/theory";
 export function BottomNav({ active, go }: { active: View; go: (view: View) => void }) {
   const items: { label: string; view: View }[] = [
     { label: "Today", view: "today" },
-    { label: "Learn", view: "drills" },
     { label: "Practice", view: "train" },
-    { label: "Theory", view: "theory" },
+    { label: "Library", view: "library" },
+    { label: "Progress", view: "progress" },
   ];
   return (
     <nav className="tab-bar" aria-label="Primary navigation">

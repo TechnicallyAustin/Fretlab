@@ -770,6 +770,47 @@ p {
   outline-offset: 2px;
 }
 
+.library-home-header h1 {
+  margin-top: 4px;
+  font-size: 1.812rem;
+  font-weight: 500;
+}
+
+.library-home-header>p:last-child {
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.library-theory-link {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--key-edge);
+  border-radius: 14px;
+  background: var(--key-dim);
+}
+
+.library-theory-link h2 {
+  margin-top: 4px;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.library-theory-link p:last-child {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: .875rem;
+}
+
+.library-theory-link button {
+  min-height: 48px;
+  border: 1px solid var(--key-edge);
+  border-radius: 11px;
+  background: var(--card);
+  color: var(--key-ink);
+  cursor: pointer;
+}
+
 .train-hero {
   padding: 24px 20px 10px;
   text-align: center;
@@ -7084,6 +7125,30 @@ p {
 
   .screen-content {
     gap: 16px;
+  }
+
+  /* These regions are useful on a phone too; keep them in the reading flow. */
+  .desktop-studio,
+  .desktop-drill-tools,
+  .desktop-progress-range,
+  .desktop-train-guide,
+  .desktop-key-relations,
+  .desktop-routine-summary,
+  .desktop-progress-insights {
+    display: grid;
+  }
+
+  .desktop-drill-tools,
+  .desktop-progress-range,
+  .desktop-train-guide,
+  .desktop-key-relations,
+  .desktop-routine-summary,
+  .desktop-progress-insights {
+    gap: 12px;
+  }
+
+  .desktop-studio {
+    grid-template-columns: 1fr;
   }
 
   .section-head h2,

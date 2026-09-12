@@ -24,6 +24,7 @@ export type View =
   | "drills"
   | "train"
   | "keys"
+  | "library"
   | "theory"
   | "chords"
   | "chord-detail"

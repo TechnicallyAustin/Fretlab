@@ -17,11 +17,11 @@ export function LibraryLaunchpad({ go }: { go: (view: View) => void }) {
     count: string;
   }[] = [
     {
-      view: "theory",
-      label: "Theory courses",
-      copy: "Intervals, harmony and rhythm you can see.",
+      view: "keys",
+      label: "Key map",
+      copy: "See nearby keys, degrees, and harmonic movement.",
       image: "/guitar-neck.jpg",
-      count: `${SCALES.length + CHORDS.length} entries`,
+      count: "12 keys",
     },
     {
       view: "chords",

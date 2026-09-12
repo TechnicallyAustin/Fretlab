@@ -1078,7 +1078,7 @@ Carried forward into Stage 3, logged rather than fixed:
 |---|---|---|
 | FL-16 | Grid keyboard navigation and a screen-reader pass | `DONE` |
 | FL-17 | Rem type scale, 16px floor, stand mode | `DONE` |
-| FL-18 | Mobile IA: promote Library, reflow the hidden regions | `TODO` |
+| FL-18 | Mobile IA: promote Library, reflow the hidden regions | `DONE` |
 | FL-19 | Left-handed mirroring and alternate tunings | `TODO` |
 | FL-20 | Dark theme | `TODO` |
 | FL-21 | Onboarding | `TODO` |
@@ -1148,8 +1148,10 @@ its labels and the surrounding type up — competitors charge for this.
 
 ---
 
-### - [ ] FL-18 — Mobile IA: promote Library, reflow the hidden regions
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** U-02
+### - [x] FL-18 — Mobile IA: promote Library, reflow the hidden regions
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** U-02
+
+> **Done.** Added a first-class `/library` landing screen with direct Key map, Chords, Scales, and Songs destinations, changed the mobile bar to Today, Practice, Library, and Progress, and reflowed the previously desktop-only practice and progress regions on mobile. The two-tap Library acceptance test and full verification gate pass.
 
 **Files:** `app/globals.css:498-505`, `components/fretlab/BottomNav.tsx`,
 `lib/fretlab/routes.ts`

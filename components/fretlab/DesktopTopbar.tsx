@@ -25,6 +25,7 @@ export function DesktopTopbar({
     drills: "Drill library",
     train: "Training modules",
     keys: "Key explorer",
+    library: "Library",
     theory: "Theory courses",
     chords: "Chord library",
     "chord-detail": "Chord study",
