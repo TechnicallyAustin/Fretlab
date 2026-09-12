@@ -14,7 +14,10 @@ Stages 1–3 are complete.
 
 There is a second, shorter list in `docs/DESIGN-PASS.md`: defects found by
 *using* the app rather than reading it. Its tasks take priority over Stage 4,
-because they are faults in work already shipped. FD-05 is the one still open.
+because they are faults in work already shipped. **All of them are now done**,
+so Stage 4 is next — but keep adding to that list rather than to the plan when
+something is found by using the app, because the two have needed different
+kinds of evidence.
 
 > A September 12 note here claimed that audit had corrected fretboard sizing and
 > the weekday activity layout. It had not. The board was still drawing its note
