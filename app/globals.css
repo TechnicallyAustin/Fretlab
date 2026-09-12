@@ -133,6 +133,41 @@ p {
   font-size: .8125rem;
 }
 
+.theme-mode-toggle {
+  position: absolute;
+  z-index: 25;
+  top: 12px;
+  right: 126px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--secondary-ink);
+  cursor: pointer;
+  font-size: .8125rem;
+}
+
+.theme-dark,
+.theme-system {
+  --paper: #060a10;
+  --card: #090d13;
+  --sunken: #161b22;
+  --line: rgba(255,255,255,.07);
+  --line-strong: rgba(255,255,255,.16);
+  --ink: #e6edf3;
+  --muted: #8b949e;
+  --quiet: #6e7681;
+  --secondary-ink: #e6edf3;
+}
+
+.theme-dark .app-frame,
+.theme-system .app-frame { background: var(--paper); }
+
+@media (prefers-color-scheme: light) {
+  .theme-system { --paper: #f4f0e7; --card: #fbf8f2; --sunken: #e9e3d6; --line: #ded7c7; --line-strong: #c9c1b0; --ink: #2b2924; --muted: #6f6a5c; --quiet: #7a7466; --secondary-ink: #3f3c34; }
+}
+
 .stand-mode .screen-content {
   font-size: 1.125rem;
 }

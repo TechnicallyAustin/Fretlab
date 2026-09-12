@@ -1072,7 +1072,7 @@ Carried forward into Stage 3, logged rather than fixed:
 
 **Goal:** the app is usable by people who are not you. Largely parallel to Stage 2.
 
-**Progress:** 3 / 6 done
+**Progress:** 4 / 6 done
 
 | ID | Task | Status |
 |---|---|---|
@@ -1080,8 +1080,8 @@ Carried forward into Stage 3, logged rather than fixed:
 | FL-17 | Rem type scale, 16px floor, stand mode | `DONE` |
 | FL-18 | Mobile IA: promote Library, reflow the hidden regions | `DONE` |
 | FL-19 | Left-handed mirroring and alternate tunings | `DONE` |
-| FL-20 | Dark theme | `WIP` |
-| FL-21 | Onboarding | `TODO` |
+| FL-20 | Dark theme | `DONE` |
+| FL-21 | Onboarding | `WIP` |
 
 ---
 
@@ -1210,8 +1210,10 @@ roots land where a Drop D player expects.
 
 ---
 
-### - [ ] FL-20 — Dark theme
-**Status:** `WIP` · **Severity:** Minor · **Audit ref:** U-06
+### - [x] FL-20 — Dark theme
+**Status:** `DONE` · **Severity:** Minor · **Audit ref:** U-06
+
+> **Done.** Added persisted light, dark, and system theme modes with semantic dark tokens and an explicit frame override. The paper theme remains the light default, and the theme acceptance guard plus the full build-backed rendered suite pass.
 
 **Files:** `app/globals.css`, `lib/fretlab/palette.ts`,
 `components/fretlab/Fretboard.tsx`
@@ -1233,7 +1235,7 @@ test to assert no raw hex in `components/`, and snapshot both themes.
 ---
 
 ### - [ ] FL-21 — Onboarding
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** beginner walkthrough
+**Status:** `WIP` · **Severity:** Major · **Audit ref:** beginner walkthrough
 
 **Files:** new screen, `lib/fretlab/useStoredKey.ts`
 

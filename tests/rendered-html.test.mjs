@@ -222,6 +222,18 @@ test("mobile Library exposes every top-level library route within two taps", asy
   assert.doesNotMatch(source, /label: "Theory"/);
 });
 
+test("theme preference has system, light, and dark modes", async () => {
+  const frame = await readProjectFile("app/_screens/FretLabFrame.tsx");
+  const store = await readProjectFile("lib/fretlab/useStoredTheme.ts");
+  const css = await readProjectFile("app/globals.css");
+  assert.match(store, /"system" \| "light" \| "dark"/);
+  assert.match(store, /fretlab-theme/);
+  assert.match(frame, /useStoredTheme/);
+  assert.match(frame, /theme-\$\{themeMode\}/);
+  assert.match(css, /\.theme-dark/);
+  assert.match(css, /prefers-color-scheme: light/);
+});
+
 test("detail routes render the entity named in the URL", async () => {
   const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   for (const [path, expected] of [

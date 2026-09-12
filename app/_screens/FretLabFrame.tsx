@@ -15,15 +15,17 @@ import { BottomNav } from "@/components/fretlab/BottomNav";
 import { DesktopTopbar } from "@/components/fretlab/DesktopTopbar";
 import { KeySelectorModal } from "@/app/_sections/KeySelectorModal";
 import { useFretLabNav } from "./useFretLabNav";
+import { useStoredTheme } from "@/lib/fretlab/useStoredTheme";
 
 export function FretLabFrame({ children }: { children: ReactNode }) {
   const { view, go } = useFretLabNav();
   const [selectedKey, setSelectedKey] = useStoredKey();
   const [keyPickerOpen, setKeyPickerOpen] = useState(false);
   const [standMode, setStandMode] = useState(false);
+  const [themeMode, setThemeMode] = useStoredTheme();
 
   return (
-    <main className="site-shell" style={cssVars(selectedKey)}>
+    <main className={`site-shell theme-${themeMode}`} style={cssVars(selectedKey)}>
       <div className="design-caption" aria-hidden="true">
         <span>FretLab</span>
         <strong>Guitar practice</strong>
@@ -37,6 +39,9 @@ export function FretLabFrame({ children }: { children: ReactNode }) {
           onClick={() => setStandMode((enabled) => !enabled)}
         >
           {standMode ? "Stand mode on" : "Stand mode"}
+        </button>
+        <button className="theme-mode-toggle" type="button" onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")} aria-label="Change colour theme">
+          {themeMode === "dark" ? "Light theme" : "Dark theme"}
         </button>
         <DesktopTopbar
           view={view}
