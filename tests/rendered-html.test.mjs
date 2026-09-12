@@ -249,6 +249,26 @@ test("theme preference has system, light, and dark modes", async () => {
   assert.doesNotMatch(components, /#[0-9a-fA-F]{6}/, "component colours belong in theme tokens");
 });
 
+/**
+ * FL-23. The review count is the app deciding what to practise, so it must be
+ * derived from recorded sessions and must not appear when there is nothing
+ * due — a review queue showing zero reads as a failure rather than as a rest.
+ */
+test("the review count is derived, and absent when nothing is due", async () => {
+  const today = await readProjectFile("app/_screens/Today.tsx");
+  assert.match(today, /dueToday\(reviewSchedule\(sessions, now\), now\)/);
+  assert.match(today, /due\.length > 0 && \(/, "an empty queue should render nothing");
+  assert.match(today, /Today&apos;s review/);
+
+  // And nothing clock-derived may reach the server, as ever.
+  const visible = (html) =>
+    html
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+      .replace(/<[^>]+>/g, " ");
+  const html = visible(await (await render("/")).text());
+  assert.ok(!/Today.s review/.test(html), "the review banner server-rendered");
+});
+
 test("first-run onboarding chooses a path and skips after completion", async () => {
   const screen = await readProjectFile("app/_screens/Onboarding.tsx");
   const store = await readProjectFile("lib/fretlab/useOnboarding.ts");

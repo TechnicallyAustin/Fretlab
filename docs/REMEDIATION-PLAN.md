@@ -15,10 +15,10 @@ lint and tests rather than through review.
 | Stage 1 — Stop teaching wrong things | `COMPLETE` | 8 / 8 |
 | Stage 2 — Make the practice loop real | `COMPLETE` | 7 / 7 |
 | **Stage 3 — Make it shippable to real people** | **`COMPLETE`** | 6 / 6 |
-| Stage 4 — Retention and revenue | `IN PROGRESS` | 1 / 5 |
+| Stage 4 — Retention and revenue | `IN PROGRESS` | 2 / 5 |
 | Design pass — `docs/DESIGN-PASS.md` | `COMPLETE` | 8 / 8 |
 
-Next task: **FL-23 — Spaced repetition.**
+Next task: **FL-24 — Ear training.**
 
 The design pass is a separate document because it came from using the app
 rather than from the audit, but it is worked the same way and its tasks take
@@ -1292,7 +1292,7 @@ returning users.
 | ID | Task | Status |
 |---|---|---|
 | FL-22 | Real guitar audio tied to the displayed shape | `DONE` |
-| FL-23 | Spaced repetition | `TODO` |
+| FL-23 | Spaced repetition | `DONE` |
 | FL-24 | Ear training | `TODO` |
 | FL-25 | Drones and backing tracks | `TODO` |
 | FL-26 | Minor keys and a larger chord library | `TODO` |
@@ -1346,8 +1346,8 @@ a small inter-string delay rather than simultaneously.
 
 ---
 
-### - [ ] FL-23 — Spaced repetition
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** competitive gap table
+### - [x] FL-23 — Spaced repetition
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** competitive gap table
 
 **Problem.** No adaptive review. Every competitor at the paid tier has some form of it,
 and it is the mechanism that makes daily practice produce results.
@@ -1358,6 +1358,33 @@ real table — already exists; this is the payoff for FL-06 recording honest sco
 Surface it as "Today's review: 12 items".
 
 **Done when.** The app decides what to practise and is right.
+
+> **Done.** SM-2 with a leech rule, in `lib/api/review.ts`, surfaced on Today
+> as "Today's review: N items" and hidden entirely when nothing is due — a
+> queue showing zero reads as a failure rather than as a rest day.
+>
+> **The schedule is derived, not stored.** There is no review table: an item's
+> interval, ease and due date come from replaying its own recorded sessions in
+> order. So every figure is a consequence of practice that really happened,
+> which is the rule the rest of the app follows about numbers, and the
+> scheduler can be changed without a migration or a backfill.
+>
+> **A scoping correction to this task.** It asked for scheduling "over note
+> locations, chord changes and intervals". The app cannot do that and should
+> not pretend to: it records a session per *drill*, not per note, and FL-07's
+> own note says FretLab does not store which notes were missed. So an item is
+> a drill **in a key** — knowing where the notes are in G is not knowing them
+> in C, which is a real distinction and one the data supports.
+>
+> The set is narrower still, and deliberately. `Train` records an accuracy;
+> `Runner` records null because it is a timer and measures nothing to be
+> accurate about. Spaced repetition needs a grade, so a timed run counts as
+> practice but not as review. Grading it would invent exactly the kind of
+> number FL-07 removed.
+>
+> Thirteen assertions, including that a timed session schedules nothing, that
+> ease has a floor however badly it goes, and that an item due today is offered
+> all day rather than from the hour it was last practised.
 
 ---
 

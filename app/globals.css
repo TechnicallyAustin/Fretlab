@@ -474,6 +474,51 @@ p {
    size — a phone column holds about four frets, which is a hand span and a
    CAGED position. Named rather than numbered: the neck has regions, and moving
    between them is the thing being learned. */
+/* What the app has decided should be practised today. Only appears when the
+   schedule actually has something due — an empty review queue shows nothing
+   rather than a zero, because a zero reads as a failure. */
+.review-banner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "label arrow" "count arrow" "detail arrow";
+  align-items: center;
+  gap: 2px 12px;
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid var(--key-bright);
+  border-radius: 15px;
+  background: var(--key-fill);
+  color: var(--key-ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.review-banner>span {
+  grid-area: label;
+  font-size: 0.8125rem;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.review-banner>strong {
+  grid-area: count;
+  font-size: 1.375rem;
+  font-weight: 500;
+}
+
+.review-banner>small {
+  grid-area: detail;
+  color: var(--key-ink);
+  font-size: 0.8125rem;
+  opacity: .8;
+}
+
+.review-banner>b {
+  grid-area: arrow;
+  font-size: 1.125rem;
+  font-weight: 400;
+}
+
 .neck-pager {
   display: flex;
   align-items: center;

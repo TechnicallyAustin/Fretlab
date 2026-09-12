@@ -19,6 +19,7 @@ import {
   workweekContributionLevels,
 } from "@/lib/api/progress";
 import { usePracticeSessions } from "@/lib/api/hooks";
+import { dueToday, reviewSchedule } from "@/lib/api/review";
 import { useClock } from "@/lib/fretlab/useClock";
 
 export function Today({
@@ -47,6 +48,11 @@ export function Today({
   // inside a date helper. Anything that is not a number means no clock yet.
   const { dayName, greeting, now } = useClock();
   const stats = typeof now !== "number" ? null : summarise(sessions, now);
+  // What the app thinks should be practised today, replayed from the sessions
+  // that were actually scored. Timed runs are practice, not review, so they do
+  // not appear here — see lib/api/review.ts.
+  const due =
+    typeof now !== "number" ? [] : dueToday(reviewSchedule(sessions, now), now);
   const week = typeof now !== "number" ? null : weekMinutes(sessions, now);
   const weekTotal = week?.reduce((sum, day) => sum + day.minutes, 0) ?? 0;
   // The tallest bar in the week, so a light week still reads as a shape rather
@@ -78,6 +84,20 @@ export function Today({
         <p>{dayName}</p>
         <h1>{greeting}</h1>
       </div>
+      {due.length > 0 && (
+        <button className="review-banner" onClick={() => go("train")}>
+          <span>Today&apos;s review</span>
+          <strong>
+            {due.length} {due.length === 1 ? "item" : "items"}
+          </strong>
+          <small>
+            {due.some((item) => item.leech)
+              ? "One is not sticking — try it slower"
+              : `Due now · ${due[0].musicKey}`}
+          </small>
+          <b>→</b>
+        </button>
+      )}
       <article className="session-hero">
         <div className="key-watermark">{sessionKey}</div>
         <p className="kicker">Today&apos;s session</p>
