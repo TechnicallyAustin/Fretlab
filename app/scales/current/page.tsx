@@ -8,10 +8,10 @@
  */
 import { useStoredKey } from "@/lib/fretlab/useStoredKey";
 import { useFretLabNav } from "@/app/_screens/useFretLabNav";
-import { ScaleDetail } from "@/app/_screens/ScaleDetail";
+import { ScaleLibraryDetail } from "@/app/_screens/ScaleLibraryDetail";
 
 export default function Page() {
   const nav = useFretLabNav();
   const [selectedKey] = useStoredKey();
-  return <ScaleDetail go={nav.go} selectedKey={selectedKey} />;
+  return <ScaleLibraryDetail go={nav.go} selectedKey={selectedKey} scaleId="major" />;
 }

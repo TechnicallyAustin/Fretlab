@@ -35,6 +35,7 @@ import { saveLastRun } from "@/lib/fretlab/lastRun";
 import { useElapsed } from "@/lib/fretlab/useElapsed";
 import { useMetronome } from "@/lib/fretlab/useMetronome";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function Runner({
   go,
@@ -106,6 +107,7 @@ function RunnerBody({
   saving: boolean;
   setSaving: (saving: boolean) => void;
 }) {
+  const { tuning } = useGuitarSetup();
   const steps = plan.steps;
   const practisedIn = plan.key;
   const index = Math.min(step, steps.length - 1);
@@ -123,7 +125,7 @@ function RunnerBody({
     countInBars: 1,
   });
 
-  const shape = drillShape(drill, practisedIn);
+  const shape = drillShape(drill, practisedIn, false, tuning);
   const planned = current.mins * 60;
   const over = seconds >= planned;
   const last = index >= steps.length - 1;

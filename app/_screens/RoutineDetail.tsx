@@ -12,20 +12,24 @@ import { ROUTINES, routineKey, routineSteps } from "@/lib/fretlab/library";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
 import { drillShape } from "@/lib/fretlab/fingering";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function RoutineDetail({
   go,
   sessionKey,
   onAdoptKey,
+  routineId,
 }: {
   /** Takes an id too: the runner needs to know what it is running. */
   go: (view: View, id?: string) => void;
   sessionKey: KeyName;
   /** Switch the global key to the routine's, when the two disagree. */
   onAdoptKey?: (key: KeyName) => void;
+  routineId: string;
 }) {
+  const { tuning } = useGuitarSetup();
   const [tab, setTab] = useState("Drills");
-  const routine = ROUTINES[1];
+  const routine = ROUTINES.find((item) => item.id === routineId) ?? ROUTINES[0];
   const steps = routineSteps(routine);
   const total = steps.reduce((sum, step) => sum + step.mins, 0);
   // A routine may be written for a key of its own. Where that disagrees with
@@ -67,7 +71,7 @@ export function RoutineDetail({
             // The mini board used to draw an arbitrary six-note slice of the
             // key's scale, the same notes whatever the step was. It draws the
             // step's own shape now, in the window it is actually played in.
-            const shape = drillShape(step.drill, practisedIn);
+            const shape = drillShape(step.drill, practisedIn, false, tuning);
             return (
             <li className={i === 1 ? "current" : ""} key={`${step.drillId}${i}`}>
               <span>{i + 1}</span>
@@ -109,10 +113,9 @@ export function RoutineDetail({
         </article>
       )}
       <div className="action-row sticky-action">
-        <button className="secondary-action">Edit</button>
-        {/* This led to Guided, which is hardcoded to one routine and records
-            nothing, so the primary action on the routine screen left Progress
-            empty. It starts the runner for this routine now. */}
+        <button className="secondary-action" onClick={() => go("routines")}>
+          All routines
+        </button>
         <button
           className="primary-action"
           onClick={() => go("runner", routine.id)}

@@ -7,7 +7,7 @@
  */
 import type { KeyName, View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
-import { DRILLS, drillNotes } from "@/lib/fretlab/library";
+import { DRILLS } from "@/lib/fretlab/library";
 import { FIFTHS } from "@/lib/fretlab/theory";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
@@ -15,6 +15,8 @@ import { cssVars } from "@/lib/fretlab/palette";
 import { lastAccuracyByDrill } from "@/lib/api/progress";
 import { usePracticeSessions } from "@/lib/api/hooks";
 import { useState } from "react";
+import { drillShape } from "@/lib/fretlab/fingering";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function GroupedDrills({
   go,
@@ -25,6 +27,7 @@ export function GroupedDrills({
   selectedKey: KeyName;
   onOpen: (id: string) => void;
 }) {
+  const { tuning } = useGuitarSetup();
   const history = usePracticeSessions({ limit: 100 });
   const accuracyByDrill = lastAccuracyByDrill(history.data ?? []);
   const [tab, setTab] = useState("Skill paths");
@@ -67,12 +70,14 @@ export function GroupedDrills({
                 </h2>
                 <span>{items.length} step path</span>
               </div>
-              {items.map((drill) => (
+              {items.map((drill) => {
+                const shape = drillShape(drill, selectedKey, false, tuning);
+                return (
                 <button key={drill.id} onClick={() => onOpen(drill.id)}>
                   <Fretboard
-                    notes={drillNotes(drill, selectedKey)}
-                    low={drill.low}
-                    high={drill.high}
+                    notes={shape.notes}
+                    low={shape.windowLow}
+                    high={shape.windowHigh}
                     mini
                     rootKey={selectedKey}
                   />
@@ -84,7 +89,8 @@ export function GroupedDrills({
                   </div>
                   <small>{drill.minutes} min</small>
                 </button>
-              ))}
+                );
+              })}
             </section>
           ) : null;
         })}

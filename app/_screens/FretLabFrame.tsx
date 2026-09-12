@@ -16,6 +16,7 @@ import { DesktopTopbar } from "@/components/fretlab/DesktopTopbar";
 import { KeySelectorModal } from "@/app/_sections/KeySelectorModal";
 import { useFretLabNav } from "./useFretLabNav";
 import { useStoredTheme } from "@/lib/fretlab/useStoredTheme";
+import { GuitarSetupProvider } from "@/lib/fretlab/GuitarSetup";
 
 export function FretLabFrame({ children }: { children: ReactNode }) {
   const { view, go } = useFretLabNav();
@@ -31,32 +32,34 @@ export function FretLabFrame({ children }: { children: ReactNode }) {
         <strong>Guitar practice</strong>
         <small>One key-colour system across every practice surface.</small>
       </div>
-      <div className={`app-frame view-${view}${standMode ? " stand-mode" : ""}`}>
-        <DesktopTopbar
-          view={view}
-          selectedKey={selectedKey}
-          go={go}
-          openKeyPicker={() => setKeyPickerOpen(true)}
-          themeMode={themeMode}
-          onToggleTheme={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
-          standMode={standMode}
-          onToggleStand={() => setStandMode((enabled) => !enabled)}
-        />
-        <button className="mobile-key-context" onClick={() => setKeyPickerOpen(true)}>
-          <span>Global key</span>
-          <strong>{selectedKey}</strong>
-          <b>⌄</b>
-        </button>
-        {children}
-        <BottomNav active={primaryViewFor(view)} go={go} />
-        {keyPickerOpen && (
-          <KeySelectorModal
+      <GuitarSetupProvider>
+        <div className={`app-frame view-${view}${standMode ? " stand-mode" : ""}`}>
+          <DesktopTopbar
+            view={view}
             selectedKey={selectedKey}
-            onSelect={setSelectedKey}
-            onClose={() => setKeyPickerOpen(false)}
+            go={go}
+            openKeyPicker={() => setKeyPickerOpen(true)}
+            themeMode={themeMode}
+            onToggleTheme={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
+            standMode={standMode}
+            onToggleStand={() => setStandMode((enabled) => !enabled)}
           />
-        )}
-      </div>
+          <button className="mobile-key-context" onClick={() => setKeyPickerOpen(true)}>
+            <span>Global key</span>
+            <strong>{selectedKey}</strong>
+            <b>⌄</b>
+          </button>
+          {children}
+          <BottomNav active={primaryViewFor(view)} go={go} />
+          {keyPickerOpen && (
+            <KeySelectorModal
+              selectedKey={selectedKey}
+              onSelect={setSelectedKey}
+              onClose={() => setKeyPickerOpen(false)}
+            />
+          )}
+        </div>
+      </GuitarSetupProvider>
     </main>
   );
 }

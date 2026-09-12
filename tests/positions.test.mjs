@@ -14,7 +14,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const { FIFTHS, OPEN_PC, keyPc } = await import("../lib/fretlab/theory.ts");
+const { DROP_D_TUNING, FIFTHS, OPEN_PC, keyPc, openPc } = await import("../lib/fretlab/theory.ts");
 const { SCALES } = await import("../lib/fretlab/library.ts");
 const { positionsFor, positionNotes, positionWindow, hasPositions } =
   await import("../lib/fretlab/positions.ts");
@@ -64,6 +64,19 @@ test("every position contains a root", () => {
           notes.some((note) => soundedPc(note) === keyPc(key)),
           `${id} ${position.id} in ${key} has no root in it`,
         );
+      }
+    }
+  }
+});
+
+test("Drop D positions keep every displayed note inside the scale", () => {
+  for (const id of SCALED) {
+    const scale = SCALES.find((each) => each.id === id);
+    for (const position of positionsFor(id)) {
+      const wanted = scale.intervals.map((interval) => (keyPc("G") + interval) % 12);
+      for (const note of positionNotes(position, "G", DROP_D_TUNING)) {
+        const sounded = (openPc(DROP_D_TUNING, note.s) + note.f) % 12;
+        assert.ok(wanted.includes(sounded), `${id} ${position.id}: Drop D note is outside the scale`);
       }
     }
   }

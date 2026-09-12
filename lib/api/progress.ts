@@ -168,6 +168,42 @@ export function consistencyLevels(
   });
 }
 
+function practiceIntensity(minutes: number): number {
+  if (minutes <= 0) return 0;
+  if (minutes < 6) return 1;
+  if (minutes < 12) return 2;
+  if (minutes < 20) return 3;
+  return 4;
+}
+
+/**
+ * Five weekday rows across N calendar weeks, oldest week first. Weekends are
+ * intentionally omitted: this compact home-card view is a weekday habit aid,
+ * while the full Progress graph still preserves all seven days.
+ */
+export function workweekContributionLevels(
+  sessions: readonly PracticeSessionWire[],
+  weeks: number,
+  now: number,
+): number[] {
+  const today = startOfToday(now);
+  const monday = today - ((new Date(today).getDay() + 6) % 7) * DAY_MS;
+  const minutesByDay = new Map<string, number>();
+
+  for (const session of sessions) {
+    const key = dayKey(session.created_at);
+    minutesByDay.set(key, (minutesByDay.get(key) ?? 0) + (session.duration_seconds ?? 0) / 60);
+  }
+
+  return Array.from({ length: weeks * 5 }, (_, index) => {
+    const weekIndex = Math.floor(index / 5);
+    const weekdayIndex = index % 5;
+    const weekOffset = weeks - 1 - weekIndex;
+    const at = monday - weekOffset * 7 * DAY_MS + weekdayIndex * DAY_MS;
+    return practiceIntensity(minutesByDay.get(dayKey(new Date(at).toISOString())) ?? 0);
+  });
+}
+
 /** Practice intensity for the current Monday-Friday week, oldest first. */
 export function weekdayContributionLevels(
   sessions: readonly PracticeSessionWire[],
@@ -184,11 +220,7 @@ export function weekdayContributionLevels(
   return Array.from({ length: 5 }, (_, index) => {
     const key = dayKey(new Date(monday + index * DAY_MS).toISOString());
     const minutes = minutesByDay.get(key) ?? 0;
-    if (minutes <= 0) return 0;
-    if (minutes < 6) return 1;
-    if (minutes < 12) return 2;
-    if (minutes < 20) return 3;
-    return 4;
+    return practiceIntensity(minutes);
   });
 }
 

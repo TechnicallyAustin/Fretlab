@@ -7,6 +7,7 @@
  */
 
 import type { KeyName, View } from "@/lib/fretlab/types";
+import { primaryViewFor } from "@/lib/fretlab/routes";
 
 export function DesktopTopbar({
   view,
@@ -54,11 +55,18 @@ export function DesktopTopbar({
     "routine-detail": "Routine detail",
     guided: "Guided routine",
   };
+  const section: Partial<Record<View, string>> = {
+    today: "Home",
+    train: "Practice",
+    drills: "Practice",
+    library: "Explore",
+    theory: "Learn",
+  };
   return (
     <header className="desktop-topbar">
       <div>
-        <span>Workspace</span>
-        <strong>{labels[view]}</strong>
+        <span>FretLab</span>
+        <strong>{section[primaryViewFor(view)] ?? "Practice"}</strong>
       </div>
       {/* The global key already has an interactive chip in the actions group.
           Stating it twice in one bar is noise, not reinforcement. */}

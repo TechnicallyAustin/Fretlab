@@ -10,7 +10,9 @@ enforces through lint and tests. Then `docs/REMEDIATION-PLAN.md`, which is both
 the specification and the progress tracker: read its Status section, then the
 one task you are about to do.
 
-Stages 1 and 2 are complete. Stage 3 is next, starting at FL-16.
+Stages 1–3 are complete. A September 12 post-remediation audit also corrected
+fretboard sizing/ranges, weekday activity layout, dark-theme contrast, setup
+propagation, and several misleading routes. Stage 4 is next, starting at FL-22.
 
 Update the plan as you go. It is the only place the current state is recorded.
 

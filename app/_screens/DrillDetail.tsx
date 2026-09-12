@@ -27,6 +27,7 @@ import {
 } from "@/lib/fretlab/patterns";
 import { dayLabel } from "@/lib/api/progress";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function DrillDetail({
   go,
@@ -38,6 +39,7 @@ export function DrillDetail({
   sessionKey: KeyName;
   drillId: string;
 }) {
+  const { tuning } = useGuitarSetup();
   const [tab, setTab] = useState("Lesson");
   const drill = DRILLS.find((item) => item.id === drillId) ?? DRILLS[0];
 
@@ -67,7 +69,7 @@ export function DrillDetail({
 
   // Two layers so the drill's own window is visible *inside* the whole neck,
   // rather than the learner having to guess which dots belong to the drill.
-  const shape = drillShape(drill, sessionKey);
+  const shape = drillShape(drill, sessionKey, false, tuning);
 
   // What this drill is actually played as. `withPlayOrder` numbers notes low
   // string to high, which is the route for a scale run and the wrong one for
@@ -76,10 +78,10 @@ export function DrillDetail({
   const pattern = drillPattern(drill);
   const cells = patternCells(pattern, drill.intervals);
   const ordered = cells.length
-    ? patternRoute(shape.notes, cells, sessionKey)
+    ? patternRoute(shape.notes, cells, sessionKey, tuning)
     : withPlayOrder(shape.notes);
   const fingers = fingersUsed(shape.notes, shape.low);
-  const fullNeck = drillShape(drill, sessionKey, true);
+  const fullNeck = drillShape(drill, sessionKey, true, tuning);
   const shapeIds = new Set(shape.notes.map((note) => `${note.s}:${note.f}`));
   // A comparison drill draws what it is against what it is not. "Major to
   // Mixolydian" told you to compare the two sevenths while drawing only one of
@@ -90,6 +92,7 @@ export function DrillDetail({
         { ...drill, intervals: compare.against },
         sessionKey,
         shape.kind === "map",
+        tuning,
       ).notes.filter((note) => !shapeIds.has(`${note.s}:${note.f}`))
     : [];
 
@@ -410,7 +413,7 @@ export function DrillDetail({
                 <span>Full first octave</span>
               </div>
               <Fretboard
-                notes={drillNotes(drill, sessionKey, true)}
+                notes={drillNotes(drill, sessionKey, true, tuning)}
                 low={0}
                 high={12}
                 labelMode="degree"

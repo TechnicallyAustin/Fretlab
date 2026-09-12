@@ -18,8 +18,8 @@
  * is checkable without a fretboard: `tests/patterns.test.mjs` asserts the
  * first eight notes of each drill against hand-worked expectations in C.
  */
-import type { KeyName, Note } from "./types";
-import { OPEN_PC, keyPc, spellPitchClass } from "./theory";
+import type { KeyName, Note, Tuning } from "./types";
+import { keyPc, openPc, spellPitchClass, STANDARD_TUNING } from "./theory";
 
 export type Pattern =
   /**
@@ -161,7 +161,7 @@ export function patternSequence(
 }
 
 /** The pitch class a note sounds. */
-const soundedPc = (note: Note) => (OPEN_PC[note.s] + note.f) % 12;
+const soundedPc = (note: Note, tuning: Tuning) => (openPc(tuning, note.s) + note.f) % 12;
 
 /**
  * The shape's notes numbered in the order the pattern arrives at them.
@@ -180,12 +180,13 @@ export function patternRoute<T extends Note>(
   notes: readonly T[],
   cells: readonly Cell[],
   key: KeyName,
+  tuning: Tuning = STANDARD_TUNING,
 ): (T & { order?: number })[] {
   if (cells.length === 0) return notes.map((note) => ({ ...note }));
 
   const byPitchClass = new Map<number, T[]>();
   for (const note of notes) {
-    const pc = soundedPc(note);
+    const pc = soundedPc(note, tuning);
     const bucket = byPitchClass.get(pc);
     if (bucket) bucket.push(note);
     else byPitchClass.set(pc, [note]);

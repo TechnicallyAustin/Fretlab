@@ -15,14 +15,16 @@ import { StatusBar } from "@/components/fretlab/StatusBar";
 import { TheoryLesson } from "@/app/_sections/TheoryLesson";
 import { majorScale, scaleShape } from "@/lib/fretlab/theory";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function KeyDetail({
   go,
   selectedKey,
 }: {
-  go: (view: View) => void;
+  go: (view: View, id?: string) => void;
   selectedKey: KeyName;
 }) {
+  const { tuning } = useGuitarSetup();
   const [tab, setTab] = useState("Scales");
   const scale = majorScale(selectedKey);
   const roles = [
@@ -76,7 +78,7 @@ export function KeyDetail({
           <section className="section shape-section">
             <div className="section-head">
               <h2>Five shapes, one scale</h2>
-              <button onClick={() => go("scale-detail")}>Open shape →</button>
+              <button onClick={() => go("scale-library-detail", "major")}>Open major scale →</button>
             </div>
             <div className="shape-row">
               {[
@@ -88,11 +90,11 @@ export function KeyDetail({
               ].map(([low, high], i) => (
                 <button
                   className={i === 1 ? "active" : ""}
-                  onClick={() => go("scale-detail")}
+                  onClick={() => go("scale-library-detail", "major")}
                   key={i}
                 >
                   <Fretboard
-                    notes={scaleShape(selectedKey, low, high)}
+                    notes={scaleShape(selectedKey, low, high, tuning)}
                     low={low}
                     high={high}
                     mini

@@ -33,7 +33,7 @@ export function SongLibrary({
       <AppHeader
         title="Songs"
         meta={`${visible.length} arrangements`}
-        onBack={() => go("keys")}
+        onBack={() => go("library")}
       />
       <section className="songs-hero">
         <div>

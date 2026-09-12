@@ -17,6 +17,7 @@ import { drillShape, withPlayOrder } from "@/lib/fretlab/fingering";
 import { lastAccuracyByDrill } from "@/lib/api/progress";
 import { usePracticeSessions } from "@/lib/api/hooks";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function Drills({
   go,
@@ -27,6 +28,7 @@ export function Drills({
   selectedKey: KeyName;
   onOpen: (id: string) => void;
 }) {
+  const { tuning } = useGuitarSetup();
   // §5: L1 owns the data. A drill shows progress only where the player has
   // actually recorded some; the library no longer ships a percentage.
   const history = usePracticeSessions({ limit: 100 });
@@ -114,7 +116,7 @@ export function Drills({
       </div>
       <div className="drill-list">
         {visible.map((drill, index) => {
-          const shape = drillShape(drill, selectedKey);
+          const shape = drillShape(drill, selectedKey, false, tuning);
           const ordered = withPlayOrder(shape.notes);
           return (
           <button

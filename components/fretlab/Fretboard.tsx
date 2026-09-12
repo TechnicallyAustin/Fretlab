@@ -12,12 +12,7 @@
  */
 import type { KeyName, Note, Tuning } from "@/lib/fretlab/types";
 import type { FingeredNote } from "@/lib/fretlab/fingering";
-import {
-  STRING_NAMES,
-  degreeLabels,
-  openPc,
-  spellPitchClass,
-} from "@/lib/fretlab/theory";
+import { degreeLabels, openPc, spellPitchClass } from "@/lib/fretlab/theory";
 import { palette } from "@/lib/fretlab/palette";
 import {
   ROLE_STYLE,
@@ -28,6 +23,7 @@ import {
   type NoteRole,
 } from "@/lib/fretlab/noteRoles";
 import { FretboardLegend } from "./FretboardLegend";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 import { useId, useRef, useState } from "react";
 
 
@@ -52,7 +48,7 @@ export function Fretboard({
   scale,
   hideTargets = false,
   tuning,
-  leftHanded = false,
+  leftHanded,
 }: {
   notes?: (Note | FingeredNote)[];
   /** Named layers, for showing a chord inside a scale without them merging. */
@@ -81,7 +77,9 @@ export function Fretboard({
   tuning?: Tuning;
   leftHanded?: boolean;
 }) {
-  const activeTuning: Tuning = tuning ?? { id: "standard", name: "Standard", openMidi: [0, 64, 59, 55, 50, 45, 40] };
+  const setup = useGuitarSetup();
+  const activeTuning: Tuning = tuning ?? setup.tuning;
+  const isLeftHanded = leftHanded ?? setup.leftHanded;
   const gradientId = `board-${useId().replaceAll(":", "")}`;
   const cellRefs = useRef<Record<string, SVGGElement | null>>({});
   const degreeName = degreeLabels(scale);
@@ -116,15 +114,14 @@ export function Fretboard({
   // Chord boards carry a marker row above the nut. It only means anything when
   // the nut is in frame: further up the neck there is no open string to mark.
   const showsMarkers = (muted?.length ?? 0) > 0 || Boolean(notes?.some((n) => n.f === 0));
-  const unit = mini ? 30 : 54;
-  const gap = mini ? 17 : 32;
+  const unit = mini ? 40 : 66;
+  const gap = mini ? 20 : 28;
   const openWidth = Math.round(unit * 0.62);
   const nameGutter = Math.round(gap * 0.95);
 
-  const frets = Array.from({ length: high - low + 1 }, (_, index) => low + index);
-  if (leftHanded) frets.reverse();
+  const fretsAscending = Array.from({ length: high - low + 1 }, (_, index) => low + index);
   let cursor = nameGutter;
-  const columns = frets.map((fret) => {
+  const naturalColumns = fretsAscending.map((fret) => {
     const width = fret === 0 ? openWidth : unit;
     const column = { fret, x: cursor, width, center: cursor + width / 2 };
     cursor += width;
@@ -132,23 +129,38 @@ export function Fretboard({
   });
 
   const width = cursor;
+  const columns = isLeftHanded
+    ? [...naturalColumns].reverse().map((column) => ({
+        ...column,
+        x: width - column.x - column.width,
+        center: width - column.center,
+      }))
+    : naturalColumns;
+  const frets = columns.map((column) => column.fret);
   const markerRow = showsMarkers && low <= 1 ? Math.round(gap * (mini ? 0.6 : 0.68)) : 0;
   const top = (mini ? 14 : 20) + markerRow;
-  const boardX = low === 0 ? nameGutter + openWidth : nameGutter;
+  const includesOpen = low === 0;
+  const playingWidth = width - nameGutter - (includesOpen ? openWidth : 0);
+  const boardX = isLeftHanded ? 0 : nameGutter + (includesOpen ? openWidth : 0);
+  const boardEnd = boardX + playingWidth;
   const boardHeight = 6 * gap;
   const numberRow = Math.round(gap * 0.82);
   const height = top + boardHeight + numberRow + (mini ? 6 : 10);
 
-  const yFor = (string: number) => top + (string - 0.5) * gap;
-  const dotRadius = Math.round(gap * 0.37);
+  const yFor = (string: number) =>
+    isLeftHanded
+      ? top + (6 - string + 0.5) * gap
+      : top + (string - 0.5) * gap;
+  const dotRadius = Math.max(mini ? 8 : 11, Math.round(gap * 0.37));
   const showsNut = low <= 1;
-  const strings = leftHanded ? [1, 2, 3, 4, 5, 6] : [6, 5, 4, 3, 2, 1];
+  const strings = isLeftHanded ? [6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6];
   const firstCell = `${strings[0]}:${frets[0]}`;
   const [activeCell, setActiveCell] = useState(firstCell);
 
-  const fretNumberSize = Math.max(mini ? 11 : 13, Math.round(gap * 0.44));
-  const stringNameSize = Math.max(mini ? 11 : 13, Math.round(gap * 0.42));
-  const labelSize = Math.max(mini ? 10 : 12, Math.round(dotRadius * 0.95));
+  const fretNumberSize = Math.max(13, Math.round(gap * 0.44));
+  const stringNameSize = Math.max(13, Math.round(gap * 0.42));
+  const labelSize = Math.max(13, Math.round(dotRadius * 0.95));
+  const stringName = (string: number) => spellPitchClass(openPc(activeTuning, string), rootKey);
 
   // Points for the play-order path, in board coordinates.
   const orderedPath = (() => {
@@ -161,13 +173,23 @@ export function Fretboard({
         const [stringText, fretText] = id.split(":");
         return {
           x: byColumn.get(Number(fretText)) ?? 0,
-          y: top + (Number(stringText) - 0.5) * gap,
+          y: yFor(Number(stringText)),
         };
       });
   })();
 
   const windowLabel =
-    low === 0 ? "open position" : `position ${low}`;
+    low === 0 && high >= 12
+      ? "full neck"
+      : low === 0
+        ? "open position"
+        : `frets ${low} to ${high}`;
+  const positionLabel =
+    low === 0 && high >= 12
+      ? "Full neck"
+      : low === 0
+        ? "Open position"
+        : `Starts at fret ${low}`;
 
   return (
     <figure className={`fretboard-figure ${mini ? "mini" : ""}`}>
@@ -175,9 +197,9 @@ export function Fretboard({
         <figcaption className="fretboard-caption">
           {caption && <strong>{caption}</strong>}
           <span className="fret-window">
-            {low === 0 ? "Open position" : `Position ${low}`}
+            {positionLabel}
             <small>
-              {low === 0 ? "nut to fret " + high : `frets ${low}\u2013${high}`}
+              {low === high ? `fret ${low}` : `frets ${low}\u2013${high}`}
             </small>
           </span>
         </figcaption>
@@ -188,49 +210,49 @@ export function Fretboard({
         // too narrow for a legible label. Below the board's comfortable width
         // it scrolls sideways instead of shrinking.
         style={{
-          ["--board-min" as string]: `${Math.round(columns.length * (mini ? 30 : 40))}px`,
+          ["--board-min" as string]: `${Math.round(columns.length * (mini ? 40 : 60))}px`,
           // A four-fret box must not stretch across a wide card: that pulls the
           // frets apart until the shape stops looking like the shape.
-          ["--board-natural" as string]: `${Math.round(width * (mini ? 1.5 : 1.25))}px`,
+          ["--board-natural" as string]: `${Math.round(width * (mini ? 1.2 : 1.15))}px`,
         }}
         role={interactive ? "grid" : "img"}
         aria-label={
-        `Guitar fretboard, ${windowLabel}, frets ${low} to ${high}. ` +
-        (muted?.length
-          ? `Do not play the ${muted.map((s2) => STRING_NAMES[s2]).join(" and ")} string${muted.length > 1 ? "s" : ""}. `
-          : "") +
-        layers
-          .filter((layer) => layer.label)
-          .map((layer) => `${layer.label}: ${layer.notes.length} notes`)
-          .join(". ")
-      }
-    >
+          `Guitar fretboard, ${windowLabel}. ` +
+          (muted?.length
+            ? `Do not play the ${muted.map((s2) => stringName(s2)).join(" and ")} string${muted.length > 1 ? "s" : ""}. `
+            : "") +
+          layers
+            .filter((layer) => layer.label)
+            .map((layer) => `${layer.label}: ${layer.notes.length} notes`)
+            .join(". ")
+        }
+      >
         <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#303340" />
-              <stop offset=".45" stopColor="#20222d" />
-              <stop offset="1" stopColor="#171923" />
+              <stop offset="0" stopColor="var(--board-top)" />
+              <stop offset=".45" stopColor="var(--board-middle)" />
+              <stop offset="1" stopColor="var(--board-bottom)" />
             </linearGradient>
           </defs>
 
           <rect
             x={boardX}
             y={top - gap * 0.15}
-            width={width - boardX}
+            width={playingWidth}
             height={boardHeight + gap * 0.3 + numberRow}
             rx="6"
             fill={`url(#${gradientId})`}
-            stroke="#3c3f4b"
+            stroke="var(--board-border)"
             strokeWidth=".8"
           />
           {/* Separates the fret-number row from the playing surface. */}
           <line
             x1={boardX}
             y1={top + boardHeight + gap * 0.15}
-            x2={width}
+            x2={boardEnd}
             y2={top + boardHeight + gap * 0.15}
-            stroke="#3c3f4b"
+            stroke="var(--board-border)"
             strokeWidth=".8"
           />
 
@@ -239,21 +261,21 @@ export function Fretboard({
             column.fret === 0 ? null : (
               <line
                 key={`fret-${column.fret}`}
-                x1={column.x}
+                x1={isLeftHanded ? column.x + column.width : column.x}
                 y1={top - gap * 0.12}
-                x2={column.x}
+                x2={isLeftHanded ? column.x + column.width : column.x}
                 y2={top + boardHeight + gap * 0.12}
-                stroke={column.fret === 1 && showsNut ? "#e8e3d8" : "#777b86"}
+                stroke={column.fret === 1 && showsNut ? "var(--board-nut)" : "var(--board-fret)"}
                 strokeWidth={column.fret === 1 && showsNut ? 4 : 1.25}
               />
             ),
           )}
           <line
-            x1={width}
+            x1={isLeftHanded ? boardX : boardEnd}
             y1={top - gap * 0.12}
-            x2={width}
+            x2={isLeftHanded ? boardX : boardEnd}
             y2={top + boardHeight + gap * 0.12}
-            stroke="#777b86"
+            stroke="var(--board-fret)"
             strokeWidth="1.25"
           />
 
@@ -266,7 +288,7 @@ export function Fretboard({
                 cx={column.center}
                 cy={top + boardHeight / 2}
                 r={mini ? 3 : 4.6}
-                fill="#c9c4b9"
+                fill="var(--board-inlay)"
                 opacity=".42"
               />
             ))}
@@ -279,7 +301,7 @@ export function Fretboard({
                 cx={column.center}
                 cy={yFor(string)}
                 r={mini ? 2.8 : 4.2}
-                fill="#c9c4b9"
+                fill="var(--board-inlay)"
                 opacity=".42"
                 />
               )),
@@ -299,10 +321,10 @@ export function Fretboard({
               return (
                 <text
                   key={`mark-${string}`}
-                  x={boardX - markerRow * 0.55}
+                  x={isLeftHanded ? boardEnd + markerRow * 0.55 : boardX - markerRow * 0.55}
                   y={yFor(string) + stringNameSize * 0.35}
                   textAnchor="middle"
-                  fill={isMuted ? "#c98b84" : "#cfd3df"}
+                  fill={isMuted ? "var(--board-muted-mark)" : "var(--board-open-mark)"}
                   fontSize={stringNameSize}
                   fontWeight="700"
                 >
@@ -317,18 +339,18 @@ export function Fretboard({
               <line
                 x1={boardX}
                 y1={yFor(string) + 0.8}
-                x2={width}
+                x2={boardEnd}
                 y2={yFor(string) + 0.8}
-                stroke="#090a0f"
+                stroke="var(--board-string-shadow)"
                 strokeWidth={0.7 + string * 0.14}
                 opacity=".72"
               />
               <line
                 x1={boardX}
                 y1={yFor(string)}
-                x2={width}
+                x2={boardEnd}
                 y2={yFor(string)}
-                stroke={string > 3 ? "#b7afa0" : "#d9d3c8"}
+                stroke={string > 3 ? "var(--board-wound-string)" : "var(--board-plain-string)"}
                 strokeWidth={0.55 + string * 0.13}
                 opacity=".9"
               />
@@ -339,14 +361,14 @@ export function Fretboard({
           {[1, 2, 3, 4, 5, 6].map((string) => (
             <text
               key={`name-${string}`}
-              x={nameGutter * 0.5}
+              x={isLeftHanded ? width - nameGutter * 0.5 : nameGutter * 0.5}
               y={yFor(string) + stringNameSize * 0.35}
               textAnchor="middle"
-              fill="#b9bdcc"
+              fill="var(--board-label-text)"
               fontSize={stringNameSize}
               fontWeight="600"
             >
-              {STRING_NAMES[string]}
+              {stringName(string)}
             </text>
           ))}
 
@@ -356,7 +378,7 @@ export function Fretboard({
           <polyline
             points={orderedPath.map((point) => `${point.x},${point.y}`).join(" ")}
             fill="none"
-            stroke="#f3f0ea"
+            stroke="var(--board-path)"
             strokeWidth={mini ? 1.6 : 2.2}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -410,7 +432,7 @@ export function Fretboard({
                 aria-colindex={interactive ? columnIndex + 1 : undefined}
                 aria-label={
                   interactive
-                    ? `${STRING_NAMES[string]} string, fret ${column.fret}${
+                    ? `${stringName(string)} string, fret ${column.fret}${
                         hasNote && (isFound || !hideTargets)
                           ? `, ${label}, ${style.legend}`
                           : ""
@@ -453,7 +475,7 @@ export function Fretboard({
                     cx={column.center}
                     cy={yFor(string)}
                     r={dotRadius}
-                    fill="#232532"
+                    fill="var(--board-empty-note)"
                     stroke={palette(rootKey).edge}
                     strokeWidth="1"
                     strokeDasharray="3 3"
@@ -467,8 +489,8 @@ export function Fretboard({
                     width={dotRadius * 2}
                     height={dotRadius * 2}
                     rx={dotRadius * 0.34}
-                    fill={solid ? fill : "#1b1d27"}
-                    stroke={solid ? "#fffdf8" : fill}
+                    fill={solid ? fill : "var(--board-note-backdrop)"}
+                    stroke={solid ? "var(--board-note-outline)" : fill}
                     strokeWidth={solid ? 1.8 : 1.6}
                   />
                 )}
@@ -478,8 +500,8 @@ export function Fretboard({
                     cx={column.center}
                     cy={yFor(string)}
                     r={dotRadius}
-                    fill={solid ? fill : "#1b1d27"}
-                    stroke={solid ? "rgba(255,255,255,.55)" : fill}
+                    fill={solid ? fill : "var(--board-note-backdrop)"}
+                    stroke={solid ? "var(--board-note-soft-outline)" : fill}
                     strokeWidth={solid ? 1 : 1.6}
                   />
                 )}
@@ -490,8 +512,8 @@ export function Fretboard({
                       cx={column.center}
                       cy={yFor(string)}
                       r={dotRadius}
-                      fill={solid ? fill : "#1b1d27"}
-                      stroke={solid ? "rgba(255,255,255,.55)" : fill}
+                      fill={solid ? fill : "var(--board-note-backdrop)"}
+                      stroke={solid ? "var(--board-note-soft-outline)" : fill}
                       strokeWidth={solid ? 1 : 1.6}
                     />
                     <circle
@@ -499,7 +521,7 @@ export function Fretboard({
                       cy={yFor(string)}
                       r={dotRadius * 0.46}
                       fill="none"
-                      stroke={solid ? "rgba(20,20,25,.55)" : fill}
+                      stroke={solid ? "var(--board-note-inner)" : fill}
                       strokeWidth="1.6"
                     />
                   </>
@@ -510,7 +532,7 @@ export function Fretboard({
                     x={column.center}
                     y={yFor(string) + labelSize * 0.35}
                     textAnchor="middle"
-                    fill={isFound && solid ? "#14151c" : "#f3f0ea"}
+                    fill={isFound && solid ? "var(--board-note-ink-dark)" : "var(--board-note-ink-light)"}
                     fontSize={labelSize}
                     fontWeight="700"
                     pointerEvents="none"
@@ -533,8 +555,8 @@ export function Fretboard({
               textAnchor="middle"
               fill={
               SINGLE_INLAYS.has(column.fret) || DOUBLE_INLAYS.has(column.fret)
-                ? "#f2efe6"
-                : "#aeb3c4"
+                ? "var(--board-number-emphasis)"
+                : "var(--board-number)"
             }
               fontSize={fretNumberSize}
               fontWeight={SINGLE_INLAYS.has(column.fret) || DOUBLE_INLAYS.has(column.fret) ? "700" : "500"}

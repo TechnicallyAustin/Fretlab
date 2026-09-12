@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { frontendSource, readProjectFile, squash } from "./helpers/sources.mjs";
+import { frontendSource, readProjectFile, screenSources, squash } from "./helpers/sources.mjs";
 
 async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -116,7 +116,7 @@ test("every board states its fret window, including mini boards", async () => {
   // which is what made drill boards unreadable.
   assert.doesNotMatch(source, /const showLabels = !mini/);
   assert.doesNotMatch(source, /const showStringNames = !mini/);
-  assert.match(source, /Position \$\{low\}/);
+  assert.match(source, /Starts at fret \$\{low\}/);
   assert.match(source, /Open position/);
 
   // Fret markers are at their real neck positions.
@@ -232,6 +232,12 @@ test("theme preference has system, light, and dark modes", async () => {
   assert.match(frame, /theme-\$\{themeMode\}/);
   assert.match(css, /\.theme-dark/);
   assert.match(css, /prefers-color-scheme: light/);
+  assert.match(css, /\.site-shell[\s\S]*color: var\(--ink\)/);
+  const components = (await screenSources())
+    .filter((source) => source.path.startsWith("components/"))
+    .map((source) => source.text)
+    .join("\n");
+  assert.doesNotMatch(components, /#[0-9a-fA-F]{6}/, "component colours belong in theme tokens");
 });
 
 test("first-run onboarding chooses a path and skips after completion", async () => {
@@ -249,13 +255,19 @@ test("first-run onboarding chooses a path and skips after completion", async () 
 
 test("Today uses a contribution graph and fretboards keep stable viewports", async () => {
   const today = await readProjectFile("app/_screens/Today.tsx");
+  const fretboard = await readProjectFile("components/fretlab/Fretboard.tsx");
   const css = await readProjectFile("app/globals.css");
-  assert.match(today, /weekdayContributionLevels\(sessions, now\)/);
+  assert.match(today, /workweekContributionLevels\(sessions, 5, now\)/);
   assert.match(today, /contribution-graph/);
   assert.match(today, /Monday through Friday/);
+  assert.match(today, /\["Tu", "Tuesday"\]/);
+  assert.match(today, /\["Th", "Thursday"\]/);
   assert.match(css, /\.contribution-graph/);
-  assert.match(css, /\.fretboard svg[\s\S]*height: 180px/);
-  assert.match(css, /\.fretboard\.mini svg[\s\S]*height: 112px/);
+  assert.match(css, /grid-template-rows: repeat\(5, 16px\)/);
+  assert.match(css, /width: min\(100%, var\(--board-natural, 100%\)\)/);
+  assert.match(fretboard, /high - low \+ 1/);
+  assert.match(fretboard, /Math\.max\(13,/);
+  assert.doesNotMatch(fretboard, /"#[0-9a-fA-F]{3,8}"/);
 });
 
 test("detail routes render the entity named in the URL", async () => {
@@ -270,6 +282,7 @@ test("detail routes render the entity named in the URL", async () => {
     // that it names the one in the URL is the whole of FL-11's first claim.
     ["/routines/runner/warm-up", "Ten minute warm-up"],
     ["/routines/runner/one-key-deep", "One key, deep"],
+    ["/routines/one-key-deep", "One key, deep"],
     // A drill id runs as a single step, so "Start this drill" starts this one.
     ["/routines/runner/thirds", "Thirds through the shape"],
   ]) {

@@ -19,14 +19,18 @@
 import type { View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
 import { StateNotice } from "@/components/fretlab/StateNotice";
-import { IN_TUNE_CENTS } from "@/lib/fretlab/pitch";
+import { IN_TUNE_CENTS, tuningStrings } from "@/lib/fretlab/pitch";
 import { useTuner } from "@/lib/fretlab/useTuner";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
+import { useMemo } from "react";
 
 /** Cents beyond which the needle pins rather than running off the dial. */
 const RANGE = 50;
 
 export function Tuner({ go }: { go: (view: View) => void }) {
-  const tuner = useTuner();
+  const { tuning: guitarSetup } = useGuitarSetup();
+  const targets = useMemo(() => tuningStrings(guitarSetup), [guitarSetup]);
+  const tuner = useTuner(targets);
   const { reading, state, tuning } = tuner;
 
   // −50..50 cents mapped across the dial, clamped so a wildly slack string
@@ -37,7 +41,7 @@ export function Tuner({ go }: { go: (view: View) => void }) {
 
   return (
     <div className="screen-content tuner-screen">
-      <AppHeader title="Tuner" meta="Standard tuning" onBack={() => go("today")} />
+      <AppHeader title="Tuner" meta={`${guitarSetup.name} tuning`} onBack={() => go("today")} />
 
       {state === "idle" && (
         <StateNotice
@@ -130,7 +134,7 @@ export function Tuner({ go }: { go: (view: View) => void }) {
           it is the whole feature when there is no microphone to be had. */}
       <section className="section">
         <div className="section-head">
-          <h2>Standard tuning</h2>
+          <h2>{guitarSetup.name} tuning</h2>
           <span>low to high</span>
         </div>
         <ol className="tuner-strings">

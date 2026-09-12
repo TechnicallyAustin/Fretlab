@@ -19,6 +19,14 @@ lint and tests rather than through review.
 
 Next task: **FL-22 — Real guitar audio tied to the displayed shape.**
 
+**Post-remediation audit, September 12:** corrected fret-range clipping and
+undersized boards, changed Today to a five-week × five-weekday contribution
+grid with labels on the left, repaired dark-theme inheritance, propagated
+tuning/handedness through generated music and the tuner, and replaced stale or
+misleading detail routes and actions. Acceptance coverage was extended for
+literal ranges, readable board labels, workweek layout, Drop D positions, and
+Drop D tuner targets.
+
 Two runtime faults reported from the browser were fixed outside the stage
 numbering and are recorded under **Found during Stage 2**. Five defects the
 audit did not list were found while working and are recorded under the tasks
@@ -1072,7 +1080,7 @@ Carried forward into Stage 3, logged rather than fixed:
 
 **Goal:** the app is usable by people who are not you. Largely parallel to Stage 2.
 
-**Progress:** 5 / 6 done
+**Progress:** 6 / 6 done — Stage 3 complete, release gate clear
 
 | ID | Task | Status |
 |---|---|---|

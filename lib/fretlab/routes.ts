@@ -37,7 +37,7 @@ export const VIEW_PATHS: Record<View, string> = {
   progress: "/progress",
   tuner: "/tuner",
   routines: "/routines",
-  "routine-detail": "/routines/current",
+  "routine-detail": "/routines/:id",
   runner: "/routines/runner/:id",
   summary: "/routines/summary",
   guided: "/routines/guided",
@@ -54,6 +54,7 @@ export const DETAIL_VIEWS = new Set<View>([
   "chord-detail",
   "scale-library-detail",
   "song-detail",
+  "routine-detail",
 ]);
 
 /**
@@ -66,6 +67,7 @@ export const DEFAULT_DETAIL_ID: Record<string, string> = {
   "chord-detail": "g-major",
   "scale-library-detail": "major",
   "song-detail": "stand-by-me",
+  "routine-detail": "warm-up",
 };
 
 export function hrefForView(view: View, id?: string): string {
@@ -100,6 +102,8 @@ export function viewForPath(pathname: string): View {
         return "scale-library-detail";
       case "songs":
         return "song-detail";
+      case "routines":
+        return "routine-detail";
     }
   }
   return "today";

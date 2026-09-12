@@ -12,6 +12,7 @@ import { scaleShape, targetNotes } from "@/lib/fretlab/theory";
 import { roleForDegree, degreeAt, type NoteGroup } from "@/lib/fretlab/noteRoles";
 import { useMetronome } from "@/lib/fretlab/useMetronome";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function DesktopPracticeStudio({
   go,
@@ -20,6 +21,7 @@ export function DesktopPracticeStudio({
   go: (view: View) => void;
   sessionKey: KeyName;
 }) {
+  const { tuning } = useGuitarSetup();
   const [mode, setMode] = useState<"Notes" | "Degrees" | "Roots">("Roots");
   // The beat used to come from a `setInterval` that was silent and drifted:
   // `setInterval` guarantees no worse than "not before", so the click and the
@@ -31,8 +33,8 @@ export function DesktopPracticeStudio({
   const currentBeat = running ? beat : 0;
   const notes =
     mode === "Roots"
-      ? targetNotes(sessionKey, 0, 12)
-      : scaleShape(sessionKey, 0, 12);
+      ? targetNotes(sessionKey, 0, 12, tuning)
+      : scaleShape(sessionKey, 0, 12, tuning);
 
   // Two layers, so the chord skeleton inside the scale is visible rather than
   // implied: 1-3-5 read first, the remaining scale tones sit behind them.
@@ -45,7 +47,7 @@ export function DesktopPracticeStudio({
             label: `${sessionKey} triad (1\u20133\u20135)`,
             emphasis: "primary",
             notes: notes.filter((note) => {
-              const role = roleForDegree(degreeAt(note.s, note.f, sessionKey));
+              const role = roleForDegree(degreeAt(note.s, note.f, sessionKey, tuning));
               return role === "root" || role === "third" || role === "fifth";
             }),
           },
@@ -54,7 +56,7 @@ export function DesktopPracticeStudio({
             label: "Rest of the scale",
             emphasis: "secondary",
             notes: notes.filter((note) => {
-              const role = roleForDegree(degreeAt(note.s, note.f, sessionKey));
+              const role = roleForDegree(degreeAt(note.s, note.f, sessionKey, tuning));
               return role !== "root" && role !== "third" && role !== "fifth";
             }),
           },
@@ -63,7 +65,7 @@ export function DesktopPracticeStudio({
     mode === "Roots"
       ? {
           title: `Find every ${sessionKey}`,
-          copy: "Squares mark the tonal centre. Say the string, then play each root from low E to high e.",
+          copy: "Squares mark the tonal centre. Say the string, then play each root from string six to string one.",
           target: `Goal · find all ${notes.length} roots in 20 seconds`,
         }
       : mode === "Degrees"

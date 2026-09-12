@@ -1,9 +1,10 @@
 # Handoff — continuing the FretLab remediation
 
-You are picking up a remediation that is half done. `docs/REMEDIATION-PLAN.md` is
+You are picking up an audit-driven remediation. `docs/REMEDIATION-PLAN.md` is
 both the specification and the tracker; this file is how to work on it.
 
-**Stages 1 and 2 are complete. Stage 3 is next, starting at FL-16.**
+**Stages 1–3 are complete. The post-remediation UI audit is complete. Stage 4
+is next, starting at FL-22.**
 
 Read this file, then read the plan's **Status**, **How to use this document** and
 **Guardrails** sections, then the one task you are about to do. Do not read all
@@ -187,21 +188,28 @@ Two things about `library.ts` that will bite you:
 
 ---
 
-## Before you start Stage 3
+## Post-remediation audit (September 12, 2026)
 
-Four things are carried forward, logged at the end of the plan rather than
-fixed. FL-18 touches mobile IA and will collide with the first two:
+The four items formerly carried into Stage 3 have been resolved or made
+explicit:
 
-1. **`Guided` is a dead second runner** — hardcoded to one routine, records
-   nothing, unreachable since FL-11. Merge into `Runner` or delete it with its
-   view, route and assertions.
-2. **`RoutineDetail` hardcodes `ROUTINES[1]`** — `/routines/current` shows the
-   same routine whichever card you opened. Needs an id in its route.
-3. **Position tables cover three scales**; the other eight use a sliding window,
-   labelled honestly. FL-19 (alternate tunings) reads `OPEN_PC`, which both the
-   fretboard and the tuner already derive from.
-4. **The tuner is unverified against a real guitar.** Detection is good to
-   better than 0.01 cents on synthesised tones, which is a different claim.
+1. `Guided` is now a compatibility route into the real recording `Runner`.
+2. Routine detail has an id-bearing route and resolves the named routine.
+3. Standard/Drop D tuning and handedness are shared across boards and tuner;
+   generated notes and positions use the selected tuning. Drop D chord shapes
+   mute the changed sixth string where a standard grip would sound a wrong note.
+4. The tuner remains verified against synthesised guitar-like tones, including
+   Drop D. A real-instrument device pass is still a release check, not a claim.
+
+The same pass restored literal fret windows, established readable natural board
+sizes, put five weekday labels beside the home contribution grid, repaired
+dark-theme inheritance and inputs, and removed misleading default actions.
+
+## Before you start Stage 4
+
+Position tables still cover three scales; the other eight use a sliding window,
+labelled honestly. The tuner still needs a real-guitar device pass before a
+release can claim field verification.
 
 ---
 

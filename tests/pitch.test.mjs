@@ -23,8 +23,9 @@ const {
   frequencyOf,
   nearestString,
   readingFor,
+  tuningStrings,
 } = await import("../lib/fretlab/pitch.ts");
-const { OPEN_PC } = await import("../lib/fretlab/theory.ts");
+const { DROP_D_TUNING, OPEN_PC } = await import("../lib/fretlab/theory.ts");
 
 const RATE = 44100;
 const SIZE = 8192;
@@ -55,6 +56,14 @@ test("every open string is detected within 2 cents", () => {
       `string ${string.string} (${string.name}${string.octave}, ${string.frequency.toFixed(2)} Hz) read ${off.toFixed(2)} cents out`,
     );
   }
+});
+
+test("Drop D gives the tuner a D2 sixth-string target", () => {
+  const strings = tuningStrings(DROP_D_TUNING);
+  assert.equal(strings[0].string, 6);
+  assert.equal(strings[0].name, "D");
+  assert.equal(strings[0].octave, 2);
+  assert.equal(strings[0].midi, 38);
 });
 
 test("a string that is out of tune is reported as out by the right amount", () => {

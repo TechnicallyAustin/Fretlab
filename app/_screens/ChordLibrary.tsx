@@ -14,6 +14,7 @@ import { chordIntervals } from "@/lib/fretlab/theory";
 import { cssVars } from "@/lib/fretlab/palette";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function ChordLibrary({
   go,
@@ -22,6 +23,7 @@ export function ChordLibrary({
   go: (view: View) => void;
   onOpen: (id: string) => void;
 }) {
+  const { tuning } = useGuitarSetup();
   const [quality, setQuality] = useState("All");
   const [root, setRoot] = useState("All");
   const [level, setLevel] = useState("All levels");
@@ -36,7 +38,7 @@ export function ChordLibrary({
       <AppHeader
         title="Chord library"
         meta={`${visible.length} shapes`}
-        onBack={() => go("keys")}
+        onBack={() => go("library")}
       />
       <section className="library-photo-hero chord-photo">
         <div>
@@ -100,7 +102,7 @@ export function ChordLibrary({
                 <b>→</b>
               </div>
               <Fretboard
-                notes={chord.fingering}
+                notes={tuning.id === "drop-d" ? chord.fingering.filter((note) => note.s !== 6) : chord.fingering}
                 low={0}
                 high={4}
                 mini

@@ -14,7 +14,8 @@
  * above. NSDF normalises each lag against the energy in that lag's own window,
  * so the true period wins.
  */
-import { OPEN_PC } from "./theory";
+import type { Tuning } from "./types";
+import { STANDARD_TUNING as STANDARD_SETUP } from "./theory";
 
 /** Concert A. Every note name and cent reading is relative to this. */
 export const A4 = 440;
@@ -185,32 +186,24 @@ export type GuitarString = {
   frequency: number;
 };
 
-/**
- * Which octave each open string sounds in, low E to high e.
- *
- * The pitch *classes* come from `OPEN_PC`, the same table the fretboard is
- * drawn from, so an alternate tuning changes one place rather than two. Only
- * the octave lives here, because a pitch class cannot say whether the sixth
- * string is the E below the bass clef or the one above it.
- */
-const STRING_OCTAVES: Record<number, number> = { 6: 2, 5: 2, 4: 3, 3: 3, 2: 3, 1: 4 };
-
-function stringAt(string: number): GuitarString {
-  const octave = STRING_OCTAVES[string];
-  // MIDI numbers C-1 as 0, so an octave starts at (octave + 1) * 12.
-  const midi = (octave + 1) * 12 + OPEN_PC[string];
+function stringAt(string: number, setup: Tuning): GuitarString {
+  const midi = setup.openMidi[string];
   const reading = readingFor(frequencyOf(midi));
   return {
     string,
     midi,
     name: reading?.name ?? "",
-    octave,
+    octave: reading?.octave ?? 0,
     frequency: frequencyOf(midi),
   };
 }
 
-/** Standard tuning, low string first, derived rather than typed out. */
-export const STANDARD_TUNING: GuitarString[] = [6, 5, 4, 3, 2, 1].map(stringAt);
+/** Tuner targets, low string first, derived from the same setup as the board. */
+export function tuningStrings(setup: Tuning): GuitarString[] {
+  return [6, 5, 4, 3, 2, 1].map((string) => stringAt(string, setup));
+}
+
+export const STANDARD_TUNING: GuitarString[] = tuningStrings(STANDARD_SETUP);
 
 /**
  * The string a frequency is closest to, by semitone distance.

@@ -205,6 +205,7 @@ function span(notes: Note[]) {
 export function chordVoicing(
   chord: { root: KeyName; quality: string; symbol: string },
   voicing: "Barre" | "Triad",
+  tuning: Tuning = STANDARD_TUNING,
 ) {
   const intervals = voicingIntervals(chord, voicing);
   if (voicing === "Barre") {
@@ -213,10 +214,14 @@ export function chordVoicing(
     // E-rooted chord by a semitone, so E major sounded F.
     const eRoot = (((keyPc(chord.root) - OPEN_PC[6]) % 12) + 12) % 12;
     const aRoot = (((keyPc(chord.root) - OPEN_PC[5]) % 12) + 12) % 12;
-    const candidates = [
-      buildShape(E_SHAPES[key], eRoot),
-      buildShape(A_SHAPES[key], aRoot),
-    ].filter((notes) => notes.every((note) => note.f >= 0 && note.f <= 15));
+    // E-form barres depend on standard tuning's low E. In Drop D the familiar,
+    // beginner-safe A form remains correct, so do not present an altered E
+    // grip as if it were the same shape.
+    const candidates = (
+      tuning.id === STANDARD_TUNING.id
+        ? [buildShape(E_SHAPES[key], eRoot), buildShape(A_SHAPES[key], aRoot)]
+        : [buildShape(A_SHAPES[key], aRoot)]
+    ).filter((notes) => notes.every((note) => note.f >= 0 && note.f <= 15));
     // Prefer the tighter grip, then the lower position: both are the easier
     // reach, and the E form running past fret 9 is what pushed chords off the
     // end of the neck.
@@ -256,7 +261,7 @@ export function chordVoicing(
       }
   return (
     best ??
-    intervalShape(chord.root, intervals, 4, 12)
+    intervalShape(chord.root, intervals, 4, 12, tuning)
       .filter((note) => note.s <= 3)
       .slice(0, 3)
   );

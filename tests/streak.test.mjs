@@ -11,7 +11,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const { summarise, consistencyLevels, accuracySeries } = await import(
+const { summarise, consistencyLevels, workweekContributionLevels, accuracySeries } = await import(
   "../lib/api/progress.ts"
 );
 const { readProjectFile } = await import("./helpers/sources.mjs");
@@ -50,6 +50,12 @@ test("practice in any key fills the consistency graph", () => {
   const levels = consistencyLevels(sessions, 26, NOW);
   const active = levels.filter((level) => level > 0).length;
   assert.equal(active, 3, "a day practised in any key is a day practised");
+});
+
+test("the compact home graph is five weekday rows across five weeks", () => {
+  const levels = workweekContributionLevels([day(0, "G"), day(1, "C")], 5, NOW);
+  assert.equal(levels.length, 25);
+  assert.equal(levels.filter((level) => level > 0).length, 2);
 });
 
 test("active days and reps count every key", () => {

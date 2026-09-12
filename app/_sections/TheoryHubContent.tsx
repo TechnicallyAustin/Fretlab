@@ -13,6 +13,7 @@ import { PianoMap } from "@/components/fretlab/PianoMap";
 import { cssVars } from "@/lib/fretlab/palette";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function TheoryHubContent({
   go,
@@ -21,6 +22,7 @@ export function TheoryHubContent({
   go: (view: View) => void;
   selectedKey: KeyName;
 }) {
+  const { tuning } = useGuitarSetup();
   const modules = [
     {
       id: "fretboard",
@@ -83,7 +85,7 @@ export function TheoryHubContent({
       <AppHeader
         title="Theory"
         meta={`Key of ${selectedKey}`}
-        onBack={() => go("keys")}
+        onBack={() => go("library")}
       />
       <section className="theory-hub-hero">
         <div>
@@ -184,7 +186,7 @@ export function TheoryHubContent({
                   <span>Same pitch, new register</span>
                 </div>
                 <Fretboard
-                  notes={intervalShape(selectedKey, [0], 0, 12)}
+                  notes={intervalShape(selectedKey, [0], 0, 12, tuning)}
                   low={0}
                   high={12}
                   labelMode="note"
@@ -208,7 +210,7 @@ export function TheoryHubContent({
                   <span>Degrees from {selectedKey}</span>
                 </div>
                 <Fretboard
-                  notes={intervalShape(selectedKey, lessonIntervals, 0, 9)}
+                  notes={intervalShape(selectedKey, lessonIntervals, 0, 9, tuning)}
                   low={0}
                   high={9}
                   labelMode="degree"

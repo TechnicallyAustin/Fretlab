@@ -16,6 +16,29 @@
   --board-wire: #3f424d;
   --board-string: #595d6c;
   --board-label: #9397ab;
+  --board-top: #303340;
+  --board-middle: #20222d;
+  --board-bottom: #171923;
+  --board-border: #3c3f4b;
+  --board-fret: #777b86;
+  --board-nut: #e8e3d8;
+  --board-inlay: #c9c4b9;
+  --board-muted-mark: #c98b84;
+  --board-open-mark: #cfd3df;
+  --board-string-shadow: #090a0f;
+  --board-wound-string: #b7afa0;
+  --board-plain-string: #d9d3c8;
+  --board-label-text: #b9bdcc;
+  --board-path: #f3f0ea;
+  --board-empty-note: #232532;
+  --board-note-backdrop: #1b1d27;
+  --board-note-outline: #fffdf8;
+  --board-note-soft-outline: rgba(255,255,255,.55);
+  --board-note-inner: rgba(20,20,25,.55);
+  --board-note-ink-dark: #14151c;
+  --board-note-ink-light: #f3f0ea;
+  --board-number-emphasis: #f2efe6;
+  --board-number: #aeb3c4;
   --card-shadow: 0 4px 10px rgba(60, 50, 30, .16);
   --board-shadow: 0 8px 20px rgba(60, 50, 30, .18);
 }
@@ -37,7 +60,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -72,6 +96,7 @@ p {
   gap: 16px;
   padding: 28px;
   background: #161826;
+  color: var(--ink);
 }
 
 .design-caption {
@@ -151,6 +176,15 @@ p {
 
 .theme-dark .app-frame,
 .theme-system .app-frame { background: var(--paper); }
+
+.theme-dark input,
+.theme-dark select,
+.theme-system input,
+.theme-system select {
+  border-color: var(--line-strong);
+  background: var(--card);
+  color: var(--ink);
+}
 
 @media (prefers-color-scheme: light) {
   .theme-system { --paper: #f4f0e7; --card: #fbf8f2; --sunken: #e9e3d6; --line: #ded7c7; --line-strong: #c9c1b0; --ink: #2b2924; --muted: #6f6a5c; --quiet: #7a7466; --secondary-ink: #3f3c34; }
@@ -419,40 +453,41 @@ p {
 
 .contribution-wrap {
   display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
   gap: 9px;
   margin-top: 12px;
 }
 
 .contribution-graph {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(5, minmax(12px, 1fr));
+  grid-template-rows: repeat(5, 16px);
+  grid-auto-flow: column;
+  gap: 4px;
 }
 
-.contribution-day {
-  display: grid;
-  gap: 5px;
-  justify-items: center;
-  color: var(--quiet);
-  font-size: .8125rem;
-}
-
-.contribution-day>span {
+.contribution-graph span {
   width: 100%;
-  aspect-ratio: 1;
   border: 1px solid color-mix(in srgb, var(--line-strong) 55%, transparent);
-  border-radius: 5px;
+  border-radius: 3px;
   background: var(--sunken);
 }
 
-.contribution-day small { font-size: .8125rem; }
+.contribution-days {
+  display: grid;
+  grid-template-rows: repeat(5, 16px);
+  gap: 4px;
+  color: var(--quiet);
+  font-size: .8125rem;
+  line-height: 16px;
+}
 
 .contribution-graph .level-1, .contribution-legend .level-1 { background: color-mix(in srgb, var(--key-bright) 24%, var(--card)); }
 .contribution-graph .level-2, .contribution-legend .level-2 { background: color-mix(in srgb, var(--key-bright) 45%, var(--card)); }
 .contribution-graph .level-3, .contribution-legend .level-3 { background: color-mix(in srgb, var(--key-bright) 68%, var(--card)); }
 .contribution-graph .level-4, .contribution-legend .level-4 { background: var(--key-bright); }
 
-.contribution-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: var(--quiet); font-size: .8125rem; }
+.contribution-legend { grid-column: 2; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: var(--quiet); font-size: .8125rem; }
 .contribution-legend i { width: 12px; height: 12px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--sunken); }
 .contribution-legend span:first-child { margin-right: 4px; }
 .contribution-legend span:last-child { margin-left: 4px; }
@@ -707,7 +742,7 @@ p {
   grid-template-areas:
     "copy go"
     "board board";
-  grid-template-rows: auto 132px;
+  grid-template-rows: auto 155px;
   gap: 12px;
   align-items: start;
   padding: 14px;
@@ -741,7 +776,7 @@ p {
 }
 
 .drill-card>.fretboard-figure svg {
-  max-height: 132px;
+  max-height: 155px;
 }
 
 .drill-go {
@@ -799,10 +834,9 @@ p {
 }
 
 .fretboard svg {
-  width: 100%;
+  width: min(100%, var(--board-natural, 100%));
   min-width: var(--board-min, 0);
   max-width: none;
-  height: 220px;
   height: auto;
   display: block;
   overflow: visible;
@@ -822,7 +856,8 @@ p {
 }
 
 .fretboard.mini svg {
-  height: 112px;
+  height: auto;
+  max-height: 155px;
 }
 
 .fret-hit {
@@ -2204,7 +2239,10 @@ p {
 .group-list section>button {
   width: 100%;
   display: grid;
-  grid-template-columns: 86px 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "copy time"
+    "board board";
   gap: 12px;
   align-items: center;
   margin-bottom: 7px;
@@ -2217,9 +2255,13 @@ p {
 }
 
 .group-list .fretboard.mini {
-  width: 86px;
+  grid-area: board;
+  width: min(100%, var(--board-natural, 100%));
   border-radius: 6px;
 }
+
+.group-list section>button>div:nth-child(2) { grid-area: copy; }
+.group-list section>button>small { grid-area: time; }
 
 .group-list section>button strong {
   font-size: 0.9375rem;
@@ -2585,7 +2627,10 @@ p {
 
 .routine-drills li {
   display: grid;
-  grid-template-columns: 24px 72px minmax(0, 1fr) auto;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  grid-template-areas:
+    "number copy state"
+    ". board board";
   gap: 10px;
   align-items: center;
   padding: 10px;
@@ -2595,8 +2640,13 @@ p {
 }
 
 .routine-drills .fretboard.mini {
-  width: 72px;
+  grid-area: board;
+  width: min(100%, var(--board-natural, 100%));
 }
+
+.routine-drills li>span { grid-area: number; }
+.routine-drills li>div { grid-area: copy; }
+.routine-drills li>em { grid-area: state; }
 
 .routine-drills li.current {
   border-color: var(--key-bright);
@@ -6313,7 +6363,7 @@ p {
 
   .chord-library-card .fretboard.mini,
   .scale-library-card .fretboard.mini {
-    width: 148px;
+    width: 240px;
     max-width: 100%;
     margin-inline: auto;
   }
@@ -7015,8 +7065,8 @@ p {
   }
 
   .drill-board-stage .fretboard svg {
-    width: 100%;
-    height: 180px;
+    width: min(100%, var(--board-natural, 100%));
+    height: auto;
     max-height: none;
   }
 
@@ -7555,21 +7605,13 @@ p {
   }
 
   .drill-card {
-    grid-template-columns: 72px minmax(0, 1fr) 40px;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
     padding-inline: 10px;
   }
 
-  .drill-card .fretboard.mini,
-  .group-list .fretboard.mini,
-  .routine-drills .fretboard.mini {
-    width: 72px;
-    min-width: 72px;
-  }
-
   .drill-card .fretboard.mini svg {
-    width: 72px;
-    min-height: 52px;
+    width: min(100%, var(--board-natural, 100%));
   }
 
   .drill-copy small:nth-of-type(2),
@@ -8401,7 +8443,7 @@ p {
   /* One standard card: title, meta, board. The description is the first thing
      to go, since the title and the board already say what the drill is. */
   .drill-card {
-    grid-template-rows: auto 104px;
+    grid-template-rows: auto 148px;
     gap: 10px;
     padding: 12px;
   }
@@ -8411,7 +8453,7 @@ p {
   }
 
   .drill-card>.fretboard-figure svg {
-    max-height: 104px;
+    max-height: 148px;
   }
 
   .drill-copy>strong {

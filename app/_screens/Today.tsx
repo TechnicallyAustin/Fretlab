@@ -12,7 +12,12 @@ import { StatusBar } from "@/components/fretlab/StatusBar";
 import { cssVars } from "@/lib/fretlab/palette";
 import { DRILLS, ROUTINES } from "@/lib/fretlab/library";
 import { StateNotice } from "@/components/fretlab/StateNotice";
-import { lastAccuracyByDrill, summarise, weekdayContributionLevels, weekMinutes } from "@/lib/api/progress";
+import {
+  lastAccuracyByDrill,
+  summarise,
+  weekMinutes,
+  workweekContributionLevels,
+} from "@/lib/api/progress";
 import { usePracticeSessions } from "@/lib/api/hooks";
 import { useClock } from "@/lib/fretlab/useClock";
 
@@ -44,7 +49,8 @@ export function Today({
   const stats = typeof now !== "number" ? null : summarise(sessions, now);
   const week = typeof now !== "number" ? null : weekMinutes(sessions, now);
   const weekTotal = week?.reduce((sum, day) => sum + day.minutes, 0) ?? 0;
-  const contributionLevels = typeof now !== "number" ? null : weekdayContributionLevels(sessions, now);
+  const contributionLevels =
+    typeof now !== "number" ? null : workweekContributionLevels(sessions, 5, now);
 
   // The session the Start button actually begins, read from the routine rather
   // than asserted. bpm is not shown: a routine has no tempo of its own.
@@ -109,7 +115,36 @@ export function Today({
           <h2>This week</h2>
           <span>{weekTotal} min</span>
         </div>
-        {contributionLevels && <div className="contribution-wrap"><div className="contribution-graph" aria-label="Practice contributions Monday through Friday">{contributionLevels.map((level, index) => <div className="contribution-day" key={index}><span className={`level-${level}`} title={level ? `${level} practice level` : "No practice"} /><small>{["Mon", "Tue", "Wed", "Thu", "Fri"][index]}</small></div>)}</div><div className="contribution-legend"><span>Less</span><i className="level-0" /><i className="level-1" /><i className="level-2" /><i className="level-3" /><i className="level-4" /><span>More</span></div></div>}
+        {contributionLevels && (
+          <div className="contribution-wrap">
+            <div className="contribution-days" aria-hidden="true">
+              {[
+                ["M", "Monday"],
+                ["Tu", "Tuesday"],
+                ["W", "Wednesday"],
+                ["Th", "Thursday"],
+                ["F", "Friday"],
+              ].map(([short, full]) => <span title={full} key={full}>{short}</span>)}
+            </div>
+            <div
+              className="contribution-graph"
+              aria-label="Practice contributions for Monday through Friday over the last five weeks"
+            >
+              {contributionLevels.map((level, index) => (
+                <span
+                  className={`level-${level}`}
+                  key={index}
+                  title={level ? `${level} practice level` : "No practice"}
+                />
+              ))}
+            </div>
+            <div className="contribution-legend">
+              <span>Less</span><i className="level-0" /><i className="level-1" />
+              <i className="level-2" /><i className="level-3" /><i className="level-4" />
+              <span>More</span>
+            </div>
+          </div>
+        )}
       </section>
       )}
       <section className="section">
@@ -122,7 +157,7 @@ export function Today({
               <button
                 key={drill.id}
                 style={cssVars(sessionKey)}
-                onClick={() => go("drill-detail")}
+                onClick={() => go("drill-detail", drill.id)}
               >
                 <span className="key-chip">Key {sessionKey}</span>
                 <Ring value={accuracyByDrill.get(drill.id) ?? 0} />

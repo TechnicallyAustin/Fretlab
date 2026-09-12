@@ -28,7 +28,7 @@ export function FretboardLegend({
           return (
             <li key={role}>
               <svg viewBox="0 0 22 22" aria-hidden="true">
-                <rect x="0" y="0" width="22" height="22" rx="6" fill="#20222d" />
+                <rect x="0" y="0" width="22" height="22" rx="6" fill="var(--board-middle)" />
                 {style.shape === "square" ? (
                   <rect
                     x="5"
@@ -37,7 +37,7 @@ export function FretboardLegend({
                     height="12"
                     rx="4"
                     fill={color}
-                    stroke="#fffdf8"
+                    stroke="var(--board-note-outline)"
                     strokeWidth="1.6"
                   />
                 ) : (
@@ -46,7 +46,7 @@ export function FretboardLegend({
                       cx="11"
                       cy="11"
                       r="6"
-                      fill={style.filled ? color : "#1b1d27"}
+                      fill={style.filled ? color : "var(--board-note-backdrop)"}
                       stroke={style.filled ? "rgba(255,255,255,.55)" : color}
                       strokeWidth={style.filled ? 1 : 1.8}
                     />

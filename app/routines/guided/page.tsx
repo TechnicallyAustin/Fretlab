@@ -8,10 +8,10 @@
  */
 import { useStoredKey } from "@/lib/fretlab/useStoredKey";
 import { useFretLabNav } from "@/app/_screens/useFretLabNav";
-import { Guided } from "@/app/_screens/Guided";
+import { Runner } from "@/app/_screens/Runner";
 
 export default function Page() {
   const nav = useFretLabNav();
   const [selectedKey] = useStoredKey();
-  return <Guided go={nav.go} selectedKey={selectedKey} />;
+  return <Runner go={nav.go} sessionKey={selectedKey} routineId="one-key-deep" />;
 }

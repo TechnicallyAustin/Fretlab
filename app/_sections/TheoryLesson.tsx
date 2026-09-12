@@ -9,8 +9,10 @@ import type { KeyName } from "@/lib/fretlab/types";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { PianoMap } from "@/components/fretlab/PianoMap";
 import { majorScale, scaleShape } from "@/lib/fretlab/theory";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function TheoryLesson({ rootKey }: { rootKey: KeyName }) {
+  const { tuning } = useGuitarSetup();
   const scale = majorScale(rootKey);
   const degrees = ["1", "2", "3", "4", "5", "6", "7"];
   const roles = [
@@ -39,7 +41,7 @@ export function TheoryLesson({ rootKey }: { rootKey: KeyName }) {
             <span>Frets 0–7</span>
           </div>
           <Fretboard
-            notes={scaleShape(rootKey, 0, 7)}
+            notes={scaleShape(rootKey, 0, 7, tuning)}
             low={0}
             high={7}
             labelMode="degree"

@@ -19,27 +19,33 @@ import { cssVars } from "@/lib/fretlab/palette";
 import { shapeWindow } from "@/lib/fretlab/geometry";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function ChordDetail({
   go,
   chordId,
 }: {
-  go: (view: View) => void;
+  go: (view: View, id?: string) => void;
   chordId: string;
 }) {
+  const { tuning } = useGuitarSetup();
   const chord = CHORDS.find((item) => item.id === chordId) ?? CHORDS[0];
   const [tab, setTab] = useState("Shape");
   const [voicing, setVoicing] = useState<"Open" | "Barre" | "Triad">("Open");
   const intervals = chordIntervals(chord);
+  const openShape =
+    tuning.id === "drop-d"
+      ? chord.fingering.filter((note) => note.s !== 6)
+      : chord.fingering;
   const displayNotes =
-    voicing === "Open" ? chord.fingering : chordVoicing(chord, voicing);
+    voicing === "Open" ? openShape : chordVoicing(chord, voicing, tuning);
   // The window follows the shape. Hardcoding one per voicing drew four chords
   // on an empty board and clipped two more.
   const range = shapeWindow(displayNotes);
   // A generated shape names the strings it uses, so the rest are damped.
   const mutedStrings =
     voicing === "Open"
-      ? chord.muted
+      ? [...new Set(tuning.id === "drop-d" ? [...chord.muted, 6] : chord.muted)]
       : [1, 2, 3, 4, 5, 6].filter((s) => !displayNotes.some((n) => n.s === s));
   return (
     <div
@@ -104,7 +110,7 @@ export function ChordDetail({
               <span>Root notes are square</span>
             </div>
             <Fretboard
-              notes={voicing === "Open" ? chord.fingering : fingerBarreShape(displayNotes)}
+              notes={voicing === "Open" ? openShape : fingerBarreShape(displayNotes)}
               low={range.low}
               high={range.high}
               labelMode="finger"
@@ -156,7 +162,7 @@ export function ChordDetail({
                 <span>Every available voicing</span>
               </div>
               <Fretboard
-                notes={intervalShape(chord.root, intervals, 0, 12)}
+                notes={intervalShape(chord.root, intervals, 0, 12, tuning)}
                 low={0}
                 high={12}
                 labelMode="degree"
@@ -184,8 +190,8 @@ export function ChordDetail({
               <li>Change away and return without looking.</li>
             </ol>
           </div>
-          <button className="primary-action" onClick={() => go("runner")}>
-            Start practice →
+          <button className="primary-action" onClick={() => go("drill-detail", "major-triad")}>
+            Practice chord tones →
           </button>
         </article>
       )}

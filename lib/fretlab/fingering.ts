@@ -13,8 +13,8 @@
  *   map  a deliberate tour of the neck ("locate every root"). Spanning the
  *        board is the point, so no finger numbers are implied.
  */
-import type { KeyName, Note } from "./types";
-import { intervalShape } from "./theory";
+import type { KeyName, Note, Tuning } from "./types";
+import { intervalShape, STANDARD_TUNING } from "./theory";
 import { positionNotes, positionWindow, positionsFor } from "./positions";
 
 export type FingeredNote = Note & {
@@ -70,7 +70,7 @@ function allowedStrings(drill: DrillLike): Set<number> {
  * Picks the four-fret window inside the drill's range holding the most notes.
  * Ties go to the lower position, which is the easier reach for a beginner.
  */
-function bestBox(drill: DrillLike, key: KeyName): { low: number; high: number } {
+function bestBox(drill: DrillLike, key: KeyName, tuning: Tuning): { low: number; high: number } {
   const strings = allowedStrings(drill);
   const span = spanOf(drill);
   let best = { low: drill.low, high: Math.min(drill.high, drill.low + span), count: -1 };
@@ -78,7 +78,7 @@ function bestBox(drill: DrillLike, key: KeyName): { low: number; high: number } 
   for (let start = drill.low; start + span <= Math.max(drill.high, drill.low + span); start += 1) {
     const end = start + span;
     if (start > drill.high) break;
-    const count = intervalShape(key, [...drill.intervals], start, end).filter((note) =>
+    const count = intervalShape(key, [...drill.intervals], start, end, tuning).filter((note) =>
       strings.has(note.s),
     ).length;
     if (count > best.count) best = { low: start, high: end, count };
@@ -94,7 +94,7 @@ function bestBox(drill: DrillLike, key: KeyName): { low: number; high: number } 
  * guitarist would recognise rather than around whatever `intervalShape`
  * happened to return.
  */
-function namedPosition(drill: DrillLike, key: KeyName): DrillShape | null {
+function namedPosition(drill: DrillLike, key: KeyName, tuning: Tuning): DrillShape | null {
   if (!drill.scale || !drill.position) return null;
   const position = positionsFor(drill.scale).find(
     (each) => each.id === drill.position,
@@ -102,8 +102,8 @@ function namedPosition(drill: DrillLike, key: KeyName): DrillShape | null {
   if (!position) return null;
 
   const strings = allowedStrings(drill);
-  const window = positionWindow(position, key);
-  const notes = positionNotes(position, key).filter((note) =>
+  const window = positionWindow(position, key, tuning);
+  const notes = positionNotes(position, key, tuning).filter((note) =>
     strings.has(note.s),
   );
   // A shape reaching the nut shows it, the same as a generated box does.
@@ -129,21 +129,26 @@ export type DrillShape = {
   windowHigh: number;
 };
 
-export function drillShape(drill: DrillLike, key: KeyName, fullNeck = false): DrillShape {
+export function drillShape(
+  drill: DrillLike,
+  key: KeyName,
+  fullNeck = false,
+  tuning: Tuning = STANDARD_TUNING,
+): DrillShape {
   const kind = drillKind(drill);
   const strings = allowedStrings(drill);
 
   // A drill that names a position gets that position, not the densest window
   // near it. This is the whole point of the tables: "box one" has to be box
   // one, in the key you are playing in.
-  const named = namedPosition(drill, key);
+  const named = namedPosition(drill, key, tuning);
   if (named && !fullNeck) return named;
 
   if (fullNeck || kind === "map") {
     const low = fullNeck ? 0 : drill.low;
     const high = fullNeck ? 12 : drill.high;
     return {
-      notes: intervalShape(key, [...drill.intervals], low, high).filter((note) =>
+      notes: intervalShape(key, [...drill.intervals], low, high, tuning).filter((note) =>
         strings.has(note.s),
       ),
       low,
@@ -154,12 +159,12 @@ export function drillShape(drill: DrillLike, key: KeyName, fullNeck = false): Dr
     };
   }
 
-  const box = bestBox(drill, key);
+  const box = bestBox(drill, key, tuning);
   // One finger per fret only holds inside a hand span. A drill that declared a
   // wider shape is played with a shift, so numbering its notes 1-6 would ask
   // for a grip no hand makes.
   const withinHand = spanOf(drill) <= BOX_SPAN;
-  const notes: FingeredNote[] = intervalShape(key, [...drill.intervals], box.low, box.high)
+  const notes: FingeredNote[] = intervalShape(key, [...drill.intervals], box.low, box.high, tuning)
     .filter((note) => strings.has(note.s))
     .map((note) =>
       withinHand

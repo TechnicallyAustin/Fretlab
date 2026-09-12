@@ -5,9 +5,9 @@
  * under lib/ so L2 sections and L3 elements can use it without importing from
  * a page, and so the boundary lint has somewhere legal to point.
  */
-import type { KeyName } from "./types";
+import type { KeyName, Tuning } from "./types";
 import type { Pattern } from "./patterns";
-import { intervalShape } from "./theory";
+import { intervalShape, STANDARD_TUNING } from "./theory";
 
 export const DRILLS = [
   {
@@ -409,12 +409,18 @@ export type Drill = (typeof DRILLS)[number];
 export function drillPattern(drill: Drill): Pattern | undefined {
   return "pattern" in drill ? (drill.pattern as Pattern) : undefined;
 }
-export function drillNotes(drill: Drill, key: KeyName, full = false) {
+export function drillNotes(
+  drill: Drill,
+  key: KeyName,
+  full = false,
+  tuning: Tuning = STANDARD_TUNING,
+) {
   return intervalShape(
     key,
     [...drill.intervals],
     full ? 0 : drill.low,
     full ? 12 : drill.high,
+    tuning,
   );
 }
 export const TRAINING_MODULES = [

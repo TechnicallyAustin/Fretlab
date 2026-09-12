@@ -23,8 +23,8 @@
  * up, because a major pentatonic is its relative minor's pentatonic. If a
  * number below is mistyped, one of those fails.
  */
-import type { KeyName, Note } from "./types";
-import { OPEN_PC, keyPc } from "./theory";
+import type { KeyName, Note, Tuning } from "./types";
+import { keyPc, openPc, STANDARD_TUNING } from "./theory";
 
 export type ScalePosition = {
   id: string;
@@ -199,8 +199,8 @@ export function hasPositions(scaleId: string): boolean {
 }
 
 /** The fret of the key's root on string six, 0-11. */
-export function rootFret(key: KeyName): number {
-  return (keyPc(key) - OPEN_PC[6] + 12) % 12;
+export function rootFret(key: KeyName, tuning: Tuning = STANDARD_TUNING): number {
+  return (keyPc(key) - openPc(tuning, 6) + 12) % 12;
 }
 
 /**
@@ -216,9 +216,15 @@ export function rootFret(key: KeyName): number {
 export function positionWindow(
   position: ScalePosition,
   key: KeyName,
+  tuning: Tuning = STANDARD_TUNING,
 ): { low: number; high: number } {
-  const low = (((rootFret(key) + position.offset) % 12) + 12) % 12;
-  return { low, high: low + position.span };
+  const anchor = (((rootFret(key, STANDARD_TUNING) + position.offset) % 12) + 12) % 12;
+  const frets = position.frets.flatMap((offsets, index) => {
+    const string = 6 - index;
+    const tuningOffset = STANDARD_TUNING.openMidi[string] - tuning.openMidi[string];
+    return offsets.map((offset) => anchor + offset + tuningOffset);
+  });
+  return { low: Math.min(...frets), high: Math.max(...frets) };
 }
 
 export type PositionNote = Note & {
@@ -230,16 +236,22 @@ export type PositionNote = Note & {
 export function positionNotes(
   position: ScalePosition,
   key: KeyName,
+  tuning: Tuning = STANDARD_TUNING,
 ): PositionNote[] {
-  const { low } = positionWindow(position, key);
+  const low = (((rootFret(key, STANDARD_TUNING) + position.offset) % 12) + 12) % 12;
   const notes: PositionNote[] = [];
   position.frets.forEach((offsets, index) => {
     const s = 6 - index;
+    const tuningOffset = STANDARD_TUNING.openMidi[s] - tuning.openMidi[s];
     for (const offset of offsets) {
-      const f = low + offset;
+      const f = low + offset + tuningOffset;
       // One finger per fret only holds inside a hand span. A wider shape is
       // played with a shift, and implying a finger for it would be a lie.
-      notes.push(position.span <= 3 ? { s, f, finger: offset + 1 } : { s, f });
+      notes.push(
+        position.span <= 3 && tuningOffset === 0
+          ? { s, f, finger: offset + 1 }
+          : { s, f },
+      );
     }
   });
   return notes;

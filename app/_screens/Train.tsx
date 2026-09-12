@@ -6,7 +6,7 @@
  * renders these from the shell in app/page.tsx; see the README on routing.
  */
 import type { KeyName, Tuning } from "@/lib/fretlab/types";
-import { DROP_D_TUNING, FIFTHS, STRING_NAMES, intervalShape, STANDARD_TUNING } from "@/lib/fretlab/theory";
+import { DROP_D_TUNING, FIFTHS, intervalShape, openPc, spellPitchClass, STANDARD_TUNING } from "@/lib/fretlab/theory";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { TRAINING_MODULES } from "@/lib/fretlab/library";
@@ -244,7 +244,7 @@ export function Train({
             ).length;
             return (
               <div key={string}>
-                <span>{STRING_NAMES[string]}</span>
+                <span>{spellPitchClass(openPc(tuning, string), selectedKey)}</span>
                 <i>
                   <b
                     style={{

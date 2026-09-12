@@ -66,7 +66,7 @@ export function Routines({
           <strong>{selectedKey}</strong>
           <small>major · all drills</small>
         </div>
-        <button onClick={() => go("routine-detail")}>
+        <button onClick={() => go("routine-detail", ROUTINES[0].id)}>
           Open today&apos;s plan <span>→</span>
         </button>
       </section>

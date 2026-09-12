@@ -6,7 +6,8 @@
  * interaction state. Never fetches. Never reads the router.
  */
 import type { View } from "@/lib/fretlab/types";
-import { CHORDS, SCALES } from "@/lib/fretlab/library";
+import { CHORDS, SCALES, SONGS } from "@/lib/fretlab/library";
+import { FIFTHS } from "@/lib/fretlab/theory";
 
 export function LibraryLaunchpad({ go }: { go: (view: View) => void }) {
   const cards: {
@@ -21,7 +22,7 @@ export function LibraryLaunchpad({ go }: { go: (view: View) => void }) {
       label: "Key map",
       copy: "See nearby keys, degrees, and harmonic movement.",
       image: "/guitar-neck.jpg",
-      count: "12 keys",
+      count: `${FIFTHS.length} keys`,
     },
     {
       view: "chords",
@@ -42,7 +43,7 @@ export function LibraryLaunchpad({ go }: { go: (view: View) => void }) {
       label: "Songs",
       copy: "Put chords and rhythm into real music.",
       image: "/guitar-stage.jpg",
-      count: "6 songs",
+      count: `${SONGS.length} songs`,
     },
   ];
   return (

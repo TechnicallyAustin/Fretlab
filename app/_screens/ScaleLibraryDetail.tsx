@@ -20,6 +20,7 @@ import { ScaleDegrees } from "@/app/_sections/ScaleDegrees";
 import { cssVars } from "@/lib/fretlab/palette";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function ScaleLibraryDetail({
   go,
@@ -31,6 +32,7 @@ export function ScaleLibraryDetail({
   selectedKey: KeyName;
   scaleId: string;
 }) {
+  const { tuning } = useGuitarSetup();
   const scale = SCALES.find((item) => item.id === scaleId) ?? SCALES[0];
   const [tab, setTab] = useState("Fretboard");
   const [positionIndex, setPositionIndex] = useState(0);
@@ -43,19 +45,19 @@ export function ScaleLibraryDetail({
   const positions = positionsFor(scale.id);
   const position = positions[Math.min(positionIndex, positions.length - 1)];
   const window = position
-    ? positionWindow(position, selectedKey)
+    ? positionWindow(position, selectedKey, tuning)
     : { low: positionIndex * 2, high: positionIndex * 2 + 4 };
   const { low, high } = window;
   const notes = position
-    ? positionNotes(position, selectedKey)
-    : intervalShape(selectedKey, scale.intervals, low, high);
+    ? positionNotes(position, selectedKey, tuning)
+    : intervalShape(selectedKey, scale.intervals, low, high, tuning);
 
   // The shape after this one, for the connecting drill. Five positions are a
   // cycle, so the one after the last is the first again.
   const next = positions.length
     ? positions[(positionIndex + 1) % positions.length]
     : null;
-  const nextWindow = next ? positionWindow(next, selectedKey) : null;
+  const nextWindow = next ? positionWindow(next, selectedKey, tuning) : null;
   const keyScale = majorScale(selectedKey);
   const keyChords = keyScale.map(
     (note, index) => `${note}${["", "m", "m", "", "", "m", "dim"][index]}`,

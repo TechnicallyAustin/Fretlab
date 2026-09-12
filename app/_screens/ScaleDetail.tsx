@@ -14,6 +14,7 @@ import { ScaleDegrees } from "@/app/_sections/ScaleDegrees";
 import { playTones } from "@/lib/fretlab/audio";
 import { scaleShape } from "@/lib/fretlab/theory";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function ScaleDetail({
   go,
@@ -22,6 +23,7 @@ export function ScaleDetail({
   go: (view: View) => void;
   selectedKey: KeyName;
 }) {
+  const { tuning } = useGuitarSetup();
   const [tab, setTab] = useState("Shapes");
   const [position, setPosition] = useState(2);
   const windows = [
@@ -62,7 +64,7 @@ export function ScaleDetail({
             ))}
           </div>
           <Fretboard
-            notes={scaleShape(selectedKey, low, high)}
+            notes={scaleShape(selectedKey, low, high, tuning)}
             low={low}
             high={high}
             labelMode="degree"

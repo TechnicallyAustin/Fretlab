@@ -14,6 +14,7 @@ import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
 import { cssVars } from "@/lib/fretlab/palette";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
+import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
 export function ScaleLibrary({
   go,
@@ -24,6 +25,7 @@ export function ScaleLibrary({
   selectedKey: KeyName;
   onOpen: (id: string) => void;
 }) {
+  const { tuning } = useGuitarSetup();
   const [family, setFamily] = useState("All");
   const [level, setLevel] = useState("All levels");
   const visible = SCALES.filter(
@@ -36,7 +38,7 @@ export function ScaleLibrary({
       <AppHeader
         title="Scale library"
         meta={`Key of ${selectedKey}`}
-        onBack={() => go("keys")}
+        onBack={() => go("library")}
       />
       <section className="library-photo-hero scale-photo">
         <div>
@@ -90,7 +92,7 @@ export function ScaleLibrary({
                 <small>{scale.mood}</small>
               </div>
               <Fretboard
-                notes={intervalShape(selectedKey, scale.intervals, 1, 7)}
+                notes={intervalShape(selectedKey, scale.intervals, 1, 7, tuning)}
                 low={1}
                 high={7}
                 mini
