@@ -559,7 +559,7 @@ test that fails if a `Date.now()` default comes back.
 **Goal:** the app can be practised with, not just read. Do not start before Stage 1 is
 `DONE`.
 
-**Progress:** 5 / 7 done
+**Progress:** 6 / 7 done
 
 | ID | Task | Status |
 |---|---|---|
@@ -568,7 +568,7 @@ test that fails if a `Date.now()` default comes back.
 | FL-11 | Runner renders the real drill and records a session | `DONE` |
 | FL-12 | Scale position tables (CAGED) | `DONE` |
 | FL-13 | Fix the key-scoped streak | `DONE` |
-| FL-14 | Give drills patterns instead of pitch-class sets | `TODO` |
+| FL-14 | Give drills patterns instead of pitch-class sets | `DONE` |
 | FL-15 | Tuner | `TODO` |
 
 ---
@@ -901,8 +901,8 @@ test("a streak counts days, not keys", () => {
 
 ---
 
-### - [ ] FL-14 — Give drills patterns instead of pitch-class sets
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** F-03
+### - [x] FL-14 — Give drills patterns instead of pitch-class sets
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** F-03
 
 **Files:** `lib/fretlab/library.ts` (DRILLS), `lib/fretlab/fingering.ts`
 
@@ -932,6 +932,36 @@ currently unused.
 against a hand-checked expected first eight notes in the key of C.
 
 **Done when.** "Thirds through the shape" draws thirds.
+
+> **Done.** `lib/fretlab/patterns.ts` adds a pattern to the drill shape: an
+> ordered list of **cells**, the groups a drill is actually played in. Three
+> kinds cover all seven affected drills — `cells` (thirds are pairs two scale
+> degrees apart, sixths five), `chords` (a stack of thirds on each named
+> degree), and `compare` (two scales at once).
+>
+> All six from the table are repaired, and a seventh found while doing it:
+> "Triad arpeggio sequence" stored a single triad `[0,4,7]` drawn across the
+> whole neck, with nothing to say which of the seven it was a sequence of.
+>
+> Chord names are derived from the intervals each cell actually contains
+> rather than from a table, so `Imaj7 ii7 iii7 IVmaj7 V7 vi7 viiø7` is computed
+> and asserted, not asserted alone.
+>
+> `patternRoute` numbers the board by the pattern's own order of arrival.
+> `withPlayOrder` sweeps low string to high, which is the route for a scale run
+> and the wrong one for anything that jumps — the board drew a field of dots
+> with a sweep through it and called that the instruction. The existing
+> `labelMode="order"` path already draws a polyline, so the board now traces
+> the thirds.
+>
+> The comparison drill uses `NoteGroup` with `primary`/`secondary` as the task
+> asked. "Major to Mixolydian" told you to compare the two sevenths while
+> drawing only one of them; the natural seventh it gives up is now the hollow
+> layer.
+>
+> Sixteen assertions in `tests/patterns.test.mjs`, every expectation worked by
+> hand in C where no accidental can hide a mistake. Reintroducing the original
+> `[0,4,7,11]` and `[0,4,9]` fails five of them.
 
 ---
 

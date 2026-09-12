@@ -6,6 +6,7 @@
  * a page, and so the boundary lint has somewhere legal to point.
  */
 import type { KeyName } from "./types";
+import type { Pattern } from "./patterns";
 import { intervalShape } from "./theory";
 
 export const DRILLS = [
@@ -53,7 +54,11 @@ export const DRILLS = [
     difficulty: 2,
     low: 1,
     high: 7,
-    intervals: [0, 4, 7, 11],
+    // Was [0, 4, 7, 11] — a major-seventh arpeggio, not thirds. Thirds run
+    // 1-3, 2-4, 3-5 through the scale, so the scale is the note set and the
+    // pattern is the pairing.
+    intervals: [0, 2, 4, 5, 7, 9, 11],
+    pattern: { kind: "cells", step: 2, size: 2, unit: "third" },
     reason: "Thirds reveal chord quality inside a scale shape.",
     goal: "Three passes without a pause",
     cue: "Hear each pair before you move.",
@@ -156,7 +161,10 @@ export const DRILLS = [
     difficulty: 2,
     low: 3,
     high: 10,
-    intervals: [0, 4, 9],
+    // Was [0, 4, 9] — a major-sixth chord. A sixth is a dyad five scale
+    // degrees apart, played as a double-stop across non-adjacent strings.
+    intervals: [0, 2, 4, 5, 7, 9, 11],
+    pattern: { kind: "cells", step: 5, size: 2, unit: "sixth" },
     reason: "Sixths turn scale knowledge into melodic double-stops.",
     goal: "One clean ascent and descent",
     cue: "Let both notes ring together.",
@@ -188,7 +196,11 @@ export const DRILLS = [
     difficulty: 2,
     low: 0,
     high: 9,
-    intervals: [0, 4, 5, 7, 11],
+    // Was [0, 4, 5, 7, 11], missing the third of IV and the fifth of V.
+    // The three triads together use all seven degrees; what makes it a
+    // I-IV-V map is the grouping, not the note set.
+    intervals: [0, 2, 4, 5, 7, 9, 11],
+    pattern: { kind: "chords", degrees: [0, 3, 4], size: 3, unit: "chord" },
     reason: "These three chords power thousands of progressions.",
     goal: "Track the nearest chord tone",
     cue: "Move the least distance possible.",
@@ -204,7 +216,11 @@ export const DRILLS = [
     difficulty: 2,
     low: 0,
     high: 9,
-    intervals: [0, 2, 4, 7, 9],
+    // Was the major pentatonic, note for note identical to "Pentatonic box
+    // one". The bridge is between two chords that share notes and differ in
+    // where they come to rest: the tonic and its relative minor.
+    intervals: [0, 2, 4, 5, 7, 9, 11],
+    pattern: { kind: "chords", degrees: [0, 5], size: 3, unit: "chord" },
     reason: "Major and relative minor share notes but change the tonal center.",
     goal: "Resolve four phrases both ways",
     cue: "Change the landing note, not the shape.",
@@ -220,7 +236,15 @@ export const DRILLS = [
     difficulty: 2,
     low: 0,
     high: 12,
-    intervals: [0, 4, 7],
+    // One triad, drawn across the whole neck, with nothing to say which of
+    // the seven it is a sequence of.
+    intervals: [0, 2, 4, 5, 7, 9, 11],
+    pattern: {
+      kind: "chords",
+      degrees: [0, 1, 2, 3, 4, 5, 6],
+      size: 3,
+      unit: "arpeggio",
+    },
     reason: "Arpeggios make harmony audible one note at a time.",
     goal: "Connect two positions",
     cue: "Accent the root of each octave.",
@@ -271,7 +295,15 @@ export const DRILLS = [
     difficulty: 3,
     low: 0,
     high: 12,
+    // The note set was right and told you nothing: it is the whole major
+    // scale, in which no arpeggio is distinguishable from any other.
     intervals: [0, 2, 4, 5, 7, 9, 11],
+    pattern: {
+      kind: "chords",
+      degrees: [0, 1, 2, 3, 4, 5, 6],
+      size: 4,
+      unit: "arpeggio",
+    },
     reason: "Seventh chords expose every scale degree’s harmonic role.",
     goal: "Name all seven chord qualities",
     cue: "Keep common tones ringing.",
@@ -287,7 +319,10 @@ export const DRILLS = [
     difficulty: 3,
     low: 3,
     high: 10,
+    // Mixolydian alone, so the natural seventh it tells you to compare
+    // against was never drawn. The comparison is the drill.
     intervals: [0, 2, 4, 5, 7, 9, 10],
+    pattern: { kind: "compare", against: [0, 2, 4, 5, 7, 9, 11], label: "Major" },
     reason: "Changing one degree shows how modes reshape a familiar key.",
     goal: "Hear and target the b7",
     cue: "Compare 7 and b7 directly.",
@@ -363,6 +398,17 @@ export const DRILLS = [
   },
 ] as const;
 export type Drill = (typeof DRILLS)[number];
+
+/**
+ * The drill's pattern, if it has one.
+ *
+ * `DRILLS` is `as const`, so it is a union of literal types and only some
+ * members carry a `pattern` key at all. Reading it needs the check; doing that
+ * once here keeps every caller from repeating it.
+ */
+export function drillPattern(drill: Drill): Pattern | undefined {
+  return "pattern" in drill ? (drill.pattern as Pattern) : undefined;
+}
 export function drillNotes(drill: Drill, key: KeyName, full = false) {
   return intervalShape(
     key,

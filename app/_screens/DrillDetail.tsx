@@ -7,7 +7,7 @@
  */
 
 import type { KeyName, View } from "@/lib/fretlab/types";
-import { DRILLS, drillNotes } from "@/lib/fretlab/library";
+import { DRILLS, drillNotes, drillPattern } from "@/lib/fretlab/library";
 import { DrillHistory } from "@/app/_sections/DrillHistory";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { PianoMap } from "@/components/fretlab/PianoMap";
@@ -19,6 +19,12 @@ import { drillShape, withPlayOrder, fingersUsed } from "@/lib/fretlab/fingering"
 import { playTones } from "@/lib/fretlab/audio";
 import { usePracticeSessions } from "@/lib/api/hooks";
 import { useClock } from "@/lib/fretlab/useClock";
+import {
+  compareLayers,
+  patternCells,
+  patternRoute,
+  spellCell,
+} from "@/lib/fretlab/patterns";
 import { dayLabel } from "@/lib/api/progress";
 import { useState } from "react";
 
@@ -62,27 +68,67 @@ export function DrillDetail({
   // Two layers so the drill's own window is visible *inside* the whole neck,
   // rather than the learner having to guess which dots belong to the drill.
   const shape = drillShape(drill, sessionKey);
-  const ordered = withPlayOrder(shape.notes);
+
+  // What this drill is actually played as. `withPlayOrder` numbers notes low
+  // string to high, which is the route for a scale run and the wrong one for
+  // thirds, sixths or arpeggios — they jump. A patterned drill is numbered by
+  // its own pattern instead.
+  const pattern = drillPattern(drill);
+  const cells = patternCells(pattern, drill.intervals);
+  const ordered = cells.length
+    ? patternRoute(shape.notes, cells, sessionKey)
+    : withPlayOrder(shape.notes);
   const fingers = fingersUsed(shape.notes, shape.low);
   const fullNeck = drillShape(drill, sessionKey, true);
   const shapeIds = new Set(shape.notes.map((note) => `${note.s}:${note.f}`));
-  const neckGroups: NoteGroup[] = [
-    {
-      id: "drill",
-      label:
-        shape.kind === "box"
-          ? `The shape \u00b7 frets ${shape.low}\u2013${shape.high}`
-          : `This drill \u00b7 frets ${shape.low}\u2013${shape.high}`,
-      emphasis: "primary",
-      notes: shape.notes,
-    },
-    {
-      id: "neck",
-      label: "Same notes elsewhere",
-      emphasis: "secondary",
-      notes: fullNeck.notes.filter((note) => !shapeIds.has(`${note.s}:${note.f}`)),
-    },
-  ];
+  // A comparison drill draws what it is against what it is not. "Major to
+  // Mixolydian" told you to compare the two sevenths while drawing only one of
+  // them, so the note the whole drill is about was never on the board.
+  const compare = compareLayers(pattern, drill.intervals);
+  const against = compare
+    ? drillShape(
+        { ...drill, intervals: compare.against },
+        sessionKey,
+        shape.kind === "map",
+      ).notes.filter((note) => !shapeIds.has(`${note.s}:${note.f}`))
+    : [];
+
+  const neckGroups: NoteGroup[] = compare
+    ? [
+        {
+          id: "mode",
+          label: `${drill.name.split(" to ").at(-1) ?? "This drill"} \u00b7 what you play`,
+          emphasis: "primary",
+          notes: shape.notes,
+        },
+        {
+          id: "against",
+          label: `${
+            pattern && pattern.kind === "compare"
+              ? pattern.label
+              : "Compared with"
+          } \u00b7 the degree it gives up`,
+          emphasis: "secondary",
+          notes: against,
+        },
+      ]
+    : [
+        {
+          id: "drill",
+          label:
+            shape.kind === "box"
+              ? `The shape \u00b7 frets ${shape.low}\u2013${shape.high}`
+              : `This drill \u00b7 frets ${shape.low}\u2013${shape.high}`,
+          emphasis: "primary",
+          notes: shape.notes,
+        },
+        {
+          id: "neck",
+          label: "Same notes elsewhere",
+          emphasis: "secondary",
+          notes: fullNeck.notes.filter((note) => !shapeIds.has(`${note.s}:${note.f}`)),
+        },
+      ];
 
   const tempos = drillSessions.map((s) => s.bpm).filter((b): b is number => b !== null);
   const accuracies = drillSessions
@@ -154,6 +200,27 @@ export function DrillDetail({
           labelMode="order"
           rootKey={sessionKey}
         />
+
+        {/* What the drill is played as, in order. The board shows where the
+            notes are; this says how they are grouped — which is the half a
+            pitch-class set could never carry. */}
+        {cells.length > 0 && (
+          <ol className="pattern-cells" aria-label={`${drill.name}, in order`}>
+            {cells.map((cell, i) => (
+              <li key={`${cell.label}${i}`}>
+                <span>{cell.label}</span>
+                <strong>{spellCell(cell, sessionKey)}</strong>
+              </li>
+            ))}
+          </ol>
+        )}
+
+        {compare && (
+          <p className="practice-compare">
+            Play the flat seventh against the natural one: the hollow note is
+            the degree {drill.name.split(" to ").at(-1)} gives up.
+          </p>
+        )}
 
         {fingers.length > 0 && (
           <p className="practice-fingers">

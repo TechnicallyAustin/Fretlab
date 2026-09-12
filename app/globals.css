@@ -1498,6 +1498,47 @@ p {
   font-size: 12px;
 }
 
+/* The drill's pattern, in playing order. A drill used to be a set of pitch
+   classes, which cannot say whether they are played as thirds or as a chord. */
+.pattern-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: cell;
+}
+
+.pattern-cells li {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.pattern-cells span {
+  color: var(--quiet);
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.pattern-cells strong {
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.practice-compare {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .key-conflict {
   display: flex;
   flex-wrap: wrap;
