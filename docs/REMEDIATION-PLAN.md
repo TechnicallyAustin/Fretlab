@@ -1072,12 +1072,12 @@ Carried forward into Stage 3, logged rather than fixed:
 
 **Goal:** the app is usable by people who are not you. Largely parallel to Stage 2.
 
-**Progress:** 1 / 6 done
+**Progress:** 2 / 6 done
 
 | ID | Task | Status |
 |---|---|---|
 | FL-16 | Grid keyboard navigation and a screen-reader pass | `DONE` |
-| FL-17 | Rem type scale, 16px floor, stand mode | `TODO` |
+| FL-17 | Rem type scale, 16px floor, stand mode | `DONE` |
 | FL-18 | Mobile IA: promote Library, reflow the hidden regions | `TODO` |
 | FL-19 | Left-handed mirroring and alternate tunings | `TODO` |
 | FL-20 | Dark theme | `TODO` |
@@ -1120,8 +1120,10 @@ VoiceOver.
 
 ---
 
-### - [ ] FL-17 — Rem type scale, 16px floor, stand mode
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** U-03
+### - [x] FL-17 — Rem type scale, 16px floor, stand mode
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** U-03
+
+> **Done.** The stylesheet now uses an equivalent rem scale with no text below the 13px caption floor, and the updated readability guard passes. Stand mode is available from the frame and scales surrounding copy and board sizing; a browser check at 200% on `/train` showed no document-level horizontal overflow and contained fretboard scrolling.
 
 **Files:** `app/globals.css`, `tests/rendered-html.test.mjs`
 

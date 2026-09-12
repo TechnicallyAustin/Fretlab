@@ -33,7 +33,7 @@ body {
   margin: 0;
   background: #161826;
   color: var(--ink);
-  font: 400 16px/1.6 Inter, system-ui, sans-serif;
+  font: 400 1rem/1.6 Inter, system-ui, sans-serif;
 }
 
 button,
@@ -87,21 +87,21 @@ p {
   border-radius: 5px;
   background: #e9e9ed;
   color: #161826;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .design-caption strong {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .design-caption small {
   overflow: hidden;
   color: #9397ab;
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -116,6 +116,35 @@ p {
   border-radius: 28px;
   background: var(--paper);
   box-shadow: 0 16px 40px rgba(0, 0, 0, .4);
+}
+
+.stand-mode-toggle {
+  position: absolute;
+  z-index: 25;
+  top: 12px;
+  right: 16px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--secondary-ink);
+  cursor: pointer;
+  font-size: .8125rem;
+}
+
+.stand-mode .screen-content {
+  font-size: 1.125rem;
+}
+
+.stand-mode .fretboard svg {
+  min-width: 110%;
+}
+
+.stand-mode .fretboard-caption,
+.stand-mode .fretboard-legend,
+.stand-mode .fretboard-caption small {
+  font-size: 1rem;
 }
 
 .screen-content {
@@ -139,7 +168,7 @@ p {
   justify-content: space-between;
   padding-top: 13px;
   color: var(--quiet);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.4;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -154,7 +183,7 @@ p {
 }
 
 .screen-heading h1 {
-  font-size: 27px;
+  font-size: 1.688rem;
   line-height: 1.1;
   font-weight: 500;
   letter-spacing: -.01em;
@@ -171,7 +200,7 @@ p {
   border-radius: 10px;
   background: var(--card);
   cursor: pointer;
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .text-action,
@@ -180,7 +209,7 @@ p {
   background: transparent;
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -197,7 +226,7 @@ p {
 
 .section-head h2 {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -208,7 +237,7 @@ p {
   border: 0;
   background: transparent;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .section-head button {
@@ -219,7 +248,7 @@ p {
 
 .kicker {
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: .15em;
   text-transform: uppercase;
@@ -231,12 +260,12 @@ p {
 
 .today-greeting p {
   color: var(--quiet);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .today-greeting h1 {
   margin-top: 3px;
-  font-size: 29px;
+  font-size: 1.812rem;
   line-height: 1.1;
   font-weight: 500;
   letter-spacing: -.01em;
@@ -257,7 +286,7 @@ p {
   right: -22px;
   top: -38px;
   color: var(--key-bright);
-  font-size: 152px;
+  font-size: 9.5rem;
   line-height: 1;
   font-weight: 500;
   opacity: .09;
@@ -267,7 +296,7 @@ p {
 .session-hero h2 {
   position: relative;
   margin-top: 14px;
-  font-size: 27px;
+  font-size: 1.688rem;
   line-height: 1.15;
   font-weight: 500;
   letter-spacing: 0;
@@ -278,7 +307,7 @@ p {
   max-width: 250px;
   margin-top: 6px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.55;
   text-wrap: pretty;
 }
@@ -296,7 +325,7 @@ p {
 }
 
 .session-stats strong {
-  font-size: 21px;
+  font-size: 1.312rem;
   line-height: 1;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -305,7 +334,7 @@ p {
 .session-stats span {
   margin-top: 5px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .primary-action,
@@ -317,7 +346,7 @@ p {
   gap: 10px;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
   transition: background .18s ease, transform .18s ease;
 }
@@ -369,7 +398,7 @@ p {
   display: grid;
   gap: 6px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-align: center;
 }
 
@@ -428,7 +457,7 @@ p {
 .resume-grid strong {
   max-width: 75%;
   margin-top: auto;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.25;
 }
@@ -448,7 +477,7 @@ p {
   border-radius: 999px;
   background: var(--card);
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -473,7 +502,7 @@ p {
   position: relative;
   z-index: 1;
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -528,7 +557,7 @@ p {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: .07em;
   text-transform: uppercase;
@@ -579,7 +608,7 @@ p {
   background: var(--sunken);
   color: var(--muted);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .chip-scroll button span {
@@ -658,7 +687,7 @@ p {
 
 .drill-copy>strong {
   display: block;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
   line-height: 1.3;
 }
@@ -673,7 +702,7 @@ p {
 .drill-copy small {
   flex: none;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .drill-copy i {
@@ -750,7 +779,7 @@ p {
 .train-hero strong {
   display: block;
   margin-top: 3px;
-  font-size: 90px;
+  font-size: 5.625rem;
   line-height: 1;
   font-weight: 500;
   animation: sweep .4s ease-out;
@@ -760,7 +789,7 @@ p {
   display: block;
   margin-top: 7px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .stat-grid {
@@ -783,7 +812,7 @@ p {
 
 .stat-grid strong {
   color: var(--key-ink);
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 1;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
@@ -792,7 +821,7 @@ p {
 .stat-grid span {
   margin-top: 5px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .train-screen>.primary-action,
@@ -832,17 +861,17 @@ p {
 .train-module-picker button>span {
   grid-row: 1 / 3;
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .train-module-picker button strong {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
 .train-module-picker button small {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .train-module-picker button i {
@@ -874,7 +903,7 @@ p {
   border: 1px solid var(--key-edge);
   border-radius: 99px;
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .train-hero>div button {
@@ -885,7 +914,7 @@ p {
   background: var(--key-fill);
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .train-board {
@@ -943,7 +972,7 @@ p {
   background: transparent;
   color: color-mix(in srgb, var(--ink) 68%, transparent);
   cursor: pointer;
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 600;
 }
 
@@ -953,7 +982,7 @@ p {
 
 .minor-label {
   color: color-mix(in srgb, var(--ink) 58%, transparent);
-  font-size: 13px;
+  font-size: 0.8125rem;
   pointer-events: none;
 }
 
@@ -969,14 +998,14 @@ p {
 }
 
 .wheel-core strong {
-  font-size: 40px;
+  font-size: 2.5rem;
   line-height: 1;
   font-weight: 500;
 }
 
 .wheel-core span {
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: .16em;
   text-transform: uppercase;
@@ -1004,7 +1033,7 @@ p {
   border: 1px solid var(--line);
   border-radius: 9px;
   background: var(--card);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -1023,7 +1052,7 @@ p {
 .steps-section>p {
   margin-top: 13px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.65;
 }
 
@@ -1047,12 +1076,12 @@ p {
 }
 
 .dial-card .ring>span {
-  font-size: 30px;
+  font-size: 1.875rem;
 }
 
 .dial-card h2 {
   margin-top: 7px;
-  font-size: 21px;
+  font-size: 1.312rem;
   line-height: 1.1;
   font-weight: 500;
   letter-spacing: -.01em;
@@ -1069,12 +1098,12 @@ p {
   gap: 22px;
   margin-top: 17px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .mini-stats strong {
   color: var(--ink);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 
@@ -1116,7 +1145,7 @@ p {
   gap: 4px;
   margin-top: 5px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-align: center;
 }
 
@@ -1127,7 +1156,7 @@ p {
   justify-content: flex-end;
   margin-top: 14px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .legend i {
@@ -1142,7 +1171,7 @@ p {
   grid-template-columns: repeat(6, 1fr);
   margin: 14px 0 5px 30px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .commit-layout {
@@ -1156,7 +1185,7 @@ p {
   grid-template-rows: repeat(7, 9px);
   gap: 3px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .commit-days span:nth-child(1) {
@@ -1214,7 +1243,7 @@ p {
   gap: 10px;
   margin-top: 11px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .commit-foot>div {
@@ -1236,7 +1265,7 @@ p {
 .routines-intro {
   margin-top: -7px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.55;
 }
 
@@ -1255,14 +1284,14 @@ p {
 }
 
 .routine-title h2 {
-  font-size: 19px;
+  font-size: 1.188rem;
   font-weight: 500;
 }
 
 .routine-title p {
   margin-top: 4px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .routine-title button {
@@ -1273,7 +1302,7 @@ p {
   background: var(--key-fill);
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -1297,7 +1326,7 @@ p {
   border-radius: 999px;
   background: var(--key-dim);
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .routine-keys i,
@@ -1328,12 +1357,12 @@ p {
 }
 
 .routine-bands b {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
 .routine-bands small {
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .routine-foot {
@@ -1341,7 +1370,7 @@ p {
   justify-content: space-between;
   margin-top: 12px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .routine-foot>span {
@@ -1369,7 +1398,7 @@ p {
   background: transparent;
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -1409,7 +1438,7 @@ p {
 
 .runner-hero h1 {
   margin-top: 8px;
-  font-size: 26px;
+  font-size: 1.625rem;
   line-height: 1.14;
   font-weight: 500;
   letter-spacing: -.01em;
@@ -1488,7 +1517,7 @@ p {
 
 .run-step-list small {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .summary-screen h1 {
@@ -1500,7 +1529,7 @@ p {
    practising daily in a different key each day read as a streak of 1. */
 .mini-stats .all-keys {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 /* The drill's pattern, in playing order. A drill used to be a set of pitch
@@ -1527,13 +1556,13 @@ p {
 
 .pattern-cells span {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .04em;
   text-transform: uppercase;
 }
 
 .pattern-cells strong {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -1541,7 +1570,7 @@ p {
 .practice-compare {
   margin: 10px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 /* The tuner. The needle is positioned from cents off the target, clamped at
@@ -1559,14 +1588,14 @@ p {
 }
 
 .tuner-dial>strong {
-  font-size: 62px;
+  font-size: 3.875rem;
   font-weight: 300;
   line-height: 1;
   letter-spacing: -.02em;
 }
 
 .tuner-dial>strong small {
-  font-size: 24px;
+  font-size: 1.5rem;
   color: var(--quiet);
 }
 
@@ -1581,7 +1610,7 @@ p {
 .tuner-cents {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .tuner-meter {
@@ -1626,7 +1655,7 @@ p {
 .tuner-hz {
   margin: 0;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1657,23 +1686,23 @@ p {
 
 .tuner-strings span {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
 }
 
 .tuner-strings strong {
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 500;
 }
 
 .tuner-strings strong small {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .tuner-strings em {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-style: normal;
   font-variant-numeric: tabular-nums;
 }
@@ -1681,7 +1710,7 @@ p {
 .tuner-note {
   margin: 10px 0 0;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .key-conflict {
@@ -1699,7 +1728,7 @@ p {
 .key-conflict p {
   margin: 0;
   color: var(--key-ink);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .key-conflict button {
@@ -1708,7 +1737,7 @@ p {
   border-radius: 10px;
   background: var(--card);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -1721,7 +1750,7 @@ p {
 .metronome-countin {
   margin: 0;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-align: center;
 }
 
@@ -1739,7 +1768,7 @@ p {
   background: var(--card);
   color: var(--quiet);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .metronome-options button.active {
@@ -1756,14 +1785,14 @@ p {
 }
 
 .elapsed strong {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
 .elapsed span {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .transport {
@@ -1794,7 +1823,7 @@ p {
 .transport small {
   margin-top: 2px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .finish-link {
@@ -1804,7 +1833,7 @@ p {
   background: transparent;
   color: var(--quiet);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
@@ -1835,11 +1864,11 @@ p {
 }
 
 .summary-screen .ring>span {
-  font-size: 32px;
+  font-size: 2rem;
 }
 
 .summary-screen h1 {
-  font-size: 29px;
+  font-size: 1.812rem;
   line-height: 1.1;
   font-weight: 500;
   letter-spacing: -.01em;
@@ -1868,7 +1897,7 @@ p {
 
 .accuracy-list span,
 .accuracy-list strong {
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .accuracy-list strong {
@@ -1914,7 +1943,7 @@ p {
   background: transparent;
   color: var(--quiet);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -1940,7 +1969,7 @@ p {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 500;
 }
 
@@ -1953,7 +1982,7 @@ p {
 
 .group-title span {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .group-list section>button {
@@ -1977,13 +2006,13 @@ p {
 }
 
 .group-list section>button strong {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .group-list section>button small {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .group-list section>button>div:nth-child(2)>i {
@@ -2008,7 +2037,7 @@ p {
 
 .detail-screen .screen-heading h1,
 .detail-title h1 {
-  font-size: 26px;
+  font-size: 1.625rem;
   line-height: 1.14;
   font-weight: 500;
   letter-spacing: -.01em;
@@ -2027,14 +2056,14 @@ p {
   background: transparent;
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .detail-title p {
   margin-top: 7px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.6;
   text-wrap: pretty;
 }
@@ -2042,7 +2071,7 @@ p {
 .detail-lede {
   max-width: 610px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.65;
 }
 
@@ -2066,7 +2095,7 @@ p {
 }
 
 .key-detail-hero h1 {
-  font-size: 24px;
+  font-size: 1.5rem;
   line-height: 1.1;
   font-weight: 500;
 }
@@ -2074,7 +2103,7 @@ p {
 .key-detail-hero p {
   margin-top: 5px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .key-badge {
@@ -2087,7 +2116,7 @@ p {
   border-radius: 16px;
   background: var(--key-fill-2);
   color: var(--key-ink);
-  font-size: 36px;
+  font-size: 2.25rem;
   line-height: 1;
   font-weight: 500;
 }
@@ -2113,7 +2142,7 @@ p {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .tempo-section button.active {
@@ -2147,18 +2176,18 @@ p {
   border-radius: 9px;
   background: var(--key-fill);
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .instruction-list strong {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .instruction-list p {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .sticky-action {
@@ -2187,7 +2216,7 @@ p {
 }
 
 .tab-copy h2 {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 500;
 }
 
@@ -2225,21 +2254,21 @@ p {
 }
 
 .degree-strip strong {
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 500;
 }
 
 .degree-strip span {
   margin-top: 3px;
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .degree-strip small {
   margin-top: 5px;
   overflow: hidden;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1;
   text-overflow: ellipsis;
 }
@@ -2272,7 +2301,7 @@ p {
 .shape-row button>span {
   display: block;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .shape-row .fretboard.mini {
@@ -2320,7 +2349,7 @@ p {
   border-radius: 8px;
   background: var(--card);
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-align: center;
 }
 
@@ -2360,7 +2389,7 @@ p {
 
 .routine-drills li>span {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-align: center;
 }
 
@@ -2370,19 +2399,19 @@ p {
 }
 
 .routine-drills strong {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .routine-drills small {
   margin-top: 3px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .routine-drills em {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-style: normal;
   text-transform: uppercase;
 }
@@ -2410,7 +2439,7 @@ p {
 
 .guided-hero h1 {
   margin-top: 8px;
-  font-size: 29px;
+  font-size: 1.812rem;
   font-weight: 500;
   letter-spacing: -.03em;
 }
@@ -2424,13 +2453,13 @@ p {
 }
 
 .guided-hero .ring>span {
-  font-size: 27px;
+  font-size: 1.688rem;
 }
 
 .guided-hero>strong {
   margin-top: -98px;
   z-index: 2;
-  font-size: 25px;
+  font-size: 1.562rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
@@ -2439,7 +2468,7 @@ p {
   z-index: 2;
   margin-bottom: 53px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .up-next {
@@ -2457,13 +2486,13 @@ p {
 }
 
 .up-next strong {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .up-next span {
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .guided-actions {
@@ -2501,26 +2530,26 @@ p {
   padding: 3px 7px;
   border-radius: 99px;
   background: rgba(251, 248, 242, .16);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .08em;
   text-transform: uppercase;
 }
 
 .library-launchpad button strong {
   margin-top: 16px;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 
 .library-launchpad button small {
   margin-top: 3px;
   color: rgba(251, 248, 242, .72);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .library-launchpad button b {
   margin-top: 9px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -2559,7 +2588,7 @@ p {
 .library-photo-hero h2,
 .songs-hero h2 {
   margin-top: 7px;
-  font-size: 26px;
+  font-size: 1.625rem;
   line-height: 1.15;
   font-weight: 500;
 }
@@ -2568,7 +2597,7 @@ p {
 .songs-hero p {
   margin-top: 7px;
   color: rgba(251, 248, 242, .74);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .library-photo-hero>span {
@@ -2577,7 +2606,7 @@ p {
   padding: 5px 9px;
   border: 1px solid rgba(251, 248, 242, .28);
   border-radius: 99px;
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-transform: uppercase;
 }
 
@@ -2642,7 +2671,7 @@ p {
   border-radius: 11px;
   background: var(--key-fill-2);
   color: var(--key-ink);
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 500;
 }
 
@@ -2655,7 +2684,7 @@ p {
 
 .chord-library-card strong,
 .scale-library-card strong {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
@@ -2663,7 +2692,7 @@ p {
 .scale-library-card small {
   margin-top: 3px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .chord-library-card>footer,
@@ -2673,7 +2702,7 @@ p {
   gap: 7px;
   margin-top: 9px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .chord-library-card>footer>span:nth-child(2),
@@ -2691,7 +2720,7 @@ p {
 .scale-library-card .library-card-open>div:first-child>span {
   grid-row: 1 / 3;
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .scale-library-card>footer b {
@@ -2715,7 +2744,7 @@ p {
   background: var(--key-fill);
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -2739,7 +2768,7 @@ p {
 .theory-hub-hero h2 {
   max-width: 640px;
   margin-top: 7px;
-  font-size: 29px;
+  font-size: 1.812rem;
   line-height: 1.12;
   font-weight: 500;
 }
@@ -2748,7 +2777,7 @@ p {
   max-width: 570px;
   margin-top: 7px;
   color: rgba(251, 248, 242, .72);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .theory-hub-hero>div>div {
@@ -2762,7 +2791,7 @@ p {
   padding: 4px 8px;
   border: 1px solid rgba(251, 248, 242, .25);
   border-radius: 99px;
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .theory-hub-hero>button {
@@ -2812,7 +2841,7 @@ p {
 
 .circle-lesson h2 {
   margin-top: 5px;
-  font-size: 24px;
+  font-size: 1.5rem;
   line-height: 1.15;
   font-weight: 500;
 }
@@ -2820,7 +2849,7 @@ p {
 .circle-lesson>header>p:last-child {
   margin-top: 7px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.6;
 }
 
@@ -2846,7 +2875,7 @@ p {
   max-width: 310px;
   margin-top: 9px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.55;
   text-align: center;
 }
@@ -2868,7 +2897,7 @@ p {
 .circle-steps small {
   display: block;
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -2877,14 +2906,14 @@ p {
 .circle-breakdown strong {
   display: block;
   margin-top: 4px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .circle-breakdown p {
   margin-top: 5px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.55;
 }
 
@@ -2909,7 +2938,7 @@ p {
 
 .circle-steps strong {
   color: var(--key-ink);
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 500;
 }
 
@@ -2923,7 +2952,7 @@ p {
 .circle-steps small {
   margin-top: 3px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -2934,7 +2963,7 @@ p {
   gap: 7px 12px;
   margin-top: 12px;
   color: var(--quiet);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .chord-tone-legend span {
@@ -2975,7 +3004,7 @@ p {
 
 .chord-playing-lesson h2 {
   margin-top: 5px;
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 1.2;
   font-weight: 500;
 }
@@ -2984,7 +3013,7 @@ p {
   max-width: 620px;
   margin-top: 7px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .chord-playing-lesson ol {
@@ -2998,9 +3027,9 @@ p {
 .chord-playing-lesson li::marker { color: var(--key-ink); font-weight: 600; }
 .chord-playing-lesson li strong,
 .chord-playing-lesson li span { display: block; }
-.chord-playing-lesson li strong { font-size: 14px; font-weight: 500; }
-.chord-playing-lesson li span { margin-top: 2px; color: var(--muted); font-size: 14px; line-height: 1.5; }
-.chord-playing-lesson .primary-action { width: 100%; min-height: 42px; font-size: 14px; }
+.chord-playing-lesson li strong { font-size: 0.875rem; font-weight: 500; }
+.chord-playing-lesson li span { margin-top: 2px; color: var(--muted); font-size: 0.875rem; line-height: 1.5; }
+.chord-playing-lesson .primary-action { width: 100%; min-height: 42px; font-size: 0.875rem; }
 
 .theory-course-grid {
   display: grid;
@@ -3028,19 +3057,19 @@ p {
 
 .theory-course-grid>button>span {
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .theory-course-grid strong {
   display: block;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .theory-course-grid p {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
@@ -3048,7 +3077,7 @@ p {
   display: block;
   margin-top: 7px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .theory-lab {
@@ -3069,7 +3098,7 @@ p {
 
 .theory-lab>header h2 {
   margin-top: 4px;
-  font-size: 23px;
+  font-size: 1.438rem;
   font-weight: 500;
 }
 
@@ -3077,7 +3106,7 @@ p {
   max-width: 650px;
   margin-top: 5px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .theory-concept-row,
@@ -3098,7 +3127,7 @@ p {
 .theory-concept-row span,
 .rhythm-cards span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .08em;
   text-transform: uppercase;
 }
@@ -3107,7 +3136,7 @@ p {
 .rhythm-cards strong {
   display: block;
   margin-top: 4px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -3115,7 +3144,7 @@ p {
 .rhythm-cards p {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .rhythm-theory {
@@ -3180,20 +3209,20 @@ p {
   border-radius: 17px;
   background: var(--key-fill-2);
   color: var(--key-ink);
-  font-size: 30px;
+  font-size: 1.875rem;
   font-weight: 500;
 }
 
 .chord-detail-hero h2 {
   margin-top: 4px;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 500;
 }
 
 .chord-detail-hero p {
   margin-top: 5px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .chord-hero-photo {
@@ -3228,14 +3257,14 @@ p {
 }
 
 .voicing-picker strong {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .voicing-picker span {
   margin-top: 2px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .fretboard-stage {
@@ -3269,21 +3298,21 @@ p {
 
 .chord-facts span {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .chord-facts strong {
   margin-top: 5px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .chord-facts p {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .chord-practice {
@@ -3297,7 +3326,7 @@ p {
 
 .chord-practice h2 {
   margin-top: 6px;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 500;
 }
 
@@ -3307,7 +3336,7 @@ p {
   margin: 15px 0 0;
   padding-left: 18px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .scale-detail-banner {
@@ -3323,14 +3352,14 @@ p {
 
 .scale-detail-banner h2 {
   margin-top: 6px;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 500;
 }
 
 .scale-detail-banner p {
   margin-top: 6px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .position-overlap {
@@ -3352,13 +3381,13 @@ p {
 
 .position-overlap span {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-transform: uppercase;
 }
 
 .position-overlap strong {
   margin-top: 4px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -3396,7 +3425,7 @@ p {
 .formula-steps small {
   margin-top: 4px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .songs-hero {
@@ -3409,7 +3438,7 @@ p {
   display: block;
   margin-bottom: 5px;
   color: rgba(251, 248, 242, .7);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-transform: uppercase;
 }
 
@@ -3452,14 +3481,14 @@ p {
 
 .song-card small {
   color: rgba(251, 248, 242, .7);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-transform: uppercase;
 }
 
 .song-card strong {
   display: block;
   margin-top: 5px;
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 1.15;
   font-weight: 500;
 }
@@ -3467,7 +3496,7 @@ p {
 .song-card p {
   margin-top: 2px;
   color: rgba(251, 248, 242, .72);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .song-card footer {
@@ -3481,7 +3510,7 @@ p {
   border: 1px solid rgba(251, 248, 242, .28);
   border-radius: 7px;
   background: rgba(20, 21, 28, .25);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .song-detail-hero {
@@ -3499,14 +3528,14 @@ p {
 }
 
 .song-detail-hero>div>span {
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .song-detail-hero h2 {
   margin-top: 7px;
-  font-size: 32px;
+  font-size: 2rem;
   line-height: 1.05;
   font-weight: 500;
 }
@@ -3527,7 +3556,7 @@ p {
   border: 1px solid rgba(251, 248, 242, .24);
   border-radius: 8px;
   background: rgba(251, 248, 242, .1);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -3580,24 +3609,24 @@ p {
 .song-timeline button>span {
   grid-row: 1 / 3;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .song-timeline strong {
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1;
   font-weight: 500;
 }
 
 .song-timeline small {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .song-instruction {
   margin-top: 13px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .song-workspace>aside>button {
@@ -3621,13 +3650,13 @@ p {
 }
 
 .song-workspace>aside>button strong {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .song-workspace>aside>button small {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .song-practice-goal {
@@ -3643,13 +3672,13 @@ p {
 
 .song-practice-goal span {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-transform: uppercase;
 }
 
 .song-practice-goal strong {
   margin-top: 3px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
@@ -3706,7 +3735,7 @@ p {
 .harmony-lesson>header h2,
 .chord-note-theory>header h2 {
   margin-top: 6px;
-  font-size: 24px;
+  font-size: 1.5rem;
   line-height: 1.15;
   font-weight: 500;
 }
@@ -3717,7 +3746,7 @@ p {
 .chord-note-theory>header p {
   margin-top: 7px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .theory-visual-grid {
@@ -3742,7 +3771,7 @@ p {
 .piano-card>p {
   margin-top: 11px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.6;
 }
 
@@ -3770,7 +3799,7 @@ p {
   border-radius: 0 0 5px 5px;
   background: #fffdf8;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .white-keys>div:last-child {
@@ -3800,7 +3829,7 @@ p {
   border-radius: 0 0 5px 5px;
   background: var(--bezel);
   color: #e9e9ed;
-  font-size: 12px;
+  font-size: 0.8125rem;
   box-shadow: 0 5px 9px rgba(35, 36, 47, .22);
 }
 
@@ -3841,12 +3870,12 @@ p {
 
 .degree-story span {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .degree-story strong {
   margin-top: 3px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
@@ -3854,7 +3883,7 @@ p {
   margin-top: 3px;
   overflow: hidden;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3882,7 +3911,7 @@ p {
 
 .interval-explainer span {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
@@ -3890,14 +3919,14 @@ p {
 .interval-explainer strong {
   margin-top: 4px;
   color: var(--key-ink);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 500;
 }
 
 .interval-explainer p {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .guitar-piano-compare {
@@ -3914,21 +3943,21 @@ p {
 
 .guitar-piano-compare span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .guitar-piano-compare h3 {
   margin-top: 5px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .guitar-piano-compare p {
   margin-top: 5px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .harmony-lesson>div {
@@ -3952,19 +3981,19 @@ p {
 
 .harmony-lesson article span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .harmony-lesson article strong {
   margin-top: 4px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .harmony-lesson article small {
   margin-top: 3px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .sound-lesson {
@@ -3976,14 +4005,14 @@ p {
 
 .sound-lesson h2 {
   margin-top: 6px;
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 500;
 }
 
 .sound-lesson p {
   margin-top: 7px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .degree-tension {
@@ -3998,7 +4027,7 @@ p {
   border-radius: 9px;
   background: var(--card);
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-align: center;
 }
 
@@ -4029,25 +4058,25 @@ p {
 
 .history-summary span {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-transform: uppercase;
 }
 
 .history-summary strong {
   margin-top: 6px;
-  font-size: 27px;
+  font-size: 1.688rem;
   line-height: 1;
   font-weight: 500;
 }
 
 .history-summary strong small {
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .history-summary b {
   margin-top: 5px;
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -4077,7 +4106,7 @@ p {
   gap: 7px;
   align-items: center;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .history-bars i {
@@ -4102,14 +4131,14 @@ p {
 .history-grid>aside>strong {
   display: block;
   margin-top: 15px;
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 500;
 }
 
 .history-grid>aside>p {
   margin-top: 7px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .history-grid>aside>div:last-child {
@@ -4122,7 +4151,7 @@ p {
 .history-grid>aside>div:last-child span,
 .history-grid>aside>div:last-child b {
   display: block;
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .history-grid>aside>div:last-child b {
@@ -4143,7 +4172,7 @@ p {
   padding: 9px 2px;
   border-top: 1px solid var(--line);
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .session-log strong {
@@ -4222,14 +4251,14 @@ p {
 .mobile-key-context span {
   grid-column: 1;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .09em;
   text-transform: uppercase;
 }
 
 .mobile-key-context strong {
   grid-column: 1;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -4269,7 +4298,7 @@ p {
 
 .key-modal>header h2 {
   margin-top: 5px;
-  font-size: 24px;
+  font-size: 1.5rem;
   line-height: 1.15;
   font-weight: 500;
 }
@@ -4277,7 +4306,7 @@ p {
 .key-modal>header p:last-child {
   margin-top: 6px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .key-modal>header button {
@@ -4288,7 +4317,7 @@ p {
   border-radius: 10px;
   background: var(--card);
   cursor: pointer;
-  font-size: 22px;
+  font-size: 1.375rem;
 }
 
 .key-modal-layout {
@@ -4319,14 +4348,14 @@ p {
 
 .key-modal-summary>span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .key-modal-summary>strong {
   margin-top: 5px;
-  font-size: 32px;
+  font-size: 2rem;
   font-weight: 500;
 }
 
@@ -4363,7 +4392,7 @@ p {
 
 .drill-library-hero h2 {
   margin-top: 5px;
-  font-size: 27px;
+  font-size: 1.688rem;
   line-height: 1.1;
   font-weight: 500;
 }
@@ -4372,7 +4401,7 @@ p {
   max-width: 560px;
   margin-top: 6px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .drill-library-hero>button {
@@ -4389,27 +4418,27 @@ p {
 
 .drill-library-hero>button span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .drill-library-hero>button strong {
   margin-top: 4px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
 .drill-library-hero>button small {
   margin-top: 3px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .drill-library-hero>button b {
   margin-top: 11px;
   color: var(--key-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .drill-filter-stack {
@@ -4433,13 +4462,13 @@ p {
   border-radius: 99px;
   background: var(--key-fill);
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .drill-copy>p {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.4;
 }
 
@@ -4451,7 +4480,7 @@ p {
 
 .drill-go>span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .drill-lesson-header {
@@ -4471,14 +4500,14 @@ p {
 
 .drill-outcome span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .drill-outcome strong {
   margin-top: 4px;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -4521,18 +4550,18 @@ p {
   border-radius: 50%;
   background: var(--sunken);
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .lesson-progress strong {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
 .lesson-progress small {
   overflow: hidden;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -4555,7 +4584,7 @@ p {
   gap: 12px;
   margin-top: 10px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .board-legend span {
@@ -4584,7 +4613,7 @@ p {
   background: var(--key-fill);
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .drill-coach-grid {
@@ -4627,21 +4656,21 @@ p {
 
 .reason-flow span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   letter-spacing: .1em;
   text-transform: uppercase;
 }
 
 .reason-flow strong {
   margin-top: 3px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
 .reason-flow small {
   margin-top: 3px;
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   line-height: 1.4;
 }
 
@@ -4659,7 +4688,7 @@ p {
 
 .drill-theory-link>header h2 {
   margin-top: 5px;
-  font-size: 25px;
+  font-size: 1.562rem;
   font-weight: 500;
 }
 
@@ -4667,7 +4696,7 @@ p {
   max-width: 680px;
   margin-top: 6px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .scale-chord-bridge {
@@ -4701,12 +4730,12 @@ p {
 .scale-chord-bridge span,
 .scale-chord-bridge small {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .scale-chord-bridge strong {
   margin: 3px 0;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -4746,25 +4775,25 @@ p {
 .scale-to-chords button span,
 .scale-to-chords button small {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .scale-to-chords button strong {
   margin: 4px 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .scale-to-chords button b {
   margin-top: 6px;
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .scale-to-chords>p {
   margin-top: 10px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .routine-principle {
@@ -4781,7 +4810,7 @@ p {
 .routine-principle span {
   text-align: center;
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -4810,17 +4839,17 @@ p {
 
 .routine-sequence>div>span {
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .routine-sequence strong {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
 .routine-sequence small {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .routine-sequence i {
@@ -4829,7 +4858,7 @@ p {
   bottom: -8px;
   z-index: 2;
   color: var(--key-ink);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-style: normal;
   transform: rotate(90deg);
 }
@@ -4907,7 +4936,7 @@ p {
     justify-content: flex-end;
     padding-top: 0;
     padding-right: 0;
-    font-size: 14px;
+    font-size: 0.875rem;
     letter-spacing: .08em;
     text-transform: uppercase;
   }
@@ -4921,7 +4950,7 @@ p {
   }
 
   .screen-heading h1 {
-    font-size: 36px;
+    font-size: 2.25rem;
   }
 
   .desktop-topbar {
@@ -4948,14 +4977,14 @@ p {
 
   .desktop-topbar>div:first-child span {
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     letter-spacing: .12em;
     text-transform: uppercase;
   }
 
   .desktop-topbar>div:first-child strong {
     margin-top: 2px;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 500;
   }
 
@@ -4964,7 +4993,7 @@ p {
     align-items: center;
     gap: 8px;
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .desktop-topbar-center i {
@@ -4999,7 +5028,7 @@ p {
     background: var(--card);
     color: var(--muted);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .desktop-topbar-actions .topbar-primary {
@@ -5044,7 +5073,7 @@ p {
   }
 
   .global-key-button small {
-    font-size: 12px;
+    font-size: 0.8125rem;
     letter-spacing: .1em;
     text-transform: uppercase;
   }
@@ -5052,14 +5081,14 @@ p {
   .global-key-button strong {
     margin-top: 1px;
     overflow: hidden;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   .global-key-button>b {
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 500;
   }
 
@@ -5116,7 +5145,7 @@ p {
     border-radius: 11px;
     background: var(--key-fill);
     color: var(--key-ink);
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 600;
   }
 
@@ -5126,7 +5155,7 @@ p {
   }
 
   .desktop-brand strong {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 600;
     letter-spacing: -.02em;
   }
@@ -5134,7 +5163,7 @@ p {
   .desktop-brand small {
     margin-top: 2px;
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     line-height: 1.45;
   }
 
@@ -5154,7 +5183,7 @@ p {
     padding: 0 12px;
     border: 1px solid transparent;
     border-radius: 11px;
-    font-size: 14px;
+    font-size: 0.875rem;
     letter-spacing: .08em;
   }
 
@@ -5176,7 +5205,7 @@ p {
     display: block;
     margin-left: auto;
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     letter-spacing: .05em;
   }
 
@@ -5195,7 +5224,7 @@ p {
   .desktop-library-nav>span {
     padding: 0 12px 5px;
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     letter-spacing: .12em;
     text-transform: uppercase;
   }
@@ -5207,7 +5236,7 @@ p {
     border-radius: 8px;
     background: transparent;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 0.8125rem;
     letter-spacing: 0;
     text-transform: none;
   }
@@ -5221,7 +5250,7 @@ p {
     display: block;
     margin-left: auto;
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
   }
 
   .desktop-side-progress {
@@ -5242,11 +5271,11 @@ p {
   .desktop-side-progress span,
   .desktop-side-progress small {
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
   }
 
   .desktop-side-progress strong {
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 500;
   }
 
@@ -5271,7 +5300,7 @@ p {
     display: block;
     margin: auto 7px 0;
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.6;
   }
 
@@ -5302,7 +5331,7 @@ p {
 
   .today-screen>.session-hero h2 {
     max-width: 480px;
-    font-size: 40px;
+    font-size: 2.5rem;
   }
 
   .today-screen>.session-hero>p:not(.kicker) {
@@ -5319,7 +5348,7 @@ p {
   }
 
   .today-greeting h1 {
-    font-size: 44px;
+    font-size: 2.75rem;
   }
 
   .resume-grid>button {
@@ -5356,7 +5385,7 @@ p {
 
   .studio-heading h2 {
     margin-top: 4px;
-    font-size: 22px;
+    font-size: 1.375rem;
     line-height: 1.2;
     font-weight: 500;
   }
@@ -5365,7 +5394,7 @@ p {
     max-width: 610px;
     margin-top: 5px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .studio-modes {
@@ -5384,7 +5413,7 @@ p {
     background: transparent;
     color: var(--quiet);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .studio-modes button.active {
@@ -5403,7 +5432,7 @@ p {
     border-radius: 11px;
     background: var(--key-fill);
     color: var(--key-ink);
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .studio-task-strip strong {
@@ -5420,7 +5449,7 @@ p {
     gap: 16px;
     margin-top: 13px;
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .studio-legend span {
@@ -5438,7 +5467,7 @@ p {
     background: var(--key-fill);
     color: var(--key-ink);
     cursor: pointer;
-    font-size: 12px;
+    font-size: 0.8125rem;
   }
 
   .studio-legend i {
@@ -5478,14 +5507,14 @@ p {
 
   .tempo-widget-head span {
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     letter-spacing: .1em;
     text-transform: uppercase;
   }
 
   .tempo-widget-head strong {
     margin-top: 2px;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 500;
   }
 
@@ -5505,7 +5534,7 @@ p {
     background: transparent;
     color: var(--quiet);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .tempo-widget-head button.active {
@@ -5543,7 +5572,7 @@ p {
   }
 
   .tempo-orbit strong {
-    font-size: 38px;
+    font-size: 2.375rem;
     line-height: 1;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
@@ -5552,7 +5581,7 @@ p {
   .tempo-orbit>span {
     margin-top: 4px;
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     letter-spacing: .12em;
     text-transform: uppercase;
   }
@@ -5629,7 +5658,7 @@ p {
   .tempo-help {
     margin-top: 12px;
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     line-height: 1.45;
     text-align: center;
   }
@@ -5655,7 +5684,7 @@ p {
     border-color: var(--key-edge);
     background: var(--key-fill);
     color: var(--key-ink);
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 500;
   }
 
@@ -5667,7 +5696,7 @@ p {
     margin-top: 8px;
     padding: 0 12px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .studio-train:hover {
@@ -5704,7 +5733,7 @@ p {
     display: block;
     margin-bottom: 6px;
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
     letter-spacing: .1em;
     text-transform: uppercase;
   }
@@ -5735,7 +5764,7 @@ p {
 
   .desktop-drill-tools>div strong {
     color: var(--key-ink);
-    font-size: 30px;
+    font-size: 1.875rem;
     line-height: 1;
     font-weight: 500;
   }
@@ -5743,7 +5772,7 @@ p {
   .desktop-drill-tools>div span {
     margin-top: 5px;
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .train-screen {
@@ -5774,7 +5803,7 @@ p {
   }
 
   .train-module-picker button strong {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .train-screen>.train-hero {
@@ -5789,7 +5818,7 @@ p {
   }
 
   .train-hero strong {
-    font-size: 72px;
+    font-size: 4.5rem;
   }
 
   .train-screen>.train-board {
@@ -5832,7 +5861,7 @@ p {
 
   .desktop-train-guide>div:first-child strong {
     margin-top: 4px;
-    font-size: 34px;
+    font-size: 2.125rem;
     line-height: 1;
     font-weight: 500;
   }
@@ -5840,7 +5869,7 @@ p {
   .desktop-train-guide>div:first-child span,
   .desktop-train-guide>p {
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .target-lanes {
@@ -5854,7 +5883,7 @@ p {
     gap: 7px;
     align-items: center;
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
   }
 
   .target-lanes i {
@@ -5912,7 +5941,7 @@ p {
   }
 
   .chord-section .section-head h2 {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .chord-chips {
@@ -5922,13 +5951,13 @@ p {
 
   .chord-chips>span {
     padding: 9px 12px;
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .chord-section>p {
     margin-top: 22px;
     max-width: 570px;
-    font-size: 17px;
+    font-size: 1.062rem;
   }
 
   .desktop-key-relations {
@@ -5968,7 +5997,7 @@ p {
     border-radius: 10px;
     background: var(--key-fill-2);
     color: var(--key-ink);
-    font-size: 19px;
+    font-size: 1.188rem;
     font-weight: 500;
   }
 
@@ -5978,14 +6007,14 @@ p {
   }
 
   .desktop-key-relations button strong {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 500;
   }
 
   .desktop-key-relations button small {
     overflow: hidden;
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -5993,7 +6022,7 @@ p {
   .desktop-key-relations>p {
     margin-top: 12px;
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .library-launchpad>div:last-child {
@@ -6012,7 +6041,7 @@ p {
   }
 
   .library-launchpad button strong {
-    font-size: 22px;
+    font-size: 1.375rem;
   }
 
   .library-screen {
@@ -6030,13 +6059,13 @@ p {
   .library-photo-hero h2,
   .songs-hero h2 {
     max-width: 650px;
-    font-size: 36px;
+    font-size: 2.25rem;
   }
 
   .library-photo-hero p,
   .songs-hero p {
     max-width: 610px;
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .library-controls {
@@ -6086,7 +6115,7 @@ p {
   }
 
   .theory-hub-hero h2 {
-    font-size: 40px;
+    font-size: 2.5rem;
   }
 
   .theory-hub-hero>button {
@@ -6099,7 +6128,7 @@ p {
   }
 
   .circle-lesson h2 {
-    font-size: 32px;
+    font-size: 2rem;
   }
 
   .circle-lesson-grid {
@@ -6117,11 +6146,11 @@ p {
   }
 
   .circle-breakdown strong {
-    font-size: 17px;
+    font-size: 1.062rem;
   }
 
   .circle-breakdown p {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .theory-course-grid {
@@ -6179,11 +6208,11 @@ p {
   .chord-big-symbol {
     min-width: 104px;
     height: 104px;
-    font-size: 44px;
+    font-size: 2.75rem;
   }
 
   .chord-detail-hero h2 {
-    font-size: 27px;
+    font-size: 1.688rem;
   }
 
   .voicing-picker {
@@ -6220,7 +6249,7 @@ p {
   }
 
   .scale-detail-banner h2 {
-    font-size: 34px;
+    font-size: 2.125rem;
   }
 
   .position-overlap {
@@ -6258,7 +6287,7 @@ p {
   }
 
   .song-card strong {
-    font-size: 26px;
+    font-size: 1.625rem;
   }
 
   .song-detail-hero {
@@ -6270,7 +6299,7 @@ p {
   }
 
   .song-detail-hero h2 {
-    font-size: 48px;
+    font-size: 3rem;
   }
 
   .song-workspace {
@@ -6373,7 +6402,7 @@ p {
   .drill-history>header h2,
   .harmony-lesson>header h2,
   .chord-note-theory>header h2 {
-    font-size: 30px;
+    font-size: 1.875rem;
   }
 
   .theory-visual-grid {
@@ -6410,7 +6439,7 @@ p {
   }
 
   .degree-story strong {
-    font-size: 18px;
+    font-size: 1.125rem;
   }
 
   .interval-explainer {
@@ -6503,7 +6532,7 @@ p {
 
   .desktop-progress-range>span {
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
     letter-spacing: .1em;
     text-transform: uppercase;
   }
@@ -6524,7 +6553,7 @@ p {
     background: transparent;
     color: var(--quiet);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .desktop-progress-range button.active {
@@ -6579,21 +6608,21 @@ p {
 
   .desktop-progress-insights span {
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     letter-spacing: .1em;
     text-transform: uppercase;
   }
 
   .desktop-progress-insights strong {
     margin-top: 7px;
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 500;
   }
 
   .desktop-progress-insights small {
     margin-top: 2px;
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .desktop-progress-insights i {
@@ -6641,14 +6670,14 @@ p {
 
   .desktop-routine-summary span {
     color: var(--quiet);
-    font-size: 12px;
+    font-size: 0.8125rem;
     letter-spacing: .1em;
     text-transform: uppercase;
   }
 
   .desktop-routine-summary strong {
     margin-top: 5px;
-    font-size: 26px;
+    font-size: 1.625rem;
     line-height: 1;
     font-weight: 500;
   }
@@ -6656,7 +6685,7 @@ p {
   .desktop-routine-summary small {
     margin-top: 4px;
     color: var(--quiet);
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .desktop-routine-summary>button {
@@ -6665,7 +6694,7 @@ p {
     background: var(--key-fill-2);
     color: var(--key-ink);
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 500;
   }
 
@@ -6696,7 +6725,7 @@ p {
   }
 
   .drill-library-hero h2 {
-    font-size: 36px;
+    font-size: 2.25rem;
   }
 
   .drill-library-hero>button {
@@ -6720,12 +6749,12 @@ p {
   }
 
   .drill-card.expanded .drill-copy>strong {
-    font-size: 17px;
+    font-size: 1.062rem;
   }
 
   .drill-copy>p {
     max-width: 470px;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .view-drill-detail .drill-detail-screen.tab-lesson {
@@ -6747,7 +6776,7 @@ p {
 
   .drill-lesson-header .detail-title h1 {
     margin-top: 8px;
-    font-size: 36px;
+    font-size: 2.25rem;
   }
 
   .drill-outcome {
@@ -6762,7 +6791,7 @@ p {
   }
 
   .lesson-progress strong {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .drill-board-stage {
@@ -7050,7 +7079,7 @@ p {
 
 @media (max-width:899px) {
   body {
-    font-size: 16px;
+    font-size: 1rem;
   }
 
   .screen-content {
@@ -7059,22 +7088,22 @@ p {
 
   .section-head h2,
   .kicker {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .section-head span,
   .section-head button {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .screen-heading h1 {
-    font-size: 29px;
+    font-size: 1.812rem;
   }
 
   .detail-title p,
   .detail-lede,
   .routines-intro {
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.65;
   }
 
@@ -7107,7 +7136,7 @@ p {
     padding: 0 13px;
     border-color: var(--line);
     background: var(--card);
-    font-size: 14px;
+    font-size: 0.875rem;
     white-space: nowrap;
   }
 
@@ -7122,7 +7151,7 @@ p {
 
   .drill-filter-stack .chip-scroll button {
     min-height: 38px;
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .drill-card.expanded {
@@ -7131,7 +7160,7 @@ p {
   }
 
   .drill-card-tags span {
-    font-size: 12px;
+    font-size: 0.8125rem;
   }
 
   .drill-card-tags span:first-child {
@@ -7142,12 +7171,12 @@ p {
   }
 
   .drill-card.expanded .drill-copy>strong {
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.3;
   }
 
   .drill-copy>p {
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 1.5;
   }
 
@@ -7165,7 +7194,7 @@ p {
   }
 
   .drill-library-hero p:not(.kicker) {
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 1.55;
   }
 
@@ -7183,35 +7212,35 @@ p {
 
   .reason-flow span,
   .reason-flow small {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .reason-flow strong {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .instruction-list strong {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 
   .instruction-list p {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .board-legend {
     flex-wrap: wrap;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .board-legend button {
     width: 100%;
     min-height: 38px;
     margin-left: 0;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .lesson-progress strong {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .lesson-progress small {
@@ -7239,7 +7268,7 @@ p {
   }
 
   .commit-foot {
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 }
 
@@ -7317,7 +7346,7 @@ p {
   }
 
   .degree-strip small {
-    font-size: 12px;
+    font-size: 0.8125rem;
   }
 }
 
@@ -7352,7 +7381,7 @@ p {
 
 .state-notice strong {
   color: var(--ink);
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 600;
   line-height: 1.35;
 }
@@ -7360,7 +7389,7 @@ p {
 .state-notice p {
   max-width: 46ch;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.5;
 }
 
@@ -7373,7 +7402,7 @@ p {
   background: var(--key-fill);
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
@@ -7407,7 +7436,7 @@ p {
 .record-notice {
   margin: 8px 12px 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.45;
 }
 
@@ -7427,14 +7456,14 @@ p {
 
 .account-card h2 {
   color: var(--ink);
-  font-size: 21px;
+  font-size: 1.312rem;
   font-weight: 600;
 }
 
 .account-card>p {
   max-width: 46ch;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.55;
 }
 
@@ -7446,7 +7475,7 @@ p {
 
 .account-facts dt {
   color: var(--quiet);
-  font-size: 14px;
+  font-size: 0.875rem;
   letter-spacing: .04em;
   text-transform: uppercase;
 }
@@ -7454,7 +7483,7 @@ p {
 .account-facts dd {
   margin: 2px 0 0;
   color: var(--ink);
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -7480,7 +7509,7 @@ p {
 
 .account-form label>span {
   color: var(--secondary-ink);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 500;
 }
 
@@ -7491,7 +7520,7 @@ p {
   border-radius: 11px;
   background: var(--paper);
   color: var(--ink);
-  font-size: 17px;
+  font-size: 1.062rem;
 }
 
 .account-form input:focus-visible {
@@ -7509,7 +7538,7 @@ p {
   background: var(--key-fill);
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -7520,7 +7549,7 @@ p {
 
 .field-error {
   color: var(--ink);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-style: normal;
   font-weight: 500;
 }
@@ -7550,7 +7579,7 @@ p {
 
 .fretboard-caption strong {
   color: var(--ink);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 600;
 }
 
@@ -7563,19 +7592,19 @@ p {
   border-radius: 999px;
   background: var(--sunken);
   color: var(--secondary-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .fret-window small {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
 .fretboard-figure.mini .fretboard-caption strong {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 /* Shape key */
@@ -7602,7 +7631,7 @@ p {
   align-items: center;
   gap: 7px;
   color: var(--secondary-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -7722,7 +7751,7 @@ p {
   border-radius: 9px;
   background: var(--key-fill-2);
   color: var(--key-ink);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
 }
 
@@ -7735,7 +7764,7 @@ p {
 .degree-note {
   min-width: 30px;
   color: var(--ink);
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 700;
 }
 
@@ -7747,13 +7776,13 @@ p {
 
 .degree-name strong {
   color: var(--ink);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 600;
 }
 
 .degree-name small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.8125rem;
 }
 
 .degree-chord {
@@ -7762,14 +7791,14 @@ p {
   border-radius: 8px;
   background: var(--sunken);
   color: var(--secondary-ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
 }
 
 .degree-list>li>button>b {
   color: var(--muted);
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 500;
 }
 
@@ -7785,7 +7814,7 @@ p {
 .degree-character {
   max-width: 58ch;
   color: var(--ink);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.55;
 }
 
@@ -7798,7 +7827,7 @@ p {
 
 .degree-detail dt {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: .03em;
   text-transform: uppercase;
@@ -7809,13 +7838,13 @@ p {
   display: flex;
   flex-direction: column;
   color: var(--ink);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 600;
 }
 
 .degree-detail dd small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -7825,7 +7854,7 @@ p {
   border-radius: 10px;
   background: var(--key-dim);
   color: var(--secondary-ink);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
@@ -7910,7 +7939,7 @@ p {
   border-radius: 8px;
   background: var(--key-fill-2);
   color: var(--key-ink);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
 }
 
@@ -7918,14 +7947,14 @@ p {
   display: flex;
   flex-direction: column;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.25;
 }
 
 .finger-guide small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -7963,7 +7992,7 @@ p {
 
 .practice-surface h2 {
   color: var(--ink);
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
   line-height: 1.25;
 }
@@ -7974,7 +8003,7 @@ p {
 
 .practice-fingers {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
@@ -7994,7 +8023,7 @@ p {
   background: var(--key-fill);
   color: var(--key-ink);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 600;
 }
 
@@ -8017,7 +8046,7 @@ p {
   background: var(--card);
   color: var(--ink);
   cursor: pointer;
-  font-size: 19px;
+  font-size: 1.188rem;
   font-weight: 600;
 }
 
@@ -8027,7 +8056,7 @@ p {
   flex-direction: column;
   align-items: center;
   color: var(--ink);
-  font-size: 17px;
+  font-size: 1.062rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1.05;
@@ -8035,7 +8064,7 @@ p {
 
 .practice-tempo small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 500;
 }
 
@@ -8048,7 +8077,7 @@ p {
   background: transparent;
   color: var(--secondary-ink);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
@@ -8060,13 +8089,13 @@ p {
   border-radius: 11px;
   background: var(--key-dim);
   color: var(--ink);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
 }
 
 .practice-goal span {
   color: var(--quiet);
-  font-size: 12px;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -8146,7 +8175,7 @@ p {
   }
 
   .drill-copy>strong {
-    font-size: 16px;
+    font-size: 1rem;
   }
 }
 
@@ -8176,14 +8205,14 @@ p {
   }
 
   .mobile-key-context>strong {
-    font-size: 15px;
+    font-size: 0.9375rem;
     font-weight: 700;
     white-space: nowrap;
   }
 
   .mobile-key-context>b {
     color: var(--muted);
-    font-size: 12px;
+    font-size: 0.8125rem;
   }
 
   /* With a compact control the row beneath it no longer needs a wide gutter. */

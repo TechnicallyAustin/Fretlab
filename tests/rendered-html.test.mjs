@@ -126,13 +126,15 @@ test("every board states its fret window, including mini boards", async () => {
   assert.match(squash(source), /DOUBLE_INLAYS=newSet\(\[12,24\]\)/);
 });
 
-test("text is readable: nothing ships below 12px", async () => {
+test("text is readable: rem type stays at or above the 13px caption floor", async () => {
   const css = await readProjectFile("app/globals.css");
-  const sizes = [...css.matchAll(/font-size:\s*([0-9.]+)px/g)].map((match) => Number(match[1]));
+  const sizes = [...css.matchAll(/font-size:\s*([0-9.]+)rem/g)].map((match) => Number(match[1]) * 16);
   assert.ok(sizes.length > 100, "expected the full stylesheet");
-  const tiny = sizes.filter((size) => size < 12);
-  assert.deepEqual(tiny, [], `found text below 12px: ${[...new Set(tiny)].join(", ")}`);
-  assert.match(css, /font: 400 16px\/1\.6 Inter/, "body copy should be 16px");
+  const tiny = sizes.filter((size) => size < 13);
+  assert.deepEqual(tiny, [], `found text below 13px: ${[...new Set(tiny)].join(", ")}`);
+  assert.match(css, /font: 400 1rem\/1\.6 Inter/, "body copy should be 1rem");
+  assert.match(css, /font-size: 1rem/, "supporting copy should use the rem scale");
+  assert.match(css, /stand-mode/, "stand mode should be present");
 });
 
 test("keeps one global key across guided drills, routines, and harmony", async () => {

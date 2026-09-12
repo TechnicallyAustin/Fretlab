@@ -20,6 +20,7 @@ export function FretLabFrame({ children }: { children: ReactNode }) {
   const { view, go } = useFretLabNav();
   const [selectedKey, setSelectedKey] = useStoredKey();
   const [keyPickerOpen, setKeyPickerOpen] = useState(false);
+  const [standMode, setStandMode] = useState(false);
 
   return (
     <main className="site-shell" style={cssVars(selectedKey)}>
@@ -28,7 +29,15 @@ export function FretLabFrame({ children }: { children: ReactNode }) {
         <strong>Guitar practice</strong>
         <small>One key-colour system across every practice surface.</small>
       </div>
-      <div className={`app-frame view-${view}`}>
+      <div className={`app-frame view-${view}${standMode ? " stand-mode" : ""}`}>
+        <button
+          className="stand-mode-toggle"
+          type="button"
+          aria-pressed={standMode}
+          onClick={() => setStandMode((enabled) => !enabled)}
+        >
+          {standMode ? "Stand mode on" : "Stand mode"}
+        </button>
         <DesktopTopbar
           view={view}
           selectedKey={selectedKey}
