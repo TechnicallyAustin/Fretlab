@@ -40,10 +40,10 @@ export function Progress({
   // rendered against the server's clock.
   const { now } = useClock();
   const activeWeeks = 26;
-  const values = now === null ? [] : accuracySeries(sessions, range, now);
-  const stats = now === null ? null : summarise(sessions, now);
-  const consistency = now === null ? [] : consistencyLevels(sessions, activeWeeks, now);
-  const months = now === null ? [] : consistencyMonths(activeWeeks, now);
+  const values = typeof now !== "number" ? [] : accuracySeries(sessions, range, now);
+  const stats = typeof now !== "number" ? null : summarise(sessions, now);
+  const consistency = typeof now !== "number" ? [] : consistencyLevels(sessions, activeWeeks, now);
+  const months = typeof now !== "number" ? [] : consistencyMonths(activeWeeks, now);
 
   // A single point has no line to draw; repeat it so the chart still reads.
   const plotted = values.length === 1 ? [values[0], values[0]] : values;
@@ -61,7 +61,7 @@ export function Progress({
     })
     .join(" ");
 
-  if (history.status === "loading" || now === null || stats === null) {
+  if (history.status === "loading" || typeof now !== "number" || stats === null) {
     return (
       <div className="screen-content">
         <AppHeader title={`${selectedKey} progress`} meta="Consistency" />

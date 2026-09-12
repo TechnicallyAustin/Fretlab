@@ -34,9 +34,15 @@ export function Today({
   // date-relative waits for it: the server has neither the user's clock nor
   // their timezone, so it drew a different week of day labels than the browser
   // did and React threw a hydration mismatch on this screen.
+  //
+  // The check is `typeof`, not `=== null`, and that matters. A stale module in
+  // the browser — a hot reload that replaced this file but not `useClock` —
+  // hands back an object with no `now` on it at all, and `undefined === null`
+  // is false. That slipped past the guard and threw "Invalid time value" from
+  // inside a date helper. Anything that is not a number means no clock yet.
   const { dayName, greeting, now } = useClock();
-  const stats = now === null ? null : summarise(sessions, now);
-  const week = now === null ? null : weekMinutes(sessions, now);
+  const stats = typeof now !== "number" ? null : summarise(sessions, now);
+  const week = typeof now !== "number" ? null : weekMinutes(sessions, now);
   const weekTotal = week?.reduce((sum, day) => sum + day.minutes, 0) ?? 0;
   const peak = Math.max(1, ...(week ?? []).map((day) => day.minutes));
 

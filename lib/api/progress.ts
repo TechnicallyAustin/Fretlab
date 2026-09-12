@@ -33,7 +33,30 @@ function dayKey(iso: string): string {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }
 
+/**
+ * Rejects a clock that is not one, with a message that says what to do.
+ *
+ * Every date-relative helper here funnels through `startOfToday`, so this is
+ * the one place a bad clock can be caught. Without it an `undefined` slid all
+ * the way down to `new Date(undefined).toISOString()` and threw "Invalid time
+ * value" from inside a React render — an error naming neither the argument,
+ * the caller, nor the fix.
+ *
+ * A caller that has no clock yet must not call these at all: `useClock()`
+ * returns null until the client has one, and the screen waits for it.
+ */
+function assertClock(now: number): void {
+  if (typeof now !== "number" || !Number.isFinite(now)) {
+    throw new TypeError(
+      `Expected a millisecond clock, received ${String(now)}. ` +
+        "Screens take one from useClock(), which is null until the client " +
+        "has a clock — render the waiting state rather than calling with it.",
+    );
+  }
+}
+
 function startOfToday(now: number): number {
+  assertClock(now);
   const date = new Date(now);
   date.setHours(0, 0, 0, 0);
   return date.getTime();

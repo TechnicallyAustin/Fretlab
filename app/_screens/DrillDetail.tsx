@@ -46,7 +46,7 @@ export function DrillDetail({
   // wait for a client clock rather than being drawn with the server's.
   const { now } = useClock();
   const entries =
-    now === null
+    typeof now !== "number"
       ? []
       : drillSessions.slice(0, 4).map((session) => ({
           id: session.id,

@@ -488,6 +488,41 @@ have verified each one fails against the pre-fix code.
 
 ## Found during Stage 2
 
+### - [x] FL-H2 — "Invalid time value" crashed the Today screen
+**Status:** `DONE` · **Severity:** Blocker · **Found:** reported from the browser
+
+**Problem.** `RangeError: Invalid time value`, thrown by `summarise()` during a
+React render. The follow-on from FL-H1: the browser was holding a hot-reloaded
+`Today.tsx` and `progress.ts` against a **stale `useClock`** — the version from
+before `now` was added to its return. So `now` arrived as `undefined`, and the
+screen's guard was `now === null`, which `undefined` does not satisfy. It went
+straight through to `new Date(undefined).toISOString()`.
+
+Two separate faults, and the module skew is only the one that fired first:
+
+- A guard written as an identity check against `null` does not cover the other
+  absent value, and the two arrive from different places.
+- The date helpers turned a bad argument into `NaN` and carried it six frames
+  before throwing an error that named neither the argument, the caller, nor
+  the fix.
+
+**Change.** `assertClock()` at `startOfToday`, the one function every
+date-relative helper funnels through, so a bad clock is refused where it enters
+with a message saying to wait for `useClock`. Every screen guard is
+`typeof now !== "number"`, which covers null, undefined and NaN alike, so a
+skewed module degrades to the waiting state instead of crashing.
+
+> A stale module graph is not a thing source code can prevent — clearing it
+> needs the dev server restarted and the page hard-reloaded. What source can
+> do is refuse the bad value at the boundary and say so, which is what this
+> does.
+
+**Guards.** Four helpers × five bad clocks must each throw a `TypeError`
+mentioning the fix, and no screen may test its clock with `=== null` again.
+Both confirmed by reintroducing the narrow guard.
+
+---
+
 ### - [x] FL-H1 — Today threw a hydration mismatch
 **Status:** `DONE` · **Severity:** Blocker · **Found:** reported from the browser
 

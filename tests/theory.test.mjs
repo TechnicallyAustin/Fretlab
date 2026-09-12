@@ -488,6 +488,62 @@ test("no date helper reads the wall clock by default", async () => {
   assert.deepEqual(defaults, [], "a Date.now() default came back");
 });
 
+/**
+ * A screen hit "RangeError: Invalid time value" from inside a React render.
+ * The cause was a browser holding a hot-reloaded `Today` against a stale
+ * `useClock`, so `now` arrived as `undefined` — and `undefined === null` is
+ * false, so the screen's guard passed it straight through. It reached
+ * `new Date(undefined).toISOString()` and threw an error naming neither the
+ * argument, the caller, nor the fix.
+ *
+ * A bad clock is now refused where it enters, with a message that says what
+ * to do about it.
+ */
+test("a date helper refuses a clock that is not one", async () => {
+  const { summarise, weekMinutes, dayLabel, consistencyMonths } = await import(
+    "../lib/api/progress.ts"
+  );
+  const iso = new Date().toISOString();
+
+  for (const bad of [undefined, null, Number.NaN, "today", {}]) {
+    for (const [label, call] of [
+      ["summarise", () => summarise([], bad)],
+      ["weekMinutes", () => weekMinutes([], bad)],
+      ["dayLabel", () => dayLabel(iso, bad)],
+      ["consistencyMonths", () => consistencyMonths(26, bad)],
+    ]) {
+      assert.throws(
+        call,
+        (error) => {
+          assert.ok(
+            error instanceof TypeError,
+            `${label}(${String(bad)}) threw ${error.name}, not a TypeError`,
+          );
+          assert.match(
+            error.message,
+            /millisecond clock/,
+            `${label}(${String(bad)}) gave an unhelpful message`,
+          );
+          return true;
+        },
+        `${label} accepted ${String(bad)} as a clock`,
+      );
+    }
+  }
+});
+
+test("no screen tests its clock with an identity check", async () => {
+  // `now === null` is the guard that let `undefined` through. The helpers
+  // throw on a bad clock now, so a screen using the narrow check would crash
+  // rather than wait.
+  for (const file of await screenSources()) {
+    assert.ok(
+      !file.text.includes("now === null"),
+      `${file.path}: guards the clock with === null, which misses undefined`,
+    );
+  }
+});
+
 test("the week reads from the clock it is given, not the one it finds", async () => {
   const { weekMinutes } = await import("../lib/api/progress.ts");
   // A fixed instant must always produce the same seven labels, ending today.

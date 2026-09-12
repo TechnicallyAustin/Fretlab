@@ -28,7 +28,7 @@ export function Routines({
   // timezone, so these wait for a client clock rather than guessing with the
   // server's and disagreeing at hydration.
   const { now } = useClock();
-  const week = now === null ? [] : weekMinutes(history.data ?? [], now);
+  const week = typeof now !== "number" ? [] : weekMinutes(history.data ?? [], now);
   const weekTotal = week.reduce((sum, day) => sum + day.minutes, 0);
   const weekSessions = week.filter((day) => day.minutes > 0).length;
   return (
@@ -74,7 +74,7 @@ export function Routines({
         {ROUTINES.map((routine, index) => {
           const steps = routineSteps(routine);
           const progress =
-            now === null
+            typeof now !== "number"
               ? { completed: 0, last: null }
               : routineProgress(
                   history.data ?? [],
