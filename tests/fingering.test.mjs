@@ -17,24 +17,59 @@ const { CHORDS } = await import("../lib/fretlab/library.ts");
 
 const KEYS = ["G", "C", "A", "Eb"];
 
-test("every box drill fits one hand position", () => {
+/**
+ * This asserted `span <= BOX_SPAN` against a global four-fret constant, which
+ * is the constraint FL-12 removes: three notes on each of six strings needs
+ * six frets, so a global clamp made "Three-note-per-string run" impossible to
+ * draw as written. The assertion was encoding that bug.
+ *
+ * The rule it is replaced by is stricter, not looser: a drill gets exactly the
+ * span it declares, and a drill that declares nothing still gets a hand.
+ */
+test("every box drill fits the span it declares", () => {
   for (const drill of DRILLS) {
     if (drillKind(drill) !== "box") continue;
+    const allowed = drill.span ?? BOX_SPAN;
     for (const key of KEYS) {
       const shape = drillShape(drill, key);
       const span = shape.high - shape.low;
       assert.ok(
-        span <= BOX_SPAN,
-        `${drill.id} in ${key} spans ${span + 1} frets; a hand covers ${BOX_SPAN + 1}`,
+        span <= allowed,
+        `${drill.id} in ${key} spans ${span + 1} frets; it declares ${allowed + 1}`,
       );
     }
   }
 });
 
-test("box drills number every fretted note with a finger", () => {
+test("only a drill that asks for a wider shape gets one", () => {
+  const wide = DRILLS.filter((drill) => (drill.span ?? BOX_SPAN) > BOX_SPAN);
+  assert.deepEqual(
+    wide.map((drill) => drill.id),
+    ["three-note"],
+    "a drill widened its span without saying why",
+  );
+});
+
+/**
+ * One finger per fret only holds inside a hand span. A shape wider than that
+ * is played with a shift, and numbering its notes 1-4 would ask for a grip no
+ * hand makes — so a wide shape must carry no fingers at all. Both directions
+ * are checked here; the original only checked the first, which is why a
+ * six-fret drill could not exist.
+ */
+test("a box drill is fingered exactly when a hand could hold it", () => {
   for (const drill of DRILLS) {
     if (drillKind(drill) !== "box") continue;
+    const handSpan = (drill.span ?? BOX_SPAN) <= BOX_SPAN;
     for (const note of drillShape(drill, "G").notes) {
+      if (!handSpan) {
+        assert.equal(
+          note.finger,
+          undefined,
+          `${drill.id} implies a finger for a shape wider than a hand`,
+        );
+        continue;
+      }
       assert.notEqual(note.finger, undefined, `${drill.id} left a note unfingered`);
       assert.ok(note.finger >= 0 && note.finger <= 4, `${drill.id} finger ${note.finger}`);
       if (note.f === 0) assert.equal(note.finger, 0, "open strings take no finger");

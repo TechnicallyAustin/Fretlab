@@ -17,6 +17,8 @@ export const DRILLS = [
     minutes: 4,
     bpm: 84,
     difficulty: 1,
+    scale: "major",
+    position: "position-1",
     low: 1,
     high: 5,
     intervals: [0, 2, 4, 5, 7, 9, 11],
@@ -80,6 +82,10 @@ export const DRILLS = [
     minutes: 6,
     bpm: 92,
     difficulty: 2,
+    // It is box one, so it points at box one. The window used to be
+    // whichever four frets held the most notes, which is not box one.
+    scale: "major-pentatonic",
+    position: "box-1",
     low: 3,
     high: 8,
     intervals: [0, 2, 4, 7, 9],
@@ -95,6 +101,8 @@ export const DRILLS = [
     minutes: 6,
     bpm: 78,
     difficulty: 2,
+    scale: "minor-pentatonic",
+    position: "box-1",
     low: 3,
     high: 8,
     intervals: [0, 3, 5, 7, 10],
@@ -242,6 +250,9 @@ export const DRILLS = [
     minutes: 7,
     bpm: 96,
     difficulty: 3,
+    // Three notes on each of six strings needs six frets. A global
+    // four-fret BOX_SPAN made this drill impossible to draw as written.
+    span: 5,
     low: 2,
     high: 10,
     intervals: [0, 2, 4, 5, 7, 9, 11],

@@ -10,6 +10,11 @@ import { AppHeader } from "@/components/fretlab/AppHeader";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { PC_KEY, intervalShape, keyPc, majorScale } from "@/lib/fretlab/theory";
 import { SCALES } from "@/lib/fretlab/library";
+import {
+  positionNotes,
+  positionWindow,
+  positionsFor,
+} from "@/lib/fretlab/positions";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
 import { ScaleDegrees } from "@/app/_sections/ScaleDegrees";
 import { cssVars } from "@/lib/fretlab/palette";
@@ -21,21 +26,36 @@ export function ScaleLibraryDetail({
   selectedKey,
   scaleId,
 }: {
-  go: (view: View) => void;
+  /** Takes an id too: the runner needs to know what it is running. */
+  go: (view: View, id?: string) => void;
   selectedKey: KeyName;
   scaleId: string;
 }) {
   const scale = SCALES.find((item) => item.id === scaleId) ?? SCALES[0];
   const [tab, setTab] = useState("Fretboard");
-  const [position, setPosition] = useState(1);
-  const windows = [
-    [0, 4],
-    [2, 6],
-    [4, 8],
-    [6, 10],
-    [8, 12],
-  ];
-  const [low, high] = windows[position - 1];
+  const [positionIndex, setPositionIndex] = useState(0);
+
+  // These were five fixed windows — [0,4], [2,6], [4,8] … — slid up the neck
+  // and flooded with every matching note. That is not a position: it is not
+  // the shape anyone teaches, it moves with no relation to the key, and
+  // nothing made it contain a root. Scales with a written table get their real
+  // shapes; the rest keep the sliding window, honestly labelled.
+  const positions = positionsFor(scale.id);
+  const position = positions[Math.min(positionIndex, positions.length - 1)];
+  const window = position
+    ? positionWindow(position, selectedKey)
+    : { low: positionIndex * 2, high: positionIndex * 2 + 4 };
+  const { low, high } = window;
+  const notes = position
+    ? positionNotes(position, selectedKey)
+    : intervalShape(selectedKey, scale.intervals, low, high);
+
+  // The shape after this one, for the connecting drill. Five positions are a
+  // cycle, so the one after the last is the first again.
+  const next = positions.length
+    ? positions[(positionIndex + 1) % positions.length]
+    : null;
+  const nextWindow = next ? positionWindow(next, selectedKey) : null;
   const keyScale = majorScale(selectedKey);
   const keyChords = keyScale.map(
     (note, index) => `${note}${["", "m", "m", "", "", "m", "dim"][index]}`,
@@ -57,8 +77,11 @@ export function ScaleLibraryDetail({
           </p>
           <h2>{scale.formula}</h2>
           <p>
-            {scale.intervals.length} notes · five connected positions · root
-            notes shown as squares
+            {scale.intervals.length} notes ·{" "}
+            {positions.length
+              ? `${positions.length} connected positions`
+              : "shown across the neck"}{" "}
+            · root notes shown as squares
           </p>
           <button
             className="sample-play detail-audio"
@@ -76,26 +99,29 @@ export function ScaleLibraryDetail({
       {tab === "Fretboard" && (
         <>
           <div className="position-picker">
-            {[1, 2, 3, 4, 5].map((item) => (
+            {(positions.length ? positions : [1, 2, 3, 4, 5]).map((item, i) => (
               <button
-                className={position === item ? "active" : ""}
-                onClick={() => setPosition(item)}
-                key={item}
+                className={positionIndex === i ? "active" : ""}
+                onClick={() => setPositionIndex(i)}
+                key={typeof item === "number" ? item : item.id}
               >
-                Position {item}
+                {typeof item === "number" ? `Position ${item}` : item.name}
               </button>
             ))}
           </div>
           <div className="fretboard-stage">
             <div className="section-head">
-              <h2>Position {position}</h2>
+              <h2>
+                {position ? position.name : `Position ${positionIndex + 1}`}
+                {position?.shape ? ` · ${position.shape}` : ""}
+              </h2>
               <span>
                 Frets {low}–{high}
               </span>
             </div>
             <Fretboard
-              notes={intervalShape(selectedKey, scale.intervals, low, high)}
-              low={low}
+              notes={notes}
+              low={window.low <= 1 ? 0 : low}
               high={high}
               scale={scale}
               labelMode="degree"
@@ -205,16 +231,31 @@ export function ScaleLibraryDetail({
         <article className="chord-practice">
           <div>
             <p className="kicker">Seven-minute scale-to-chord lab</p>
-            <h2>Connect position {position} to harmony</h2>
+            <h2>
+              Connect {position ? position.name : `position ${positionIndex + 1}`}
+              {next ? ` to ${next.name}` : " to harmony"}
+            </h2>
+            {/* The point of a position system is the join between shapes, so
+                the drill names the shape you are leaving and the one you are
+                arriving at, with the fret they share. */}
             <ol>
-              <li>Ascend the scale at 72 bpm.</li>
-              <li>Play I–IV–V and name each chord tone.</li>
+              <li>Ascend {position ? position.name : "the shape"} and stop on the top root.</li>
+              {next && nextWindow ? (
+                <li>
+                  Shift to {next.name} at fret {nextWindow.low}, and descend it.
+                </li>
+              ) : (
+                <li>Play I–IV–V and name each chord tone.</li>
+              )}
               <li>
-                Improvise, landing on the active chord&apos;s nearest tone.
+                Improvise across both, landing on the nearest chord tone.
               </li>
             </ol>
           </div>
-          <button className="primary-action" onClick={() => go("runner")}>
+          <button
+            className="primary-action"
+            onClick={() => go("runner", "two-position")}
+          >
             Start practice →
           </button>
         </article>

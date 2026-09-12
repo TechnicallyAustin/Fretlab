@@ -15,6 +15,7 @@
  */
 import type { KeyName, Note } from "./types";
 import { intervalShape } from "./theory";
+import { positionNotes, positionWindow, positionsFor } from "./positions";
 
 export type FingeredNote = Note & {
   /** 1-4 within the box, 0 for an open string. Absent on map drills. */
@@ -28,10 +29,32 @@ export type DrillLike = {
   /** Restrict to these strings (1 = high e). Absent means all six. */
   strings?: readonly number[];
   kind?: "box" | "map";
+  /**
+   * The named scale position this drill *is*, where it names one.
+   *
+   * "Pentatonic box one" could not be honoured while a box was whatever window
+   * held the most notes: that window is not box one, and need not contain a
+   * root. A drill that names a shape now points at it.
+   */
+  scale?: string;
+  position?: string;
+  /**
+   * Frets this drill's shape may span, overriding the four-fret default.
+   *
+   * `BOX_SPAN` used to be a global constant, which made "Three-note-per-string
+   * run" structurally impossible: three notes on each of six strings needs six
+   * frets, and every box was clamped to four.
+   */
+  span?: number;
 };
 
-/** Four frets, so each finger owns one. */
+/** Four frets, so each finger owns one. The default, not the only option. */
 export const BOX_SPAN = 3;
+
+/** The span a drill's shape is allowed, which a wide drill may widen. */
+function spanOf(drill: DrillLike): number {
+  return drill.span ?? BOX_SPAN;
+}
 
 export function drillKind(drill: DrillLike): "box" | "map" {
   if (drill.kind) return drill.kind;
@@ -49,10 +72,11 @@ function allowedStrings(drill: DrillLike): Set<number> {
  */
 function bestBox(drill: DrillLike, key: KeyName): { low: number; high: number } {
   const strings = allowedStrings(drill);
-  let best = { low: drill.low, high: Math.min(drill.high, drill.low + BOX_SPAN), count: -1 };
+  const span = spanOf(drill);
+  let best = { low: drill.low, high: Math.min(drill.high, drill.low + span), count: -1 };
 
-  for (let start = drill.low; start + BOX_SPAN <= Math.max(drill.high, drill.low + BOX_SPAN); start += 1) {
-    const end = start + BOX_SPAN;
+  for (let start = drill.low; start + span <= Math.max(drill.high, drill.low + span); start += 1) {
+    const end = start + span;
     if (start > drill.high) break;
     const count = intervalShape(key, [...drill.intervals], start, end).filter((note) =>
       strings.has(note.s),
@@ -61,6 +85,38 @@ function bestBox(drill: DrillLike, key: KeyName): { low: number; high: number } 
   }
 
   return { low: best.low, high: best.high };
+}
+
+/**
+ * The shape for a drill that names a scale position, or null if it names none.
+ *
+ * The window is the position's own, so the board is drawn around the shape a
+ * guitarist would recognise rather than around whatever `intervalShape`
+ * happened to return.
+ */
+function namedPosition(drill: DrillLike, key: KeyName): DrillShape | null {
+  if (!drill.scale || !drill.position) return null;
+  const position = positionsFor(drill.scale).find(
+    (each) => each.id === drill.position,
+  );
+  if (!position) return null;
+
+  const strings = allowedStrings(drill);
+  const window = positionWindow(position, key);
+  const notes = positionNotes(position, key).filter((note) =>
+    strings.has(note.s),
+  );
+  // A shape reaching the nut shows it, the same as a generated box does.
+  const includesOpen = window.low <= 1;
+
+  return {
+    notes,
+    low: window.low,
+    high: window.high,
+    kind: "box",
+    windowLow: includesOpen ? 0 : window.low,
+    windowHigh: window.high,
+  };
 }
 
 export type DrillShape = {
@@ -76,6 +132,12 @@ export type DrillShape = {
 export function drillShape(drill: DrillLike, key: KeyName, fullNeck = false): DrillShape {
   const kind = drillKind(drill);
   const strings = allowedStrings(drill);
+
+  // A drill that names a position gets that position, not the densest window
+  // near it. This is the whole point of the tables: "box one" has to be box
+  // one, in the key you are playing in.
+  const named = namedPosition(drill, key);
+  if (named && !fullNeck) return named;
 
   if (fullNeck || kind === "map") {
     const low = fullNeck ? 0 : drill.low;
@@ -93,9 +155,17 @@ export function drillShape(drill: DrillLike, key: KeyName, fullNeck = false): Dr
   }
 
   const box = bestBox(drill, key);
+  // One finger per fret only holds inside a hand span. A drill that declared a
+  // wider shape is played with a shift, so numbering its notes 1-6 would ask
+  // for a grip no hand makes.
+  const withinHand = spanOf(drill) <= BOX_SPAN;
   const notes: FingeredNote[] = intervalShape(key, [...drill.intervals], box.low, box.high)
     .filter((note) => strings.has(note.s))
-    .map((note) => ({ ...note, finger: note.f === 0 ? 0 : note.f - box.low + 1 }));
+    .map((note) =>
+      withinHand
+        ? { ...note, finger: note.f === 0 ? 0 : note.f - box.low + 1 }
+        : { ...note },
+    );
 
   // Open strings sit outside the box but are still played, so show the nut.
   const includesOpen = box.low <= 1;

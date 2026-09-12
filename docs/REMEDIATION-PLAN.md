@@ -524,14 +524,14 @@ test that fails if a `Date.now()` default comes back.
 **Goal:** the app can be practised with, not just read. Do not start before Stage 1 is
 `DONE`.
 
-**Progress:** 3 / 7 done
+**Progress:** 4 / 7 done
 
 | ID | Task | Status |
 |---|---|---|
 | FL-09 | Audio metronome on the Web Audio clock | `DONE` |
 | FL-10 | Routine steps become drill ids | `DONE` |
 | FL-11 | Runner renders the real drill and records a session | `DONE` |
-| FL-12 | Scale position tables (CAGED) | `TODO` |
+| FL-12 | Scale position tables (CAGED) | `DONE` |
 | FL-13 | Fix the key-scoped streak | `TODO` |
 | FL-14 | Give drills patterns instead of pitch-class sets | `TODO` |
 | FL-15 | Tuner | `TODO` |
@@ -739,8 +739,8 @@ per step with the right `drill_id` and a plausible `duration_seconds`, and that
 
 ---
 
-### - [ ] FL-12 — Scale position tables (CAGED)
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** G-02
+### - [x] FL-12 — Scale position tables (CAGED)
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** G-02
 
 **Files:** `lib/fretlab/library.ts` (SCALES), `lib/fretlab/fingering.ts:34,50-70`,
 `app/_screens/ScaleLibraryDetail.tsx`
@@ -775,6 +775,41 @@ every scale tone between frets 0 and 12 with no gaps.
 
 **Done when.** `/scales/major-pentatonic` offers boxes 1–5 and each is the shape a
 guitarist would recognise.
+
+> **Done.** `lib/fretlab/positions.ts` holds five shapes each for the major
+> scale (named for their CAGED chord) and both pentatonics, written as frets
+> per string relative to the root's fret on string six, so one table serves all
+> twelve keys.
+>
+> The tables are hand-written, so they are machine-checked — twelve assertions
+> in `tests/positions.test.mjs`. Every note is in the scale, every position
+> contains a root, every shape fits its declared span, and the five together
+> cover every scale tone from fret 0 to 12 with no gaps. The strongest of them
+> is independent: a major pentatonic box must be the same physical shape as the
+> next minor pentatonic box up, because a major pentatonic is its relative
+> minor's. Two separately typed tables agreeing is what would catch a plausible
+> typo in either.
+>
+> `drillShape` takes a named position when a drill names one, so "Pentatonic
+> box one" is box one rather than whichever window held the most notes.
+> `BOX_SPAN` is now a default a drill may override, which is what made
+> "Three-note-per-string run" drawable — and a shape wider than a hand carries
+> no finger numbers, because one finger per fret stops being true.
+>
+> Scale detail lists the real positions with their CAGED shape names, and its
+> practice tab names the shape you are leaving, the shape you are arriving at,
+> and the fret to shift on.
+>
+> **Two existing assertions failed and were rewritten, not weakened.**
+> `tests/fingering.test.mjs` asserted `span <= BOX_SPAN` against the global
+> constant and that every box note carries a finger — which is precisely the
+> constraint this task removes, so the assertions were encoding the bug. Both
+> are stricter now: a drill gets exactly the span it declares, and a shape is
+> fingered *exactly when* a hand could hold it.
+>
+> Positions are written for three scales. The other eight keep the sliding
+> window, now labelled honestly ("shown across the neck") rather than claiming
+> "five connected positions" it did not have.
 
 ---
 
