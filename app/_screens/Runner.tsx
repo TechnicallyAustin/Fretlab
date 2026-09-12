@@ -9,6 +9,7 @@ import type { KeyName, View } from "@/lib/fretlab/types";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { scaleShape } from "@/lib/fretlab/theory";
+import { useElapsed } from "@/lib/fretlab/useElapsed";
 import { useState } from "react";
 
 export function Runner({
@@ -18,17 +19,13 @@ export function Runner({
   go: (view: View) => void;
   sessionKey: KeyName;
 }) {
+  const { label: elapsedLabel } = useElapsed(sessionKey);
   const [bpm, setBpm] = useState(84);
   const [paused, setPaused] = useState(false);
   const notes = scaleShape(sessionKey, 1, 5);
   return (
     <div className="screen-content flow-screen">
-      <StatusBar end="1 of 4" />
-      <div className="step-bar">
-        {[0, 1, 2, 3].map((n) => (
-          <i className={n === 0 ? "done" : n === 1 ? "current" : ""} key={n} />
-        ))}
-      </div>
+      <StatusBar end="Practice run" />
       <div className="runner-hero">
         <p className="kicker">Key of {sessionKey}</p>
         <h1>Position one, up and back</h1>
@@ -56,8 +53,8 @@ export function Runner({
         ))}
       </div>
       <div className="elapsed">
-        <strong>02:18</strong>
-        <span>of 4:00</span>
+        <strong>{elapsedLabel}</strong>
+        <span>elapsed</span>
       </div>
       <div className="transport">
         <button onClick={() => setBpm((n) => Math.max(40, n - 4))}>

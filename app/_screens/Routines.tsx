@@ -10,6 +10,8 @@ import { AppHeader } from "@/components/fretlab/AppHeader";
 import { FIFTHS } from "@/lib/fretlab/theory";
 import { ROUTINES } from "@/lib/fretlab/library";
 import { cssVars } from "@/lib/fretlab/palette";
+import { usePracticeSessions } from "@/lib/api/hooks";
+import { weekMinutes } from "@/lib/api/progress";
 
 export function Routines({
   go,
@@ -18,6 +20,11 @@ export function Routines({
   go: (view: View) => void;
   selectedKey: KeyName;
 }) {
+  // §5: L1 owns the data. These were literals: 3 sessions, 68 minutes.
+  const history = usePracticeSessions({ limit: 100 });
+  const week = weekMinutes(history.data ?? []);
+  const weekTotal = week.reduce((sum, day) => sum + day.minutes, 0);
+  const weekSessions = week.filter((day) => day.minutes > 0).length;
   return (
     <div className="screen-content routines-screen">
       <AppHeader
@@ -40,12 +47,12 @@ export function Routines({
       <section className="desktop-routine-summary">
         <div>
           <span>This week</span>
-          <strong>3</strong>
-          <small>sessions</small>
+          <strong>{weekSessions}</strong>
+          <small>{weekSessions === 1 ? "session" : "sessions"}</small>
         </div>
         <div>
           <span>Practice time</span>
-          <strong>68</strong>
+          <strong>{weekTotal}</strong>
           <small>minutes</small>
         </div>
         <div>

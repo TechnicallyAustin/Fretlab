@@ -7,9 +7,9 @@
  */
 import type { KeyName, View } from "@/lib/fretlab/types";
 import { ROUTINES } from "@/lib/fretlab/library";
-import { Ring } from "@/components/fretlab/Ring";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { cssVars } from "@/lib/fretlab/palette";
+import { useElapsed } from "@/lib/fretlab/useElapsed";
 import { useState } from "react";
 
 export function Guided({
@@ -19,6 +19,7 @@ export function Guided({
   go: (view: View) => void;
   selectedKey: KeyName;
 }) {
+  const { label: elapsedLabel } = useElapsed(selectedKey);
   const [paused, setPaused] = useState(false);
   const [step, setStep] = useState(1);
   const routine = ROUTINES[1];
@@ -37,9 +38,8 @@ export function Guided({
       <div className="guided-hero">
         <p className="kicker">Now playing · key of {selectedKey}</p>
         <h1>{current.name}</h1>
-        <Ring value={46} size={158} />
-        <strong>02:18</strong>
-        <span>remaining</span>
+        <strong>{elapsedLabel}</strong>
+        <span>elapsed</span>
       </div>
       <div className={`metronome ${paused ? "paused" : ""}`}>
         {[0, 1, 2, 3].map((n) => (

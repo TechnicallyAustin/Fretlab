@@ -7,6 +7,7 @@
  */
 import type { View } from "@/lib/fretlab/types";
 import { CHORDS, SCALES, SONGS } from "@/lib/fretlab/library";
+import { FIFTHS } from "@/lib/fretlab/theory";
 
 export function BottomNav({ active, go }: { active: View; go: (view: View) => void }) {
   const items: { label: string; view: View }[] = [
@@ -44,7 +45,7 @@ export function BottomNav({ active, go }: { active: View; go: (view: View) => vo
       <div className="desktop-library-nav">
         <span>Explore</span>
         <button onClick={() => go("keys")}>
-          Key map <small>12</small>
+          Key map <small>{FIFTHS.length}</small>
         </button>
         <button onClick={() => go("chords")}>
           Chords <small>{CHORDS.length}</small>
@@ -55,16 +56,6 @@ export function BottomNav({ active, go }: { active: View; go: (view: View) => vo
         <button onClick={() => go("songs")}>
           Songs <small>{SONGS.length}</small>
         </button>
-      </div>
-      <div className="desktop-side-progress">
-        <div>
-          <span>Weekly goal</span>
-          <strong>68 / 90 min</strong>
-        </div>
-        <i>
-          <b />
-        </i>
-        <small>Three sessions this week</small>
       </div>
       <p className="desktop-nav-note">
         One connected practice system for the entire fretboard.

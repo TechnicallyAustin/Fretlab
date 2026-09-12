@@ -11,6 +11,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
+import { screenSources } from "./helpers/sources.mjs";
 
 const { CHORDS, SCALES, SONGS } = await import("../lib/fretlab/library.ts");
 const { shapeWindow } = await import("../lib/fretlab/geometry.ts");
@@ -315,4 +316,33 @@ test("every scale's labels cover every note it contains", () => {
       assert.ok(labels[interval], `${scale.name}: degree ${interval} unlabelled`);
     }
   }
+});
+
+// ---------------------------------------------------------------- no fiction
+
+/**
+ * Screens used to ship figures nobody had earned: a 31 day streak on a new
+ * account, "18 minutes / 4 drills / 84 bpm", a frozen 02:18 clock, a week of
+ * invented minutes, a 68/90 weekly goal with no goal feature behind it, and
+ * Apple's 9:41 in the status bar.
+ *
+ * Numbers inside JSX text are the shape that bug takes, so this fails on any
+ * of them. A figure belongs in an expression that derives it, not in markup.
+ */
+test("screens render no hardcoded figures", async () => {
+  const files = await screenSources();
+  const offenders = [];
+  for (const file of files) {
+    // Text nodes between tags: >  12  < but not >{value}<.
+    for (const match of file.text.matchAll(/>\s*([0-9][0-9:.,/\s]*)\s*</g)) {
+      const literal = match[1].trim();
+      // A lone digit is structural numbering (step 1, 2, 3), not a measurement.
+      if (/^[0-9]$/.test(literal)) continue;
+      offenders.push(`${file.path}: >${literal}<`);
+    }
+    for (const match of file.text.matchAll(/\b(?:end|title|label)="[^"]*?\b(\d[\d:.,]*)\b[^"]*"/g)) {
+      offenders.push(`${file.path}: "${match[0].slice(0, 48)}"`);
+    }
+  }
+  assert.deepEqual(offenders, [], `fabricated figures:\n  ${offenders.join("\n  ")}`);
 });

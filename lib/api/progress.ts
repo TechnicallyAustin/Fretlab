@@ -194,3 +194,74 @@ export function insights(sessions: readonly PracticeSessionWire[]): Insight[] {
     },
   ];
 }
+
+/**
+ * Minutes practised on each of the last seven days, oldest first.
+ *
+ * The Today screen drew a week chart from a literal array, so a brand-new
+ * account was shown someone else's week. These are the user's own minutes, and
+ * a day with no practice is a real zero rather than a skipped point: on a bar
+ * chart a gap reads as a rest day, which is the truth.
+ */
+export function weekMinutes(
+  sessions: readonly PracticeSessionWire[],
+  now = Date.now(),
+): { label: string; minutes: number; isToday: boolean }[] {
+  const LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+  const byDay = new Map<string, number>();
+  for (const session of sessions) {
+    const key = dayKey(session.created_at);
+    byDay.set(key, (byDay.get(key) ?? 0) + (session.duration_seconds ?? 0) / 60);
+  }
+  const today = startOfToday(now);
+  return Array.from({ length: 7 }, (_, index) => {
+    const at = new Date(today - (6 - index) * DAY_MS);
+    return {
+      label: LABELS[at.getDay()],
+      minutes: Math.round(byDay.get(dayKey(at.toISOString())) ?? 0),
+      isToday: index === 6,
+    };
+  });
+}
+
+/**
+ * The most recent accuracy recorded for each drill.
+ *
+ * The drill library used to carry a `progress` percentage per drill, baked into
+ * the content, so a brand-new account saw "72% complete" on a drill it had
+ * never opened. A drill a player has not practised has no progress, and a
+ * missing entry here says exactly that.
+ */
+export function lastAccuracyByDrill(
+  sessions: readonly PracticeSessionWire[],
+): Map<string, number> {
+  const newest = new Map<string, { at: number; accuracy: number }>();
+  for (const session of sessions) {
+    if (session.accuracy === null || !session.drill_id) continue;
+    const at = new Date(session.created_at).getTime();
+    if (Number.isNaN(at)) continue;
+    const current = newest.get(session.drill_id);
+    if (!current || at > current.at) {
+      newest.set(session.drill_id, { at, accuracy: session.accuracy });
+    }
+  }
+  return new Map([...newest].map(([id, entry]) => [id, entry.accuracy]));
+}
+
+/**
+ * The month names spanned by the consistency graph, oldest first.
+ *
+ * These were six hardcoded strings — "Mar" through "Aug" — against a window
+ * that always ends today, so the axis was wrong on every day of the year bar a
+ * handful.
+ */
+export function consistencyMonths(weeks = 26, now = Date.now()): string[] {
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const today = startOfToday(now);
+  const seen: string[] = [];
+  for (let day = (weeks * 7) - 1; day >= 0; day -= 1) {
+    const name = MONTHS[new Date(today - day * DAY_MS).getMonth()];
+    if (seen.at(-1) !== name) seen.push(name);
+  }
+  return seen;
+}

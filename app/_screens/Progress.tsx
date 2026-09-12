@@ -13,6 +13,7 @@ import { usePracticeSessions } from "@/lib/api/hooks";
 import {
   accuracySeries,
   consistencyLevels,
+  consistencyMonths,
   insights,
   summarise,
   type RangeLabel,
@@ -37,14 +38,22 @@ export function Progress({
   const stats = summarise(sessions);
   const consistency = consistencyLevels(sessions);
   const activeWeeks = 26;
+  const months = consistencyMonths(activeWeeks);
 
   // A single point has no line to draw; repeat it so the chart still reads.
   const plotted = values.length === 1 ? [values[0], values[0]] : values;
+  // The scale used to be pinned to 55-95%, so a beginner scoring 40% drew a
+  // line outside the SVG. It follows the data now, padded and clamped, and the
+  // bounds are labelled so the shape of the line means something.
+  const floor = Math.max(0, Math.min(...plotted, 100) - 5);
+  const ceiling = Math.min(100, Math.max(...plotted, 0) + 5);
+  const span = Math.max(1, ceiling - floor);
   const points = plotted
-    .map(
-      (v, i) =>
-        `${(i / Math.max(1, plotted.length - 1)) * 100},${100 - ((v - 55) / 40) * 82}`,
-    )
+    .map((v, i) => {
+      const x = (i / Math.max(1, plotted.length - 1)) * 100;
+      const y = 100 - ((Math.min(Math.max(v, floor), ceiling) - floor) / span) * 82;
+      return `${x},${y}`;
+    })
     .join(" ");
 
   if (history.status === "loading") {
@@ -146,7 +155,9 @@ export function Progress({
       <section className="chart-card">
         <div className="section-head">
           <h2>Daily accuracy</h2>
-          <span>Last {range}</span>
+          <span>
+            Last {range} · {floor}–{ceiling}%
+          </span>
         </div>
         <svg
           viewBox="0 0 100 100"
@@ -186,12 +197,9 @@ export function Progress({
           </span>
         </div>
         <div className="commit-months">
-          <span>Mar</span>
-          <span>Apr</span>
-          <span>May</span>
-          <span>Jun</span>
-          <span>Jul</span>
-          <span>Aug</span>
+          {months.map((month) => (
+            <span key={month}>{month}</span>
+          ))}
         </div>
         <div className="commit-layout">
           <div className="commit-days">
@@ -201,7 +209,7 @@ export function Progress({
           </div>
           <div
             className="commit-graph"
-            aria-label="Practice activity across 26 weeks"
+            aria-label={`Practice activity across ${activeWeeks} weeks`}
           >
             {consistency.map((level, index) => (
               <span

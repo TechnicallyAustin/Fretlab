@@ -10,6 +10,11 @@ import { DesktopPracticeStudio } from "@/app/_sections/DesktopPracticeStudio";
 import { Ring } from "@/components/fretlab/Ring";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { cssVars } from "@/lib/fretlab/palette";
+import { DRILLS, ROUTINES } from "@/lib/fretlab/library";
+import { StateNotice } from "@/components/fretlab/StateNotice";
+import { lastAccuracyByDrill, summarise, weekMinutes } from "@/lib/api/progress";
+import { usePracticeSessions } from "@/lib/api/hooks";
+import { useClock } from "@/lib/fretlab/useClock";
 
 export function Today({
   go,
@@ -18,41 +23,49 @@ export function Today({
   go: (view: View) => void;
   sessionKey: KeyName;
 }) {
-  const week = [
-    ["M", 14],
-    ["T", 22],
-    ["W", 8],
-    ["T", 18],
-    ["F", 6],
-    ["S", 0],
-    ["S", 0],
-  ] as const;
+  // §5: L1 owns the data. Every figure on this screen is the player's own or
+  // is not shown. It used to greet a brand-new account with a 31 day streak.
+  const history = usePracticeSessions({ limit: 100 });
+  const sessions = history.data ?? [];
+  const stats = summarise(sessions);
+  const week = weekMinutes(sessions);
+  const weekTotal = week.reduce((sum, day) => sum + day.minutes, 0);
+  const peak = Math.max(1, ...week.map((day) => day.minutes));
+  const accuracyByDrill = lastAccuracyByDrill(sessions);
+  const { dayName, greeting } = useClock();
+
+  // The session the Start button actually begins, read from the routine rather
+  // than asserted. bpm is not shown: a routine has no tempo of its own.
+  const routine = ROUTINES[0];
+  const routineMinutes = routine.drills.reduce((sum, step) => sum + step.mins, 0);
+
+  // "Pick up again" means drills with history, newest first.
+  const resumable = DRILLS.filter((drill) => accuracyByDrill.has(drill.id)).slice(0, 2);
+
   return (
     <div className="screen-content today-screen">
-      <StatusBar end="31 day streak" />
+      <StatusBar
+        end={stats.streakDays ? `${stats.streakDays} day streak` : "No streak yet"}
+      />
       <div className="today-greeting">
-        <p>Thursday</p>
-        <h1>Good evening</h1>
+        <p>{dayName}</p>
+        <h1>{greeting}</h1>
       </div>
       <article className="session-hero">
         <div className="key-watermark">{sessionKey}</div>
         <p className="kicker">Today&apos;s session</p>
         <h2>The key of {sessionKey}</h2>
         <p>
-          Four drills that all live in one key, so the shapes start rhyming.
+          {routine.name}. Every drill in one key, so the shapes start rhyming.
         </p>
         <div className="session-stats">
           <div>
-            <strong>18</strong>
+            <strong>{routineMinutes}</strong>
             <span>minutes</span>
           </div>
           <div>
-            <strong>4</strong>
+            <strong>{routine.drills.length}</strong>
             <span>drills</span>
-          </div>
-          <div>
-            <strong>84</strong>
-            <span>bpm</span>
           </div>
         </div>
         <button className="primary-action" onClick={() => go("runner")}>
@@ -62,24 +75,24 @@ export function Today({
       <section className="section">
         <div className="section-head">
           <h2>This week</h2>
-          <span>68 min</span>
+          <span>{weekTotal} min</span>
         </div>
         <div className="week-chart">
-          {week.map(([day, mins], i) => (
-            <div className="day" key={`${day}${i}`}>
+          {week.map((day, i) => (
+            <div className="day" key={i}>
               <div
-                className={`bar-track ${i === 4 ? "today" : ""}`}
-                title={`${mins} minutes`}
+                className={`bar-track ${day.isToday ? "today" : ""}`}
+                title={`${day.minutes} minutes`}
               >
                 <span
                   style={{
-                    height: mins
-                      ? `${Math.max(18, Math.round((mins / 22) * 100))}%`
+                    height: day.minutes
+                      ? `${Math.max(18, Math.round((day.minutes / peak) * 100))}%`
                       : 0,
                   }}
                 />
               </div>
-              <span>{day}</span>
+              <span>{day.label}</span>
             </div>
           ))}
         </div>
@@ -88,26 +101,30 @@ export function Today({
         <div className="section-head">
           <h2>Pick up again · {sessionKey} major</h2>
         </div>
-        <div className="resume-grid">
-          <button
-            style={cssVars(sessionKey)}
-            onClick={() => go("drill-detail")}
-          >
-            <span className="key-chip">Key {sessionKey}</span>
-            <Ring value={62} />
-            <strong>Locate every root</strong>
-            <small>3 min left</small>
-          </button>
-          <button
-            style={cssVars(sessionKey)}
-            onClick={() => go("drill-detail")}
-          >
-            <span className="key-chip">Key {sessionKey}</span>
-            <Ring value={23} />
-            <strong>Pentatonic box one</strong>
-            <small>6 min left</small>
-          </button>
-        </div>
+        {resumable.length ? (
+          <div className="resume-grid">
+            {resumable.map((drill) => (
+              <button
+                key={drill.id}
+                style={cssVars(sessionKey)}
+                onClick={() => go("drill-detail")}
+              >
+                <span className="key-chip">Key {sessionKey}</span>
+                <Ring value={accuracyByDrill.get(drill.id) ?? 0} />
+                <strong>{drill.name}</strong>
+                <small>{drill.minutes} min</small>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <StateNotice
+            tone="empty"
+            title="Nothing to pick up yet"
+            detail="Finish a training module and the drills you have worked on appear here."
+            actionLabel="Open training"
+            onAction={() => go("train")}
+          />
+        )}
       </section>
       <DesktopPracticeStudio go={go} sessionKey={sessionKey} />
     </div>

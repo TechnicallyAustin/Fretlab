@@ -12,6 +12,8 @@ import { FIFTHS } from "@/lib/fretlab/theory";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
 import { cssVars } from "@/lib/fretlab/palette";
+import { lastAccuracyByDrill } from "@/lib/api/progress";
+import { usePracticeSessions } from "@/lib/api/hooks";
 import { useState } from "react";
 
 export function GroupedDrills({
@@ -23,6 +25,8 @@ export function GroupedDrills({
   selectedKey: KeyName;
   onOpen: (id: string) => void;
 }) {
+  const history = usePracticeSessions({ limit: 100 });
+  const accuracyByDrill = lastAccuracyByDrill(history.data ?? []);
   const [tab, setTab] = useState("Skill paths");
   const categories = [
     "Neck knowledge",
@@ -75,7 +79,7 @@ export function GroupedDrills({
                   <div>
                     <strong>{drill.name}</strong>
                     <i>
-                      <b style={{ width: `${drill.progress}%` }} />
+                      <b style={{ width: `${accuracyByDrill.get(drill.id) ?? 0}%` }} />
                     </i>
                   </div>
                   <small>{drill.minutes} min</small>

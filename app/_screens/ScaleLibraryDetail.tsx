@@ -9,7 +9,6 @@ import type { KeyName, View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { PC_KEY, intervalShape, keyPc, majorScale } from "@/lib/fretlab/theory";
-import { Ring } from "@/components/fretlab/Ring";
 import { SCALES } from "@/lib/fretlab/library";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
 import { ScaleDegrees } from "@/app/_sections/ScaleDegrees";
@@ -68,7 +67,6 @@ export function ScaleLibraryDetail({
             ▶ Hear scale
           </button>
         </div>
-        <Ring value={72} size={110} label="72 percent learned" />
       </section>
       <SegmentTabs
         labels={["Fretboard", "Degrees", "Harmony map", "Practice"]}

@@ -48,3 +48,19 @@ export async function readProjectFile(relative) {
 
 /** Collapses whitespace so assertions do not depend on formatter settings. */
 export const squash = (text) => text.replace(/\s+/g, "");
+
+/** Every screen and section file, with its path, for per-file assertions. */
+export async function screenSources() {
+  const files = [];
+  for (const dir of ["app/_screens", "app/_sections", "components/fretlab"]) {
+    await walk(join(ROOT, dir), files);
+  }
+  return Promise.all(
+    files
+      .filter((file) => file.endsWith(".tsx"))
+      .map(async (file) => ({
+        path: file.slice(ROOT.length),
+        text: await readFile(file, "utf8"),
+      })),
+  );
+}

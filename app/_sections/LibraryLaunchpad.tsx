@@ -21,7 +21,7 @@ export function LibraryLaunchpad({ go }: { go: (view: View) => void }) {
       label: "Theory courses",
       copy: "Intervals, harmony and rhythm you can see.",
       image: "/guitar-neck.jpg",
-      count: "5 modules",
+      count: `${SCALES.length + CHORDS.length} entries`,
     },
     {
       view: "chords",
@@ -33,7 +33,7 @@ export function LibraryLaunchpad({ go }: { go: (view: View) => void }) {
     {
       view: "scales",
       label: "Scale library",
-      copy: "Eleven sounds mapped across the neck.",
+      copy: "Every scale in the library, mapped across the neck.",
       image: "/guitar-neck.jpg",
       count: `${SCALES.length} families`,
     },

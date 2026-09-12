@@ -14,6 +14,8 @@ import { Ring } from "@/components/fretlab/Ring";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
 import { cssVars } from "@/lib/fretlab/palette";
 import { drillShape, withPlayOrder } from "@/lib/fretlab/fingering";
+import { lastAccuracyByDrill } from "@/lib/api/progress";
+import { usePracticeSessions } from "@/lib/api/hooks";
 import { useState } from "react";
 
 export function Drills({
@@ -25,6 +27,10 @@ export function Drills({
   selectedKey: KeyName;
   onOpen: (id: string) => void;
 }) {
+  // §5: L1 owns the data. A drill shows progress only where the player has
+  // actually recorded some; the library no longer ships a percentage.
+  const history = usePracticeSessions({ limit: 100 });
+  const accuracyByDrill = lastAccuracyByDrill(history.data ?? []);
   const [filter, setFilter] = useState("All");
   const [level, setLevel] = useState("All levels");
   const [query, setQuery] = useState("");
@@ -144,7 +150,11 @@ export function Drills({
               </div>
             </div>
             <div className="drill-go">
-              <Ring value={drill.progress} size={44} />
+              {accuracyByDrill.has(drill.id) ? (
+                <Ring value={accuracyByDrill.get(drill.id) ?? 0} size={44} />
+              ) : (
+                <span className="drill-unstarted">Not yet practised</span>
+              )}
               <span>Open →</span>
             </div>
           </button>

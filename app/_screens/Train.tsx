@@ -11,7 +11,8 @@ import { Fretboard } from "@/components/fretlab/Fretboard";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { TRAINING_MODULES } from "@/lib/fretlab/library";
 import { playTones } from "@/lib/fretlab/audio";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useElapsed } from "@/lib/fretlab/useElapsed";
+import { useMemo, useState } from "react";
 import { api, ApiClientError } from "@/lib/api/client";
 
 export function Train({
@@ -74,26 +75,12 @@ export function Train({
    * Only the figures this screen actually measures are sent: hits, misses and
    * elapsed time. Nothing is invented to fill a column.
    */
-  /**
-   * A real clock, so the figure on screen is the one that gets recorded.
-   *
-   * The wall clock is read only inside the interval callback — subscribing to
-   * an external source and calling setState from it — because reading it during
-   * render is impure and calling setState in an effect body cascades. The start
-   * time lives in a ref, which the effect may write and the recorder may read,
-   * and which render never touches.
-   */
-  const startedAt = useRef(0);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  useEffect(() => {
-    startedAt.current = Date.now();
-    const id = window.setInterval(
-      () => setElapsedSeconds(Math.round((Date.now() - startedAt.current) / 1000)),
-      500,
-    );
-    return () => window.clearInterval(id);
-  }, [signature]);
-  const elapsedLabel = `${Math.floor(elapsedSeconds / 60)}:${String(elapsedSeconds % 60).padStart(2, "0")}`;
+  // A real clock, so the figure on screen is the one that gets recorded.
+  const {
+    seconds: elapsedSeconds,
+    label: elapsedLabel,
+    startedAt,
+  } = useElapsed(signature);
 
   const record = async (complete: boolean) => {
     if (!complete) return;
