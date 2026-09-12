@@ -265,3 +265,4 @@ wrangler.jsonc          CLI-only config for D1 migrations and seeding
 ### A note on `wrangler.jsonc`
 
 The Cloudflare Vite plugin merges `wrangler.jsonc` with the inline `config` in `vite.config.ts`. Anything the plugin already supplies must **not** be repeated there: duplicating `compatibility_flags` stops the Workers runtime from starting, and an older `compatibility_date` than the plugin's default breaks dev with `WeakRef is not defined`.
+# Fretlab
