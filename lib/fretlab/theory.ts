@@ -255,3 +255,74 @@ export function chordVoicing(
       .slice(0, 3)
   );
 }
+
+/**
+ * How a pitch class is written in a given key.
+ *
+ * The board used to hold one sharps-only table and index it by pitch class, so
+ * the key of F drew A# where its own scale — computed correctly two functions
+ * away — says Bb. Five of the twelve keys are flat keys, and in Eb three of the
+ * seven notes came out with the wrong letter. A key uses each letter exactly
+ * once; that rule is the whole reason accidentals exist, and a learner shown
+ * both A# and B in one key has to unlearn it later.
+ *
+ * Notes inside the key take their spelling from the key. Chromatic notes take
+ * the key's own accidental direction, so a flat key stays in flats.
+ */
+const SHARP_NAMES = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
+const FLAT_NAMES = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
+
+/** Renders an ASCII accidental as the typographic one the board draws. */
+function typeset(name: string) {
+  return name.replaceAll("#", "♯").replaceAll("b", "♭");
+}
+
+export function spellPitchClass(pc: number, key: KeyName): string {
+  const normalised = ((pc % 12) + 12) % 12;
+  const scale = majorScale(key);
+  for (const name of scale) {
+    if (pcOfName(name) === normalised) return typeset(name);
+  }
+  // Outside the key: follow the key's own accidental direction.
+  const flatKey = key.includes("b") || key === "F";
+  return (flatKey ? FLAT_NAMES : SHARP_NAMES)[normalised];
+}
+
+/** The pitch class a written note name sounds. */
+export function pcOfName(name: string): number {
+  const letter = LETTERS.indexOf(name[0]);
+  const accidental = [...name.slice(1)].reduce(
+    (sum, mark) => sum + (mark === "#" || mark === "♯" ? 1 : -1),
+    0,
+  );
+  return ((LETTER_PC[letter] + accidental) % 12 + 12) % 12;
+}
+
+/**
+ * Degree labels for a scale, taken from the scale's own formula.
+ *
+ * A fixed chromatic table spells every raised degree as a lowered one, so the
+ * board labelled Lydian's ♯4 — the note the whole mode is named for — as ♭5,
+ * which is a different scale's note. The SCALES entries already carry the right
+ * spelling in their `formula`; this reads it back.
+ *
+ * Degrees outside the scale keep the chromatic fallback, since they have no
+ * function in it to name.
+ */
+const CHROMATIC_DEGREES = [
+  "1", "♭2", "2", "♭3", "3", "4", "♭5", "5", "♭6", "6", "♭7", "7",
+];
+
+export function degreeLabels(scale?: {
+  formula: string;
+  intervals: readonly number[];
+}): string[] {
+  const labels = [...CHROMATIC_DEGREES];
+  if (!scale || scale.formula.includes("W")) return labels;
+  const tokens = scale.formula.split(" ");
+  if (tokens.length !== scale.intervals.length) return labels;
+  scale.intervals.forEach((semitones, index) => {
+    labels[((semitones % 12) + 12) % 12] = typeset(tokens[index]);
+  });
+  return labels;
+}

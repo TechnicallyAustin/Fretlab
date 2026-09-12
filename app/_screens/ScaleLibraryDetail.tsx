@@ -99,6 +99,7 @@ export function ScaleLibraryDetail({
               notes={intervalShape(selectedKey, scale.intervals, low, high)}
               low={low}
               high={high}
+              scale={scale}
               labelMode="degree"
               rootKey={selectedKey}
             />

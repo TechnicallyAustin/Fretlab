@@ -12,7 +12,12 @@
  */
 import type { KeyName, Note } from "@/lib/fretlab/types";
 import type { FingeredNote } from "@/lib/fretlab/fingering";
-import { OPEN_PC, STRING_NAMES } from "@/lib/fretlab/theory";
+import {
+  OPEN_PC,
+  STRING_NAMES,
+  degreeLabels,
+  spellPitchClass,
+} from "@/lib/fretlab/theory";
 import { palette } from "@/lib/fretlab/palette";
 import {
   ROLE_STYLE,
@@ -25,8 +30,6 @@ import {
 import { FretboardLegend } from "./FretboardLegend";
 import { useId } from "react";
 
-const INTERVALS = ["1", "♭2", "2", "♭3", "3", "4", "♭5", "5", "♭6", "6", "♭7", "7"];
-const NOTE_NAMES = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"];
 
 /** Frets that carry an inlay dot on a real guitar neck. */
 const SINGLE_INLAYS = new Set([3, 5, 7, 9, 15, 17, 19, 21]);
@@ -46,6 +49,7 @@ export function Fretboard({
   caption,
   legend = false,
   muted,
+  scale,
 }: {
   notes?: (Note | FingeredNote)[];
   /** Named layers, for showing a chord inside a scale without them merging. */
@@ -64,8 +68,11 @@ export function Fretboard({
   legend?: boolean;
   /** Strings that must not sound. Drawn as x above the nut. */
   muted?: readonly number[];
+  /** The scale on show, so degree labels use its own spelling (Lydian's ♯4). */
+  scale?: { formula: string; intervals: readonly number[] };
 }) {
   const gradientId = `board-${useId().replaceAll(":", "")}`;
+  const degreeName = degreeLabels(scale);
 
   // Layers collapse into one lookup: the first group that claims a cell owns it.
   const layers: NoteGroup[] =
@@ -365,8 +372,8 @@ export function Fretboard({
                     ? String(entry.finger)
                     : ""
                 : labelMode === "degree"
-                  ? INTERVALS[degree]
-                  : NOTE_NAMES[pc];
+                  ? degreeName[degree]
+                  : spellPitchClass(pc, rootKey);
 
               // A secondary layer reads as context behind the primary one.
               const secondary = entry?.group.emphasis === "secondary";

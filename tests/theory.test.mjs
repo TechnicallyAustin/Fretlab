@@ -14,7 +14,18 @@ import test from "node:test";
 
 const { CHORDS, SCALES, SONGS } = await import("../lib/fretlab/library.ts");
 const { shapeWindow } = await import("../lib/fretlab/geometry.ts");
-const { FIFTHS, OPEN_PC, chordIntervals, chordVoicing, voicingIntervals, keyPc, majorScale } =
+const {
+  FIFTHS,
+  OPEN_PC,
+  chordIntervals,
+  chordVoicing,
+  degreeLabels,
+  keyPc,
+  majorScale,
+  pcOfName,
+  spellPitchClass,
+  voicingIntervals,
+} =
   await import(
   "../lib/fretlab/theory.ts"
 );
@@ -258,6 +269,50 @@ test("every voicing fits the window it is drawn in", () => {
         );
       }
       assert.ok(high - low >= 4, `${chord.symbol} ${voicing}: window too narrow`);
+    }
+  }
+});
+
+// ---------------------------------------------------------------- spelling
+
+test("the board spells notes the way the key does", () => {
+  for (const key of FIFTHS) {
+    for (const note of majorScale(key)) {
+      const written = spellPitchClass(pcOfName(note), key);
+      assert.equal(
+        written,
+        note.replaceAll("#", "♯").replaceAll("b", "♭"),
+        `${key}: board writes ${written} where the scale says ${note}`,
+      );
+    }
+  }
+});
+
+test("no key is drawn with two spellings of the same letter", () => {
+  for (const key of FIFTHS) {
+    const drawn = [0, 2, 4, 5, 7, 9, 11].map((step) =>
+      spellPitchClass(keyPc(key) + step, key),
+    );
+    const letters = drawn.map((n) => n[0]);
+    assert.equal(new Set(letters).size, 7, `${key} draws ${drawn.join(" ")}`);
+  }
+});
+
+test("a scale's degree labels use its own formula", () => {
+  const lydian = SCALES.find((s) => s.id === "lydian");
+  const labels = degreeLabels(lydian);
+  assert.equal(labels[6], "♯4", "Lydian's characteristic note is the sharp 4");
+  const phrygian = SCALES.find((s) => s.id === "phrygian");
+  assert.equal(degreeLabels(phrygian)[1], "♭2");
+  // No scale given: the chromatic fallback still names every degree.
+  assert.equal(degreeLabels()[6], "♭5");
+});
+
+test("every scale's labels cover every note it contains", () => {
+  for (const scale of SCALES) {
+    const labels = degreeLabels(scale);
+    for (const interval of scale.intervals) {
+      assert.ok(labels[interval], `${scale.name}: degree ${interval} unlabelled`);
     }
   }
 });
