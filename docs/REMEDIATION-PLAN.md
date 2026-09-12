@@ -4,12 +4,32 @@ Derived from the September 2026 audit. This document is the working state for th
 work: it is both the specification and the progress tracker. **Update it as you go** —
 it is the only place the current state is recorded.
 
+If you are an agent picking this up, read `docs/HANDOFF.md` first. It covers the
+working loop, how to verify, and the conventions this codebase enforces through
+lint and tests rather than through review.
+
+## Status
+
+| Stage | | Done |
+|---|---|---|
+| Stage 1 — Stop teaching wrong things | `COMPLETE` | 8 / 8 |
+| Stage 2 — Make the practice loop real | `COMPLETE` | 7 / 7 |
+| **Stage 3 — Make it shippable to real people** | **`NEXT`** | 0 / 6 |
+| Stage 4 — Retention and revenue | `TODO` | 0 / 5 |
+
+Next task: **FL-16 — Grid keyboard navigation and a screen-reader pass.**
+
+Two runtime faults reported from the browser were fixed outside the stage
+numbering and are recorded under **Found during Stage 2**. Five defects the
+audit did not list were found while working and are recorded under the tasks
+that turned them up — see the Stage 2 execution log at the end of this file.
+
 ---
 
 ## How to use this document
 
 1. Work tasks in ID order within a stage. Stages are ordered by dependency; do not
-   start Stage 2 until every Stage 1 task is `DONE`.
+   start a stage until every task in the one before it is `DONE`.
 2. Before starting a task, set its status to `WIP`. When it is finished **and
    verified**, set it to `DONE` and tick its checkbox.
 3. Update the **Progress** table at the top of each stage in the same edit.
@@ -33,8 +53,8 @@ it is the only place the current state is recorded.
 
 These hold for every task. Violating one fails the task even if the feature works.
 
-- **The working tree is dirty right now.** Commit or stash the existing changes before
-  starting. Do not fold unrelated pending work into these commits.
+- **One task, one commit.** The tree is clean between tasks. Do not fold unrelated
+  pending work into a task's commit.
 - **Every task ends green.** `npm run typecheck && npm run lint && npm test` must all
   pass before you mark a task `DONE`. `npm test` runs a build first, so it is slow;
   run `npm run test:unit` while iterating.
@@ -1427,3 +1447,92 @@ asked for.
   cannot know its position until routine steps carry drill ids (FL-10), so FL-11
   restores a real one.
 - Chord `level` is still derived from array index. That is FL-26's, left alone.
+
+---
+
+## Stage 2 execution log
+
+**Stage 2 — complete.** Seven tasks, nine commits: seven for the tasks, plus two
+for defects found in already-`DONE` work and one runtime fault reported from the
+browser.
+
+| Commit | Covers |
+|---|---|
+| `3b5ee35` | FL-09 |
+| `3df69d2` | FL-10 |
+| `7862621` | FL-07 follow-up — routines shipped progress nobody earned |
+| `5cf5a81` | FL-11 |
+| `6d95084` | Hydration mismatch on Today (FL-H1) |
+| `3ad18f9` | FL-12 |
+| `2adef0b` | "Invalid time value" crash (FL-H2) |
+| `d3e7de9` | FL-13 |
+| `24ee275` | FL-14 |
+| `c076009` | FL-15 |
+
+`npm run typecheck`, `npm run lint` and `npm test` are green: **163 tests**, up
+from 73 at the end of Stage 1. `npm run test:integration` is green at 13 against
+a live server.
+
+New suites: `metronome` (13), `positions` (12), `patterns` (16), `pitch` (18),
+`streak` (10).
+
+### Five defects the audit did not list
+
+Each is written up under the task that turned it up. They are collected here
+because the pattern matters more than any one of them: **four of the five were
+found by writing a test, not by reading the code.**
+
+1. **Routines shipped invented progress.** `ROUTINES` carried `completed: 3` and
+   `last: "Yesterday"` as literals. FL-07's guard greps JSX text nodes, and these
+   reached the screen through library data, so a task marked `DONE` had left a
+   fresh account looking at three filled progress dots. Recorded under FL-07.
+2. **The accuracy chart was drawn out of date order.** `dayKey` built unpadded
+   strings and `accuracySeries` sorts them as strings, so October sorted before
+   September and the 11th before the 9th. The trend the chart showed was
+   fiction. Recorded under FL-13.
+3. **A seventh mis-taught drill.** The audit listed six; "Triad arpeggio
+   sequence" stored one triad `[0,4,7]` across the whole neck with nothing to say
+   which of seven it was a sequence of. Recorded under FL-14.
+4. **`playTones` had never worked on iOS.** It built a fresh `AudioContext` per
+   call and never resumed it, and mobile browsers start one suspended until a
+   user gesture. Recorded under FL-09.
+5. **A second, silent metronome.** `DesktopPracticeStudio` had its own
+   `setInterval` beat counter drifting independently of the Runner's. Recorded
+   under FL-09.
+
+### Two assertions were rewritten, not weakened
+
+FL-12 removes the global four-fret `BOX_SPAN`, and two assertions in
+`tests/fingering.test.mjs` existed to enforce it — so they were encoding the bug
+the task exists to fix. Both are stricter now: a drill gets exactly the span it
+*declares*, and a shape is fingered *exactly when* a hand could hold it. This is
+the one situation the "do not weaken a test" guardrail allows, and it says to
+name it in the commit message, which `3ad18f9` does.
+
+### Verification method worth keeping
+
+Every guard added in Stage 2 was checked by **reintroducing the defect and
+watching the test fail**, then restoring. A test that has never failed is not
+known to test anything. Examples: FL-10's mistyped drill id, FL-12's removed
+interpolation, FL-13's key-filtered history, FL-14's `[0,4,7,11]`, FL-15's
+removed sub-sample interpolation.
+
+### Not done, carried into Stage 3
+
+- **`Guided` is a second runner.** Hardcoded to `ROUTINES[1]`, records nothing,
+  and unreachable since FL-11 pointed `RoutineDetail`'s primary action at the
+  real one. Merge it into `Runner` or delete it, along with its view, route and
+  the assertions that expect it.
+- **`RoutineDetail` hardcodes `ROUTINES[1]`.** `/routines/current` shows the same
+  routine whichever card you opened — the same defect FL-11 fixed one screen
+  along. It needs an id in its route.
+- **Position tables cover three scales.** Major, major pentatonic and minor
+  pentatonic. The other eight use the sliding window, now labelled "shown across
+  the neck" rather than claiming positions they do not have.
+- **`npm test` runs the integration suite in parallel with everything else**, and
+  they contend on the shared local D1 when a dev server is up. A write test fails
+  perhaps one run in five and passes alone. Not a product defect; worth fixing
+  before it trains anyone to ignore a red suite.
+- **The tuner has not been tested against a real guitar.** Detection is verified
+  against synthesised tones to better than 0.01 cents, which is not the same
+  claim as the plan's "it tunes a real guitar".
