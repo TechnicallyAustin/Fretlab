@@ -1,5 +1,20 @@
 # Design pass — audit and plan
 
+## Status
+
+| | Task | |
+|---|---|---|
+| FD-00 | Land the working tree | `DONE` |
+| FD-01 | Fretboard legibility | `DONE` — step 2 open as FD-05 |
+| FD-02 | Contribution graph | `DONE` |
+| FD-03 | Delete `Guided` | `DONE` |
+| FD-04 | Board density | `CLOSED` — premise was wrong, nothing to do |
+| **FD-05** | **A full neck that fits a phone** | **`TODO`** |
+
+Tracked alongside `docs/REMEDIATION-PLAN.md`; the same working loop in
+`docs/HANDOFF.md` applies to both.
+
+
 Audit of the app as it stands on 12 September 2026, at working-tree state (not
 `HEAD` — see FD-00). Written to be executed the same way as
 `docs/REMEDIATION-PLAN.md`: one task at a time, in ID order, each ending green
@@ -28,7 +43,7 @@ conflict, earlier wins.
 
 ## FD-00 — Land the working tree before anything else
 
-**Status:** `TODO` · **Severity:** Blocker
+**Status:** `DONE` · **Severity:** Blocker
 
 **Problem.** The tree carries **43 modified files and 3 untracked paths**,
 uncommitted, and **`npm test` is red**:
@@ -57,7 +72,7 @@ from a clean `HEAD`. Do not build on top of it.
 
 ## FD-01 — The fretboard is illegible at the size it renders
 
-**Status:** `TODO` · **Severity:** Blocker · **Reported:** "This fretboard is too
+**Status:** `DONE` · **Severity:** Blocker · **Reported:** "This fretboard is too
 small to see."
 
 **Files:** `components/fretlab/Fretboard.tsx` (geometry + type sizes),
@@ -137,7 +152,7 @@ phone.
 
 ## FD-02 — The contribution graph reads as a row, not a week
 
-**Status:** `TODO` · **Severity:** Major · **Reported:** "should have M, TU, W,
+**Status:** `DONE` · **Severity:** Major · **Reported:** "should have M, TU, W,
 Tr F on the side not on the top"
 
 **Files:** `app/_screens/Today.tsx:118-146`, `app/globals.css`
@@ -184,7 +199,7 @@ beside the rows they name.
 
 ## FD-03 — Delete `Guided`
 
-**Status:** `TODO` · **Severity:** Major · **Carried from Stage 2**
+**Status:** `DONE` · **Severity:** Major · **Carried from Stage 2**
 
 **Problem.** `Guided` is a second runner: hardcoded to `ROUTINES[1]`, records
 nothing, and **unreachable** — no screen links to it since FL-11 pointed
@@ -211,25 +226,34 @@ The route test's view list shrinks by one and still passes.
 
 ## FD-04 — Make density earn its name
 
-**Status:** `TODO` · **Severity:** Minor
+**Status:** `CLOSED — premise was wrong` · **Severity:** Minor
 
-**Problem.** "Compact" has been read as "smaller" in at least three places, which
-trades usability for pixels rather than buying it:
+**What I claimed.** That "compact" had been read as "smaller" in three places:
+`.contribution-days` at 12px, board labels below 13px once scaled, and
+`DrillDetail` rendering **three** fretboards on one screen with `ChordDetail`
+rendering two.
 
-- `.contribution-days` at 12px (FD-02)
-- board labels below 13px once scaled (FD-01)
-- `DrillDetail` renders **three** fretboards on one screen; `ChordDetail` renders
-  two. Each is capped small by FD-01's rule, so the screen is dense with boards
-  that are individually too small to read — the worst of both.
+**The first two were real and are fixed** by FD-00 and FD-01.
 
-**Required change.** Density comes from removing what does not carry signal, not
-from shrinking what does. On `DrillDetail`, decide which single board is the
-lesson and give it the width; demote the others to a toggle or remove them.
+**The third was my error.** I counted `<Fretboard` occurrences per *file*, not
+what renders together. They are on different tabs:
 
-**Acceptance.** No screen renders more than two boards at once, and every board
-that renders is above the FD-01 legibility floor.
+| Screen | Boards in file | Visible at once |
+|---|---|---|
+| `DrillDetail` | 3 | **2** — the shape board, plus one per tab |
+| `ChordDetail` | 2 | **1** — one per tab |
 
-**Done when.** A beginner can tell, at a glance, which board to look at.
+So the acceptance I wrote — "no screen renders more than two boards at once" —
+was already met before I wrote it. There is no density defect here, and
+rebuilding these screens to fix one would have been change for its own sake.
+
+The related worry, that an overflowing board clips silently, is also already
+handled: `.fretboard` carries a visible thin scrollbar, added with the comment
+*"A board that has to scroll says so, rather than silently clipping."*
+
+**Nothing to do.** Left in the document rather than deleted, because a claim
+that was investigated and withdrawn is worth more to the next reader than a
+gap.
 
 ---
 
@@ -250,6 +274,50 @@ Checked during this audit and deliberately left alone:
   labelled honestly. Not a defect, but the gap grows as scales get used.
 - The integration suite contends on the shared local D1 under `npm test`.
 - The tuner is unverified against a real guitar.
+
+---
+
+## FD-05 — A full neck that fits a phone
+
+**Status:** `TODO` · **Severity:** Major · **Was:** FD-01 step 2
+
+**Problem.** FD-01 fixed legibility by never scaling a board below its own
+width. The full 0–12 board is 860 units and a phone column is 354, so it is now
+legible **and scrolls 2.4 screens**. That is the right trade — a legible board
+you scroll beats an 8px one you do not — but it is not the finished answer.
+
+At legible size about five frets fit a 354px column:
+
+| Frets | Natural width | Fits 354px? |
+|---|---|---|
+| 0–4 | 332u | yes |
+| 0–6 | 464u | no |
+| 0–12 | 860u | no, by 2.4× |
+
+Four callers render a 0–12 board: `DesktopPracticeStudio`, `DrillDetail`,
+`ChordDetail`, `TheoryHubContent`.
+
+**Three options, in order of preference.**
+
+1. **Stack the neck across two rows on narrow viewports** — frets 0–6 above,
+   7–12 below. Everything stays visible, legible, and needs no interaction. Most
+   work: the SVG geometry has to wrap.
+2. **A fret-window control** — "0–5 / 5–10 / 7–12", built on the CAGED regions
+   FL-12 already names, so the control teaches that the neck has regions instead
+   of merely paging it. Moderate work; needs a viewport hook, and the codebase
+   has that pattern four times over (`useStoredKey`, `useClock`, `lastRun`,
+   `GuitarSetup`).
+3. **Scroll to what matters** — leave the scroll but start it on the drill's own
+   window rather than at the nut. Cheapest; least teaching value.
+
+**Do not** solve it by shrinking type. That is the defect FD-01 just removed.
+
+**Acceptance.** Extend `tests/board-legibility.test.mjs`: at 324px and 354px, no
+board's natural width exceeds the container. That assertion fails today, which
+is the honest statement of what is left.
+
+**Done when.** A beginner can see the whole neck on a phone without scrolling,
+at readable size.
 
 ---
 

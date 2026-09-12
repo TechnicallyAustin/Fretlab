@@ -10,11 +10,21 @@ enforces through lint and tests. Then `docs/REMEDIATION-PLAN.md`, which is both
 the specification and the progress tracker: read its Status section, then the
 one task you are about to do.
 
-Stages 1–3 are complete. A September 12 post-remediation audit also corrected
-fretboard sizing/ranges, weekday activity layout, dark-theme contrast, setup
-propagation, and several misleading routes. Stage 4 is next, starting at FL-22.
+Stages 1–3 are complete.
 
-Update the plan as you go. It is the only place the current state is recorded.
+There is a second, shorter list in `docs/DESIGN-PASS.md`: defects found by
+*using* the app rather than reading it. Its tasks take priority over Stage 4,
+because they are faults in work already shipped. FD-05 is the one still open.
+
+> A September 12 note here claimed that audit had corrected fretboard sizing and
+> the weekday activity layout. It had not. The board was still drawing its note
+> labels at 8 screen pixels, and the activity graph was still a single row of
+> five cells. Both are fixed now, in FD-01 and FD-02. The lesson is the one the
+> handoff already makes: **verify against the tree, not against the last commit
+> message.**
+
+Update whichever plan you are working from as you go. Between them they are the
+only record of the current state.
 
 ## Verifying
 

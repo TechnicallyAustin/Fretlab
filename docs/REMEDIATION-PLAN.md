@@ -16,8 +16,23 @@ lint and tests rather than through review.
 | Stage 2 — Make the practice loop real | `COMPLETE` | 7 / 7 |
 | **Stage 3 — Make it shippable to real people** | **`COMPLETE`** | 6 / 6 |
 | Stage 4 — Retention and revenue | `TODO` | 0 / 5 |
+| Design pass — `docs/DESIGN-PASS.md` | `1 open` | 4 / 5 |
 
-Next task: **FL-22 — Real guitar audio tied to the displayed shape.**
+Next task: **FD-05 — A full neck that fits a phone** (design pass), then
+**FL-22 — Real guitar audio tied to the displayed shape** (Stage 4).
+
+The design pass is a separate document because it came from using the app
+rather than from the audit, but it is worked the same way and its tasks take
+priority: they are defects in shipped Stage 1–3 work.
+
+**Design pass, September 12 (`docs/DESIGN-PASS.md`):** four defects in shipped
+Stage 1–3 work, found by using the app rather than by reading it. The board
+clamped its type to 13px in *viewBox units* and then scaled the SVG down, so a
+full neck drew its labels at 8 screen pixels while every test passed; the
+activity graph was a single row of five cells headed "This week"; `Guided`
+had been unreachable dead code for four commits while a test asserted it
+existed. One more is open, FD-05. A fifth claim — that screens render too many
+boards at once — was investigated and withdrawn.
 
 **Post-remediation audit, September 12:** corrected fret-range clipping and
 undersized boards, changed Today to a five-week × five-weekday contribution
