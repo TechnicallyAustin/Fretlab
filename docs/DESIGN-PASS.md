@@ -10,6 +10,8 @@
 | FD-03 | Delete `Guided` | `DONE` |
 | FD-04 | Board density | `CLOSED` — premise was wrong, nothing to do |
 | FD-05 | A full neck that fits a phone | `PARTIAL` — opens on the notes; still scrolls |
+| FD-06 | Fretboard fingerings | `DONE` |
+| FD-07 | Text contrast | `DONE` |
 
 Tracked alongside `docs/REMEDIATION-PLAN.md`; the same working loop in
 `docs/HANDOFF.md` applies to both.
@@ -336,6 +338,64 @@ at readable size.
 > The scroll target is a pure function, so it is tested: the notes land inside
 > the visible column, the board never scrolls past its own edges, and a board
 > with room to spare stays where it is.
+
+---
+
+## FD-06 — Fretboard fingerings
+
+**Status:** `DONE` · **Severity:** Blocker · **Reported:** "fretboard fingerings
+dont make sense"
+
+**Problem.** The same rule was written four times and three copies were wrong.
+
+Fingering counted from the fret *window's* low fret. A window reaching the nut
+starts at fret 0, which no finger occupies, so every open-position shape came
+out a finger too high — fret 1 asked for the middle finger and fret 3 for the
+little one, leaving the index unused. Open strings were given finger 1, which
+tells a beginner to fret the nut. Across the library, in twelve keys: **14 open
+strings fingered and 25 shapes misnumbered.**
+
+`fingerBarreShape` numbered by *rank* of distinct fret instead, so a C barre at
+fret 3 with its triad at fret 5 called fret 5 the middle finger. Two frets above
+an index barre is the ring finger. **11 notes** across the chord library.
+
+`fingersUsed`, which writes the caption under a drill board, derived its frets
+as `boxLow + finger - 1` — the rule written out again, inverted — so the caption
+could disagree with the board, and did: `Index on fret 0`.
+
+**Change.** One rule, in `lib/fretlab/hand.ts`: the hand's first finger sits at
+the lowest *frettable* fret, `max(1, windowLow)`. Open strings take no finger.
+Capped at four. It has its own module because `fingering` already imports
+`positions`, so the shared rule could not live in either without a cycle.
+`fingersUsed` reads frets off the notes rather than recomputing them.
+
+**Left alone, deliberately.** Three scale positions span five frets and carry no
+finger numbers. That is correct: minor pentatonic box 3 in A runs frets 9–13,
+but the hand anchors at 10 and reaches back to 9, so mechanical numbering would
+be *wrong* rather than merely absent.
+
+---
+
+## FD-07 — Text contrast
+
+**Status:** `DONE` · **Severity:** Major · **Reported:** "adjust contrast"
+
+**Problem.** Both secondary text tiers failed WCAG AA, and nothing checked.
+`--quiet` was **3.64:1** on a sunken panel against a 4.5:1 requirement and
+`--muted` 4.22:1; in dark, `--quiet` was 3.77:1. Between them they colour 173
+rules — most of the app's secondary copy.
+
+The activity graph could not show its own lowest signal either: the ramp left
+**1.11:1** between "did not practise" and "practised a little".
+
+**Change.** Both tiers cleared to 4.5:1 on every surface, with the step between
+them preserved so they still read as two tiers rather than one grey. Ramp evened
+to 38/60/80/100, checked across all twelve key hues. The key palette was
+measured and left alone — `key-ink` on `key-fill` is 5.50:1 at worst.
+
+**Found while testing:** the 26-week graph on Progress defines its own copy of
+that ramp, at the same wrong values. The guard reads every ramp in the
+stylesheet and asserts they agree.
 
 ---
 
