@@ -13,8 +13,9 @@
  * everything else schedules against the one context it returns.
  */
 import type { Accent } from "./metronome";
-import type { KeyName } from "./types";
-import { keyPc } from "./theory";
+import type { KeyName, Note, Tuning } from "./types";
+import { STANDARD_TUNING, keyPc } from "./theory";
+import { STRUM_DELAY, pluckBuffer } from "./pluck";
 
 type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
 
@@ -67,27 +68,109 @@ export function playClick(context: AudioContext, time: number, accent: Accent): 
   oscillator.stop(time + length + 0.02);
 }
 
+/**
+ * Play a set of intervals above a key's root, for the screens that show a
+ * scale or an interval rather than a fingered shape.
+ *
+ * Where a shape *is* on screen, use `playShape`: it knows which string each
+ * note is on, so an open C and a barre C sound like the different things they
+ * are. This is the fallback for a sequence of degrees, which has no strings.
+ *
+ * It shares the plucked voice, so the two never sound like different
+ * instruments, and the base is the third octave — where a guitar actually puts
+ * these notes, rather than an arbitrary MIDI 48.
+ */
 export function playTones(rootKey: KeyName, intervals: number[], sequence = false) {
   const context = unlock();
   if (!context) return;
   const baseMidi = 48 + keyPc(rootKey);
-  const spacing = sequence ? 0.24 : 0.035;
+  const spacing = sequence ? 0.26 : STRUM_DELAY;
+
   intervals.forEach((interval, index) => {
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    const start = context.currentTime + index * spacing;
-    const duration = sequence ? 0.42 : 1.25;
-    oscillator.type = index % 2 ? "sine" : "triangle";
-    oscillator.frequency.value =
-      440 * Math.pow(2, (baseMidi + interval - 69) / 12);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(
-      sequence ? 0.12 : 0.075,
-      start + 0.025,
+    const samples = pluckBuffer(
+      frequencyOf(baseMidi + interval),
+      context.sampleRate,
+      {
+        seconds: sequence ? 0.9 : 2.2,
+        seed: (baseMidi + interval) * 2654435761,
+      },
     );
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-    oscillator.connect(gain).connect(context.destination);
-    oscillator.start(start);
-    oscillator.stop(start + duration + 0.03);
+    playBuffer(context, samples, context.currentTime + index * spacing, 0.45);
+  });
+}
+
+
+
+/** Equal temperament, A4 = 440, so this agrees with the tuner. */
+function frequencyOf(midi: number): number {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+/**
+ * Play a buffer of samples at a given time, through the shared context.
+ *
+ * The buffer is generated rather than fetched, so there is nothing to load and
+ * no sample pack to ship — and it can be tested, which a fetched sample cannot.
+ */
+function playBuffer(
+  context: AudioContext,
+  samples: Float32Array,
+  at: number,
+  gain: number,
+): void {
+  const buffer = context.createBuffer(1, samples.length, context.sampleRate);
+  // getChannelData rather than copyToChannel: the latter's type demands a
+  // Float32Array backed by a plain ArrayBuffer, and this one is generated.
+  buffer.getChannelData(0).set(samples);
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+  const level = context.createGain();
+  level.gain.value = gain;
+  source.connect(level).connect(context.destination);
+  source.start(at);
+}
+
+export type PlayShapeOptions = {
+  /** Play one string at a time instead of strumming. */
+  sequence?: boolean;
+  /** Seconds between strings in a strum. */
+  strum?: number;
+};
+
+/**
+ * Play the shape that is on screen, at the pitches it would actually sound.
+ *
+ * This is the point of FL-22. `playTones` synthesises from an abstract
+ * interval over a fixed MIDI 48 base, so an open C and a barre C at the eighth
+ * fret sounded identical, and neither was in the octave a guitar puts them in.
+ * Here a note is a string and a fret, the string's open pitch comes from the
+ * tuning map — so Drop D sounds like Drop D — and the fret is added to it.
+ *
+ * Strings sound low to high a few milliseconds apart, because a chord whose
+ * notes all start at the same instant does not sound like a hand.
+ */
+export function playShape(
+  notes: readonly Note[],
+  tuning: Tuning = STANDARD_TUNING,
+  { sequence = false, strum = STRUM_DELAY }: PlayShapeOptions = {},
+): void {
+  const context = unlock();
+  if (!context || notes.length === 0) return;
+
+  // Low string first, which is the direction a downstroke travels.
+  const ordered = [...notes].sort((a, b) => b.s - a.s);
+  const spacing = sequence ? 0.26 : strum;
+
+  ordered.forEach((note, index) => {
+    const open = tuning.openMidi[note.s];
+    if (open === undefined) return;
+    const frequency = frequencyOf(open + note.f);
+    const samples = pluckBuffer(frequency, context.sampleRate, {
+      seconds: sequence ? 0.9 : 2.2,
+      // A deterministic seed per string, so the same chord sounds the same
+      // twice and no two strings share an identical noise burst.
+      seed: note.s * 2654435761 + note.f,
+    });
+    playBuffer(context, samples, context.currentTime + index * spacing, 0.5);
   });
 }

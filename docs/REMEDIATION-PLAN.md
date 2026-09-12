@@ -15,10 +15,10 @@ lint and tests rather than through review.
 | Stage 1 — Stop teaching wrong things | `COMPLETE` | 8 / 8 |
 | Stage 2 — Make the practice loop real | `COMPLETE` | 7 / 7 |
 | **Stage 3 — Make it shippable to real people** | **`COMPLETE`** | 6 / 6 |
-| Stage 4 — Retention and revenue | `TODO` | 0 / 5 |
+| Stage 4 — Retention and revenue | `IN PROGRESS` | 1 / 5 |
 | Design pass — `docs/DESIGN-PASS.md` | `COMPLETE` | 8 / 8 |
 
-Next task: **FL-22 — Real guitar audio tied to the displayed shape.**
+Next task: **FL-23 — Spaced repetition.**
 
 The design pass is a separate document because it came from using the app
 rather than from the audit, but it is worked the same way and its tasks take
@@ -1291,7 +1291,7 @@ returning users.
 
 | ID | Task | Status |
 |---|---|---|
-| FL-22 | Real guitar audio tied to the displayed shape | `TODO` |
+| FL-22 | Real guitar audio tied to the displayed shape | `DONE` |
 | FL-23 | Spaced repetition | `TODO` |
 | FL-24 | Ear training | `TODO` |
 | FL-25 | Drones and backing tracks | `TODO` |
@@ -1299,8 +1299,8 @@ returning users.
 
 ---
 
-### - [ ] FL-22 — Real guitar audio tied to the displayed shape
-**Status:** `TODO` · **Severity:** Minor · **Audit ref:** G-05
+### - [x] FL-22 — Real guitar audio tied to the displayed shape
+**Status:** `DONE` · **Severity:** Minor · **Audit ref:** G-05
 
 **Files:** `lib/fretlab/audio.ts`
 
@@ -1317,6 +1317,32 @@ is ~30 lines and removes the "this is not a guitar" impression immediately. Stru
 a small inter-string delay rather than simultaneously.
 
 **Done when.** Hearing a chord matches seeing it.
+
+> **Done.** `playShape(notes, tuning)` takes the shape on screen and sounds each
+> note at its real pitch — the string's open note from the tuning map, plus the
+> fret — so an open C and a barre C are different sounds and Drop D sounds like
+> Drop D. `ChordDetail` plays its displayed voicing. Strings sound low to high
+> 12ms apart, because a chord struck all at once does not sound like a hand.
+>
+> The voice is Karplus–Strong in `lib/fretlab/pluck.ts`, generating a buffer
+> rather than fetching a sample — so there is nothing to ship and, more
+> usefully, it can be **tested against this app's own tuner**. FL-15 listening
+> to FL-22: if either drifts, `tests/pluck.test.mjs` fails.
+>
+> That test earned its place immediately. The first version used linear
+> interpolation for the fractional delay, which sounds fine and is
+> progressively sharp — 5 cents at the low strings, **15 cents by the twelfth
+> fret of the B string**, well outside what this app tells a player is in tune.
+> Nobody would have caught that by ear. An allpass holds its group delay across
+> the range: the worst error is now 0.11 cents, and the tolerance is 2 cents,
+> the same bar FL-15 set for the tuner.
+>
+> `playTones` is kept for screens that show a scale or an interval rather than a
+> fingered shape — there are no strings to take pitches from — but it shares the
+> plucked voice so the two never sound like different instruments.
+>
+> The oscillator left in `audio.ts` is the metronome click, which should stay a
+> click.
 
 ---
 

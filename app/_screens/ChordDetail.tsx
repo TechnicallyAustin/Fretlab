@@ -17,7 +17,7 @@ import { chordIntervals, chordVoicing, intervalShape } from "@/lib/fretlab/theor
 import { fingerBarreShape } from "@/lib/fretlab/fingering";
 import { cssVars } from "@/lib/fretlab/palette";
 import { shapeWindow } from "@/lib/fretlab/geometry";
-import { playTones } from "@/lib/fretlab/audio";
+import { playShape } from "@/lib/fretlab/audio";
 import { useState } from "react";
 import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
 
@@ -66,9 +66,12 @@ export function ChordDetail({
             </p>
             <h2>{chord.notes}</h2>
             <p>{chord.tip}</p>
+            {/* The shape on screen, not an abstract interval set: an open C
+                and a barre C at the eighth fret are different sounds, and the
+                tuning decides what each string is. */}
             <button
               className="sample-play detail-audio"
-              onClick={() => playTones(chord.root, intervals)}
+              onClick={() => playShape(displayNotes, tuning)}
             >
               ▶ Hear chord
             </button>
