@@ -264,9 +264,16 @@ test("Today uses a contribution graph and fretboards keep stable viewports", asy
   assert.match(today, /\["Th", "Thursday"\]/);
   assert.match(css, /\.contribution-graph/);
   assert.match(css, /grid-template-rows: repeat\(5, 16px\)/);
-  assert.match(css, /width: min\(100%, var\(--board-natural, 100%\)\)/);
+  // These two asserted the board's *old* sizing: a width cap at 1.15x natural,
+  // and the type clamp living inside the component. FD-01 removes both — the
+  // cap was the regression that shrank boards on desktop, and the clamp was
+  // unreachable from a test where it sat, which is how a "13px" label came to
+  // render at 8px. They are replaced by the rule that actually holds, checked
+  // properly in tests/board-legibility.test.mjs.
+  assert.match(css, /min-width: var\(--board-min, 0\)/);
+  assert.ok(!css.includes("--board-natural"), "the old width cap should be gone");
   assert.match(fretboard, /high - low \+ 1/);
-  assert.match(fretboard, /Math\.max\(13,/);
+  assert.match(fretboard, /boardGeometry\(/);
   assert.doesNotMatch(fretboard, /"#[0-9a-fA-F]{3,8}"/);
 });
 

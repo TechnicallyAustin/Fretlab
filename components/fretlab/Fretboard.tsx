@@ -24,6 +24,7 @@ import {
 } from "@/lib/fretlab/noteRoles";
 import { FretboardLegend } from "./FretboardLegend";
 import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
+import { boardGeometry } from "@/lib/fretlab/boardGeometry";
 import { useId, useRef, useState } from "react";
 
 
@@ -114,10 +115,11 @@ export function Fretboard({
   // Chord boards carry a marker row above the nut. It only means anything when
   // the nut is in frame: further up the neck there is no open string to mark.
   const showsMarkers = (muted?.length ?? 0) > 0 || Boolean(notes?.some((n) => n.f === 0));
-  const unit = mini ? 40 : 66;
-  const gap = mini ? 20 : 28;
-  const openWidth = Math.round(unit * 0.62);
-  const nameGutter = Math.round(gap * 0.95);
+  // The sizing arithmetic lives in lib/ so a test can reach it: every type size
+  // below is clamped to 13, but those are viewBox units, and the board used to
+  // be allowed to scale down until a "13px" label drew at 8 screen pixels.
+  const geo = boardGeometry({ low, high, mini, showsMarkers });
+  const { unit, gap, openWidth, nameGutter } = geo;
 
   const fretsAscending = Array.from({ length: high - low + 1 }, (_, index) => low + index);
   let cursor = nameGutter;
@@ -128,7 +130,7 @@ export function Fretboard({
     return column;
   });
 
-  const width = cursor;
+  const width = geo.width;
   const columns = isLeftHanded
     ? [...naturalColumns].reverse().map((column) => ({
         ...column,
@@ -137,29 +139,24 @@ export function Fretboard({
       }))
     : naturalColumns;
   const frets = columns.map((column) => column.fret);
-  const markerRow = showsMarkers && low <= 1 ? Math.round(gap * (mini ? 0.6 : 0.68)) : 0;
-  const top = (mini ? 14 : 20) + markerRow;
+  const { markerRow, top } = geo;
   const includesOpen = low === 0;
   const playingWidth = width - nameGutter - (includesOpen ? openWidth : 0);
   const boardX = isLeftHanded ? 0 : nameGutter + (includesOpen ? openWidth : 0);
   const boardEnd = boardX + playingWidth;
-  const boardHeight = 6 * gap;
-  const numberRow = Math.round(gap * 0.82);
-  const height = top + boardHeight + numberRow + (mini ? 6 : 10);
+  const { boardHeight, numberRow, height } = geo;
 
   const yFor = (string: number) =>
     isLeftHanded
       ? top + (6 - string + 0.5) * gap
       : top + (string - 0.5) * gap;
-  const dotRadius = Math.max(mini ? 8 : 11, Math.round(gap * 0.37));
+  const { dotRadius } = geo;
   const showsNut = low <= 1;
   const strings = isLeftHanded ? [6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6];
   const firstCell = `${strings[0]}:${frets[0]}`;
   const [activeCell, setActiveCell] = useState(firstCell);
 
-  const fretNumberSize = Math.max(13, Math.round(gap * 0.44));
-  const stringNameSize = Math.max(13, Math.round(gap * 0.42));
-  const labelSize = Math.max(13, Math.round(dotRadius * 0.95));
+  const { fretNumberSize, stringNameSize, labelSize } = geo;
   const stringName = (string: number) => spellPitchClass(openPc(activeTuning, string), rootKey);
 
   // Points for the play-order path, in board coordinates.
@@ -210,10 +207,15 @@ export function Fretboard({
         // too narrow for a legible label. Below the board's comfortable width
         // it scrolls sideways instead of shrinking.
         style={{
-          ["--board-min" as string]: `${Math.round(columns.length * (mini ? 40 : 60))}px`,
-          // A four-fret box must not stretch across a wide card: that pulls the
-          // frets apart until the shape stops looking like the shape.
-          ["--board-natural" as string]: `${Math.round(width * (mini ? 1.2 : 1.15))}px`,
+          // The board's own width, so it is never scaled *down*. Below this the
+          // type shrinks with it: a 13-unit label rendered at 0.73 is 8 pixels,
+          // which is what "too small to see" was.
+          ["--board-min" as string]: `${width}px`,
+          // Scaling up is bounded by height, not width. The viewBox is fixed and
+          // preserveAspectRatio is xMidYMid meet, so a wider board scales frets,
+          // dots and labels together — nothing is pulled apart, it just gets
+          // tall. This is the constraint that actually exists.
+          ["--board-aspect" as string]: `${geo.aspect.toFixed(3)}`,
         }}
         role={interactive ? "grid" : "img"}
         aria-label={
