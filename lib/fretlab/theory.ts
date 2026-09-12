@@ -97,41 +97,129 @@ export function intervalShape(
       if (pcs.includes((OPEN_PC[s] + f) % 12)) notes.push({ s, f });
   return notes;
 }
-export function chordIntervals(chord: { quality: string; symbol: string }) {
-  if (chord.quality === "Minor") return [0, 3, 7];
+/**
+ * A chord quality, normalised to the one name the shape tables use.
+ *
+ * The library spells quality for a reader ("Seventh", with `maj` in the symbol
+ * separating the two kinds); the tables below need one key per sound.
+ */
+export type ChordShapeKey =
+  | "Major"
+  | "Minor"
+  | "Dominant"
+  | "Major7"
+  | "Sus2"
+  | "Sus4"
+  | "Diminished";
+
+export function shapeKey(chord: { quality: string; symbol: string }): ChordShapeKey {
+  if (chord.quality === "Minor") return "Minor";
   if (chord.quality === "Seventh")
-    return chord.symbol.includes("maj") ? [0, 4, 7, 11] : [0, 4, 7, 10];
-  if (chord.quality === "Suspended") return [0, 2, 7];
-  if (chord.quality === "Diminished") return [0, 3, 6];
-  return [0, 4, 7];
+    return chord.symbol.includes("maj") ? "Major7" : "Dominant";
+  if (chord.quality === "Sus2") return "Sus2";
+  if (chord.quality === "Sus4") return "Sus4";
+  if (chord.quality === "Diminished") return "Diminished";
+  return "Major";
+}
+
+const QUALITY_INTERVALS: Record<ChordShapeKey, number[]> = {
+  Major: [0, 4, 7],
+  Minor: [0, 3, 7],
+  Dominant: [0, 4, 7, 10],
+  Major7: [0, 4, 7, 11],
+  Sus2: [0, 2, 7],
+  Sus4: [0, 5, 7],
+  Diminished: [0, 3, 6],
+};
+
+export function chordIntervals(chord: { quality: string; symbol: string }) {
+  return QUALITY_INTERVALS[shapeKey(chord)];
+}
+
+/**
+ * The tones a given voicing is actually trying to sound.
+ *
+ * Three strings cannot hold a seventh chord, and the fifth is the tone that
+ * carries the least: it is neither the name of the chord nor its quality. So a
+ * three-string voicing of a seventh drops it, which is the shell voicing every
+ * comping guitarist plays. Stating that here keeps it a decision rather than
+ * whatever a search happens to settle on.
+ */
+export function voicingIntervals(
+  chord: { quality: string; symbol: string },
+  voicing: "Open" | "Barre" | "Triad",
+) {
+  const full = chordIntervals(chord);
+  if (voicing !== "Triad" || full.length <= 3) return full;
+  return full.filter((interval) => interval !== 7);
+}
+
+/**
+ * Movable shapes, as fret offsets from the barre. Index 0 is string 6.
+ * `null` is a string the shape does not use, which for a movable form means it
+ * must be damped rather than left to ring.
+ *
+ * Two families, because one is not enough: the E form runs out of neck above
+ * fret 9, and some qualities have no comfortable E form at all.
+ */
+const E_SHAPES: Record<ChordShapeKey, (number | null)[]> = {
+  Major: [0, 2, 2, 1, 0, 0],
+  Minor: [0, 2, 2, 0, 0, 0],
+  Dominant: [0, 2, 0, 1, 0, 0],
+  Major7: [0, 2, 1, 1, 0, 0],
+  Sus2: [0, 2, 4, 4, 0, 0],
+  Sus4: [0, 2, 2, 2, 0, 0],
+  Diminished: [0, 1, 2, 0, null, null],
+};
+
+const A_SHAPES: Record<ChordShapeKey, (number | null)[]> = {
+  Major: [null, 0, 2, 2, 2, 0],
+  Minor: [null, 0, 2, 2, 1, 0],
+  Dominant: [null, 0, 2, 0, 2, 0],
+  Major7: [null, 0, 2, 1, 2, 0],
+  Sus2: [null, 0, 2, 2, 0, 0],
+  Sus4: [null, 0, 2, 2, 3, 0],
+  Diminished: [null, 0, 1, 2, 1, null],
+};
+
+const STRINGS_HIGH_TO_LOW = [6, 5, 4, 3, 2, 1];
+
+function buildShape(offsets: (number | null)[], barreFret: number): Note[] {
+  return STRINGS_HIGH_TO_LOW.flatMap((string, index) => {
+    const offset = offsets[index];
+    return offset === null ? [] : [{ s: string, f: barreFret + offset }];
+  });
+}
+
+function span(notes: Note[]) {
+  const frets = notes.map((note) => note.f);
+  return Math.max(...frets) - Math.min(...frets);
 }
 
 export function chordVoicing(
   chord: { root: KeyName; quality: string; symbol: string },
   voicing: "Barre" | "Triad",
 ) {
-  const intervals = chordIntervals(chord);
+  const intervals = voicingIntervals(chord, voicing);
   if (voicing === "Barre") {
-    const rootFret = Math.max(
-      1,
-      keyPc(chord.root) -
-        OPEN_PC[6] +
-        (keyPc(chord.root) < OPEN_PC[6] ? 12 : 0),
+    const key = shapeKey(chord);
+    // Fret 0 is the open form and is correct; forcing it to 1 sharpened every
+    // E-rooted chord by a semitone, so E major sounded F.
+    const eRoot = (((keyPc(chord.root) - OPEN_PC[6]) % 12) + 12) % 12;
+    const aRoot = (((keyPc(chord.root) - OPEN_PC[5]) % 12) + 12) % 12;
+    const candidates = [
+      buildShape(E_SHAPES[key], eRoot),
+      buildShape(A_SHAPES[key], aRoot),
+    ].filter((notes) => notes.every((note) => note.f >= 0 && note.f <= 15));
+    // Prefer the tighter grip, then the lower position: both are the easier
+    // reach, and the E form running past fret 9 is what pushed chords off the
+    // end of the neck.
+    candidates.sort(
+      (a, b) =>
+        span(a) - span(b) ||
+        Math.min(...a.map((n) => n.f)) - Math.min(...b.map((n) => n.f)),
     );
-    const offsets =
-      chord.quality === "Minor"
-        ? [0, 2, 2, 0, 0, 0]
-        : chord.quality === "Seventh"
-          ? chord.symbol.includes("maj")
-            ? [0, 2, 1, 1, 0, 0]
-            : [0, 2, 0, 1, 0, 0]
-          : chord.quality === "Suspended"
-            ? [0, 2, 2, 2, 0, 0]
-            : [0, 2, 2, 1, 0, 0];
-    return [6, 5, 4, 3, 2, 1].map((string, index) => ({
-      s: string,
-      f: rootFret + offsets[index],
-    }));
+    return candidates[0] ?? buildShape(E_SHAPES[key], eRoot);
   }
   const candidates = [3, 2, 1].map((string) =>
     Array.from({ length: 9 }, (_, index) => 4 + index)

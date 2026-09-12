@@ -13,7 +13,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 const { CHORDS, SCALES, SONGS } = await import("../lib/fretlab/library.ts");
-const { FIFTHS, OPEN_PC, chordIntervals, keyPc, majorScale } = await import(
+const { shapeWindow } = await import("../lib/fretlab/geometry.ts");
+const { FIFTHS, OPEN_PC, chordIntervals, chordVoicing, voicingIntervals, keyPc, majorScale } =
+  await import(
   "../lib/fretlab/theory.ts"
 );
 
@@ -189,6 +191,73 @@ test("every song progression names a chord the library has", () => {
         symbols.has(symbol),
         `${song.title}: no chord "${symbol}" in the library`,
       );
+    }
+  }
+});
+
+// ---------------------------------------------------------------- voicings
+
+test("a generated voicing is the chord it claims to be", () => {
+  for (const chord of CHORDS) {
+    for (const voicing of ["Barre", "Triad"]) {
+      const notes = chordVoicing(chord, voicing);
+      const want = [...new Set(voicingIntervals(chord, voicing))].sort((a, b) => a - b);
+      const got = [...new Set(notes.map((n) => degreeOf(n, chord.root)))].sort(
+        (a, b) => a - b,
+      );
+      assert.deepEqual(got, want, `${chord.symbol} ${voicing}`);
+    }
+  }
+});
+
+test("a barre voicing is reachable by one hand", () => {
+  for (const chord of CHORDS) {
+    const notes = chordVoicing(chord, "Barre");
+    const frets = notes.map((n) => n.f);
+    const reach = Math.max(...frets) - Math.min(...frets);
+    assert.ok(reach <= 4, `${chord.symbol}: ${reach + 1} frets apart`);
+    assert.ok(Math.min(...frets) >= 0, `${chord.symbol}: negative fret`);
+    assert.ok(Math.max(...frets) <= 15, `${chord.symbol}: past the neck`);
+  }
+});
+
+test("a barre voicing sounds its own root on its lowest string", () => {
+  for (const chord of CHORDS) {
+    const notes = chordVoicing(chord, "Barre");
+    const lowest = notes.reduce((a, b) => (b.s > a.s ? b : a));
+    assert.equal(
+      degreeOf(lowest, chord.root),
+      0,
+      `${chord.symbol}: bass note is degree ${degreeOf(lowest, chord.root)}, not the root`,
+    );
+  }
+});
+
+test("a three-string voicing drops the fifth, never the third or the seventh", () => {
+  for (const chord of CHORDS) {
+    const shell = voicingIntervals(chord, "Triad");
+    const full = chordIntervals(chord);
+    assert.ok(shell.length <= 3, `${chord.symbol}: ${shell.length} tones on three strings`);
+    for (const interval of full) {
+      if (interval === 7 && full.length > 3) continue;
+      assert.ok(shell.includes(interval), `${chord.symbol} drops ${interval}`);
+    }
+  }
+});
+
+test("every voicing fits the window it is drawn in", () => {
+  for (const chord of CHORDS) {
+    for (const voicing of ["Open", "Barre", "Triad"]) {
+      const notes =
+        voicing === "Open" ? chord.fingering : chordVoicing(chord, voicing);
+      const { low, high } = shapeWindow(notes);
+      for (const note of notes) {
+        assert.ok(
+          note.f >= low && note.f <= high,
+          `${chord.symbol} ${voicing}: fret ${note.f} outside window ${low}-${high}`,
+        );
+      }
+      assert.ok(high - low >= 4, `${chord.symbol} ${voicing}: window too narrow`);
     }
   }
 });

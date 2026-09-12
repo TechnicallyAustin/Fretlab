@@ -709,7 +709,7 @@ export const CHORDS = [
     root: "A" as KeyName,
     symbol: "Asus2",
     name: "A suspended two",
-    quality: "Suspended",
+    quality: "Sus2",
     formula: "1 · 2 · 5",
     notes: "A · B · E",
     fingering: [
@@ -742,7 +742,7 @@ export const CHORDS = [
 ].map((chord, index) => ({
   ...chord,
   level:
-    index < 8 || chord.quality === "Suspended"
+    index < 8 || chord.quality.startsWith("Sus")
       ? "Beginner"
       : index < 15
         ? "Intermediate"

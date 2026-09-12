@@ -16,6 +16,7 @@ import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
 import { chordIntervals, chordVoicing, intervalShape } from "@/lib/fretlab/theory";
 import { fingerBarreShape } from "@/lib/fretlab/fingering";
 import { cssVars } from "@/lib/fretlab/palette";
+import { shapeWindow } from "@/lib/fretlab/geometry";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
 
@@ -30,11 +31,16 @@ export function ChordDetail({
   const [tab, setTab] = useState("Shape");
   const [voicing, setVoicing] = useState<"Open" | "Barre" | "Triad">("Open");
   const intervals = chordIntervals(chord);
-  const range = voicing === "Open" ? [0, 4] : voicing === "Barre" ? [1, 7] : [4, 12];
   const displayNotes =
+    voicing === "Open" ? chord.fingering : chordVoicing(chord, voicing);
+  // The window follows the shape. Hardcoding one per voicing drew four chords
+  // on an empty board and clipped two more.
+  const range = shapeWindow(displayNotes);
+  // A generated shape names the strings it uses, so the rest are damped.
+  const mutedStrings =
     voicing === "Open"
-      ? chord.fingering
-      : chordVoicing(chord, voicing);
+      ? chord.muted
+      : [1, 2, 3, 4, 5, 6].filter((s) => !displayNotes.some((n) => n.s === s));
   return (
     <div
       className="screen-content detail-screen chord-detail-screen"
@@ -99,11 +105,11 @@ export function ChordDetail({
             </div>
             <Fretboard
               notes={voicing === "Open" ? chord.fingering : fingerBarreShape(displayNotes)}
-              low={range[0]}
-              high={range[1]}
+              low={range.low}
+              high={range.high}
               labelMode="finger"
               rootKey={chord.root}
-              muted={voicing === "Open" ? chord.muted : undefined}
+              muted={mutedStrings}
               caption={`${chord.name} \u00b7 ${voicing.toLowerCase()} shape`}
             />
             <ChordToneLegend chord={chord} />

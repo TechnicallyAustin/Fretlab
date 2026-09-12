@@ -24,3 +24,25 @@ export function wedge(
   return `M${p1[0]} ${p1[1]}A${r1} ${r1} 0 0 1 ${p2[0]} ${p2[1]}L${p3[0]} ${p3[1]}A${r0} ${r0} 0 0 0 ${p4[0]} ${p4[1]}Z`;
 }
 
+
+/**
+ * The fret window a shape should be drawn in.
+ *
+ * Chord detail used to hardcode one window per voicing, so a shape whose root
+ * sat higher than the window simply did not draw — four chords rendered a blank
+ * board and two rendered a few of their notes with nothing to say the rest were
+ * missing, which reads as a complete and wrong chord.
+ *
+ * One fret of air either side, never below the nut, and at least `minSpan`
+ * frets wide so a compact grip does not render as a sliver.
+ */
+export function shapeWindow(
+  notes: readonly { f: number }[],
+  minSpan = 4,
+): { low: number; high: number } {
+  if (!notes.length) return { low: 0, high: minSpan };
+  const frets = notes.map((note) => note.f);
+  const low = Math.max(0, Math.min(...frets) - 1);
+  const high = Math.max(Math.max(...frets) + 1, low + minSpan);
+  return { low, high };
+}
