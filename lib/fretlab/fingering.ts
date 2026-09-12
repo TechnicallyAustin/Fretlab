@@ -111,14 +111,18 @@ export function drillShape(drill: DrillLike, key: KeyName, fullNeck = false): Dr
 }
 
 /**
- * Finger numbers for a stored chord shape.
+ * Finger numbers for a *generated* movable shape.
  *
- * Open strings take no finger. Fretted notes are numbered by fret order from
- * the lowest fretted position, which is how the common open and movable shapes
- * are actually played. Where one fret carries several notes they share a finger,
- * matching the barre a player would use.
+ * Open chords do not come through here — their fingering is authored in the
+ * library, because the grip a hand actually uses cannot be derived from the
+ * fret numbers. Open G puts a note on fret 3 of both outer strings with four
+ * open strings between them; any rule that numbers by fret order gives them
+ * the same finger and asks for a barre that must also leave the middle open.
+ *
+ * A barre shape is the one case where the derivation holds: the lowest fret is
+ * the barre and takes the first finger, and each higher fret takes the next.
  */
-export function fingerChordShape(shape: readonly Note[]): FingeredNote[] {
+export function fingerBarreShape(shape: readonly Note[]): FingeredNote[] {
   const fretted = shape.filter((note) => note.f > 0);
   if (!fretted.length) return shape.map((note) => ({ ...note, finger: 0 }));
 

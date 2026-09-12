@@ -10,7 +10,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 const { DRILLS } = await import("../lib/fretlab/library.ts");
-const { drillShape, drillKind, fingerChordShape, BOX_SPAN } = await import(
+const { drillShape, drillKind, fingerBarreShape, BOX_SPAN } = await import(
   "../lib/fretlab/fingering.ts"
 );
 const { CHORDS } = await import("../lib/fretlab/library.ts");
@@ -75,21 +75,28 @@ test("map drills tour the neck and imply no fingering", () => {
   }
 });
 
-test("chord shapes are fingered, with open strings left open", () => {
-  for (const chord of CHORDS.slice(0, 8)) {
-    const fingered = fingerChordShape(chord.fingering);
-    assert.equal(fingered.length, chord.fingering.length);
-    for (const note of fingered) {
-      if (note.f === 0) assert.equal(note.finger, 0);
-      else assert.ok(note.finger >= 1 && note.finger <= 4, `${chord.id} finger ${note.finger}`);
-    }
-    // Notes sharing a fret share a finger, which is what a barre is.
-    const byFret = new Map();
-    for (const note of fingered.filter((n) => n.f > 0)) {
-      if (byFret.has(note.f)) assert.equal(byFret.get(note.f), note.finger);
-      else byFret.set(note.f, note.finger);
-    }
+test("a generated barre shape is fingered from the barre up", () => {
+  // Only generated movable shapes come through fingerBarreShape. Authored open
+  // chords are validated in theory.test.mjs, where the hand-shape rules live.
+  const eShapeBarre = [
+    { s: 6, f: 5 }, { s: 5, f: 7 }, { s: 4, f: 7 },
+    { s: 3, f: 6 }, { s: 2, f: 5 }, { s: 1, f: 5 },
+  ];
+  const fingered = fingerBarreShape(eShapeBarre);
+  assert.equal(fingered.length, eShapeBarre.length);
+  for (const note of fingered) {
+    assert.ok(note.finger >= 1 && note.finger <= 4, `finger ${note.finger}`);
   }
+  // The barre fret takes finger 1; each higher fret takes the next finger.
+  assert.deepEqual(
+    fingered.map((n) => n.finger),
+    [1, 3, 3, 2, 1, 1],
+  );
+});
+
+test("an all-open shape asks for no fingers", () => {
+  const fingered = fingerBarreShape([{ s: 6, f: 0 }, { s: 1, f: 0 }]);
+  for (const note of fingered) assert.equal(note.finger, 0);
 });
 
 test("drill cards and boards read the same shape", () => {

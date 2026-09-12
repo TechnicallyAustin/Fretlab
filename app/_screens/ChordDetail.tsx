@@ -14,7 +14,7 @@ import { Fretboard } from "@/components/fretlab/Fretboard";
 import { PianoMap } from "@/components/fretlab/PianoMap";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
 import { chordIntervals, chordVoicing, intervalShape } from "@/lib/fretlab/theory";
-import { fingerChordShape } from "@/lib/fretlab/fingering";
+import { fingerBarreShape } from "@/lib/fretlab/fingering";
 import { cssVars } from "@/lib/fretlab/palette";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
@@ -98,11 +98,12 @@ export function ChordDetail({
               <span>Root notes are square</span>
             </div>
             <Fretboard
-              notes={fingerChordShape(displayNotes)}
+              notes={voicing === "Open" ? chord.fingering : fingerBarreShape(displayNotes)}
               low={range[0]}
               high={range[1]}
               labelMode="finger"
               rootKey={chord.root}
+              muted={voicing === "Open" ? chord.muted : undefined}
               caption={`${chord.name} \u00b7 ${voicing.toLowerCase()} shape`}
             />
             <ChordToneLegend chord={chord} />

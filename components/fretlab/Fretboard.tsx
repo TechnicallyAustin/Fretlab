@@ -45,6 +45,7 @@ export function Fretboard({
   rootKey = "G",
   caption,
   legend = false,
+  muted,
 }: {
   notes?: (Note | FingeredNote)[];
   /** Named layers, for showing a chord inside a scale without them merging. */
@@ -61,6 +62,8 @@ export function Fretboard({
   caption?: string;
   /** Draw the shape key underneath. On by default for boards that teach. */
   legend?: boolean;
+  /** Strings that must not sound. Drawn as x above the nut. */
+  muted?: readonly number[];
 }) {
   const gradientId = `board-${useId().replaceAll(":", "")}`;
 
@@ -91,6 +94,9 @@ export function Fretboard({
   // Mini boards used to hide fret numbers and string names entirely, which is
   // why a window starting at fret 7 read as nonsense. They are smaller now, not
   // absent.
+  // Chord boards carry a marker row above the nut. It only means anything when
+  // the nut is in frame: further up the neck there is no open string to mark.
+  const showsMarkers = (muted?.length ?? 0) > 0 || Boolean(notes?.some((n) => n.f === 0));
   const unit = mini ? 30 : 54;
   const gap = mini ? 17 : 32;
   const openWidth = Math.round(unit * 0.62);
@@ -106,7 +112,8 @@ export function Fretboard({
   });
 
   const width = cursor;
-  const top = mini ? 14 : 20;
+  const markerRow = showsMarkers && low <= 1 ? Math.round(gap * (mini ? 0.6 : 0.68)) : 0;
+  const top = (mini ? 14 : 20) + markerRow;
   const boardX = low === 0 ? nameGutter + openWidth : nameGutter;
   const boardHeight = 6 * gap;
   const numberRow = Math.round(gap * 0.82);
@@ -166,6 +173,9 @@ export function Fretboard({
         role="img"
       aria-label={
         `Guitar fretboard, ${windowLabel}, frets ${low} to ${high}. ` +
+        (muted?.length
+          ? `Do not play the ${muted.map((s2) => STRING_NAMES[s2]).join(" and ")} string${muted.length > 1 ? "s" : ""}. `
+          : "") +
         layers
           .filter((layer) => layer.label)
           .map((layer) => `${layer.label}: ${layer.notes.length} notes`)
@@ -251,6 +261,32 @@ export function Fretboard({
                 />
               )),
             )}
+
+          {/* Muted and open strings, the way a printed chord box marks them.
+            Without this an untouched string reads as "don't care" rather than
+            "do not play", which is the difference between C major and a muddy
+            inversion. */}
+          {markerRow > 0 &&
+            [1, 2, 3, 4, 5, 6].map((string) => {
+              const isMuted = muted?.includes(string);
+              const isOpen = !isMuted && layers.some((layer) =>
+                layer.notes.some((note) => note.s === string && note.f === 0),
+              );
+              if (!isMuted && !isOpen) return null;
+              return (
+                <text
+                  key={`mark-${string}`}
+                  x={boardX - markerRow * 0.55}
+                  y={yFor(string) + stringNameSize * 0.35}
+                  textAnchor="middle"
+                  fill={isMuted ? "#c98b84" : "#cfd3df"}
+                  fontSize={stringNameSize}
+                  fontWeight="700"
+                >
+                  {isMuted ? "\u00d7" : "\u25cb"}
+                </text>
+              );
+            })}
 
           {/* Strings: thicker and duller as they get lower. */}
           {[1, 2, 3, 4, 5, 6].map((string) => (
