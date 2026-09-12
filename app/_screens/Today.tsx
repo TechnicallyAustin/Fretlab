@@ -28,12 +28,17 @@ export function Today({
   // is not shown. It used to greet a brand-new account with a 31 day streak.
   const history = usePracticeSessions({ limit: 100 });
   const sessions = history.data ?? [];
-  const stats = summarise(sessions);
-  const week = weekMinutes(sessions);
-  const weekTotal = week.reduce((sum, day) => sum + day.minutes, 0);
-  const peak = Math.max(1, ...week.map((day) => day.minutes));
   const accuracyByDrill = lastAccuracyByDrill(sessions);
-  const { dayName, greeting } = useClock();
+
+  // `now` is null until the client has a clock. Everything below that is
+  // date-relative waits for it: the server has neither the user's clock nor
+  // their timezone, so it drew a different week of day labels than the browser
+  // did and React threw a hydration mismatch on this screen.
+  const { dayName, greeting, now } = useClock();
+  const stats = now === null ? null : summarise(sessions, now);
+  const week = now === null ? null : weekMinutes(sessions, now);
+  const weekTotal = week?.reduce((sum, day) => sum + day.minutes, 0) ?? 0;
+  const peak = Math.max(1, ...(week ?? []).map((day) => day.minutes));
 
   // The session the Start button actually begins, read from the routine rather
   // than asserted. bpm is not shown: a routine has no tempo of its own.
@@ -46,7 +51,13 @@ export function Today({
   return (
     <div className="screen-content today-screen">
       <StatusBar
-        end={stats.streakDays ? `${stats.streakDays} day streak` : "No streak yet"}
+        end={
+          stats === null
+            ? "FretLab"
+            : stats.streakDays
+              ? `${stats.streakDays} day streak`
+              : "No streak yet"
+        }
       />
       <div className="today-greeting">
         <p>{dayName}</p>
@@ -78,6 +89,10 @@ export function Today({
           Start session <span>→</span>
         </button>
       </article>
+      {/* Seven day labels come from the clock alone, with or without any
+          sessions, so this whole section waits for a client clock rather than
+          rendering an empty chart the browser then disagrees with. */}
+      {week && (
       <section className="section">
         <div className="section-head">
           <h2>This week</h2>
@@ -103,6 +118,7 @@ export function Today({
           ))}
         </div>
       </section>
+      )}
       <section className="section">
         <div className="section-head">
           <h2>Pick up again · {sessionKey} major</h2>

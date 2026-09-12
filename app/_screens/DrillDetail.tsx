@@ -18,6 +18,7 @@ import type { NoteGroup } from "@/lib/fretlab/noteRoles";
 import { drillShape, withPlayOrder, fingersUsed } from "@/lib/fretlab/fingering";
 import { playTones } from "@/lib/fretlab/audio";
 import { usePracticeSessions } from "@/lib/api/hooks";
+import { useClock } from "@/lib/fretlab/useClock";
 import { dayLabel } from "@/lib/api/progress";
 import { useState } from "react";
 
@@ -41,16 +42,22 @@ export function DrillDetail({
     (session) => session.drill_id === drill.id,
   );
 
-  const entries = drillSessions.slice(0, 4).map((session) => ({
-    id: session.id,
-    day: dayLabel(session.created_at),
-    bpm: session.bpm,
-    accuracy: session.accuracy,
-    time:
-      session.duration_seconds === null
-        ? "—"
-        : `${Math.floor(session.duration_seconds / 60)}:${String(session.duration_seconds % 60).padStart(2, "0")}`,
-  }));
+  // "Today" and "Tue" are answers about the viewer's calendar, so the labels
+  // wait for a client clock rather than being drawn with the server's.
+  const { now } = useClock();
+  const entries =
+    now === null
+      ? []
+      : drillSessions.slice(0, 4).map((session) => ({
+          id: session.id,
+          day: dayLabel(session.created_at, now),
+          bpm: session.bpm,
+          accuracy: session.accuracy,
+          time:
+            session.duration_seconds === null
+              ? "—"
+              : `${Math.floor(session.duration_seconds / 60)}:${String(session.duration_seconds % 60).padStart(2, "0")}`,
+        }));
 
   // Two layers so the drill's own window is visible *inside* the whole neck,
   // rather than the learner having to guess which dots belong to the drill.

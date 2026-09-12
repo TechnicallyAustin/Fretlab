@@ -18,7 +18,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
-import { screenSources } from "./helpers/sources.mjs";
+import { readProjectFile, screenSources } from "./helpers/sources.mjs";
 
 const { CHORDS, DRILLS, ROUTINES, SCALES, SONGS, drillNotes, routineSteps } =
   await import("../lib/fretlab/library.ts");
@@ -471,6 +471,36 @@ test("routine progress counts practice days, not sessions", async () => {
   const progress = routineProgress(sessions, ["position-one", "thirds"], now);
   assert.equal(progress.completed, 2);
   assert.equal(progress.last, "Today");
+});
+
+/**
+ * The mechanical half of the hydration fix.
+ *
+ * Every helper in `lib/api/progress.ts` answers a question about the user's
+ * local calendar. When they defaulted `now` to `Date.now()` a caller could —
+ * and did — read the wall clock during render, which is what made the server
+ * and the browser disagree about what day it was. Requiring the argument makes
+ * that unwriteable; this makes sure the defaults stay gone.
+ */
+test("no date helper reads the wall clock by default", async () => {
+  const source = await readProjectFile("lib/api/progress.ts");
+  const defaults = source.match(/=\s*Date\.now\(\)/g) ?? [];
+  assert.deepEqual(defaults, [], "a Date.now() default came back");
+});
+
+test("the week reads from the clock it is given, not the one it finds", async () => {
+  const { weekMinutes } = await import("../lib/api/progress.ts");
+  // A fixed instant must always produce the same seven labels, ending today.
+  const now = new Date(2026, 8, 11, 12).getTime(); // Friday 11 Sep 2026, local
+  const week = weekMinutes([], now);
+  assert.equal(week.length, 7);
+  assert.deepEqual(
+    week.map((day) => day.label),
+    ["S", "S", "M", "T", "W", "T", "F"],
+    "the last seven days ending on a Friday",
+  );
+  assert.equal(week.at(-1).isToday, true);
+  assert.deepEqual(weekMinutes([], now), week, "same clock, same week");
 });
 
 test("no routine ships a progress figure of its own", () => {

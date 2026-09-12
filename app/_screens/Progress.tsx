@@ -18,6 +18,7 @@ import {
   summarise,
   type RangeLabel,
 } from "@/lib/api/progress";
+import { useClock } from "@/lib/fretlab/useClock";
 import { useState } from "react";
 
 export function Progress({
@@ -34,11 +35,15 @@ export function Progress({
   const history = usePracticeSessions({ limit: 100, musicKey: selectedKey });
   const sessions = history.data ?? [];
 
-  const values = accuracySeries(sessions, range);
-  const stats = summarise(sessions);
-  const consistency = consistencyLevels(sessions);
+  // Every figure below is relative to the user's own calendar, which only the
+  // client knows. The loading state covers the wait, so nothing here is ever
+  // rendered against the server's clock.
+  const { now } = useClock();
   const activeWeeks = 26;
-  const months = consistencyMonths(activeWeeks);
+  const values = now === null ? [] : accuracySeries(sessions, range, now);
+  const stats = now === null ? null : summarise(sessions, now);
+  const consistency = now === null ? [] : consistencyLevels(sessions, activeWeeks, now);
+  const months = now === null ? [] : consistencyMonths(activeWeeks, now);
 
   // A single point has no line to draw; repeat it so the chart still reads.
   const plotted = values.length === 1 ? [values[0], values[0]] : values;
@@ -56,7 +61,7 @@ export function Progress({
     })
     .join(" ");
 
-  if (history.status === "loading") {
+  if (history.status === "loading" || now === null || stats === null) {
     return (
       <div className="screen-content">
         <AppHeader title={`${selectedKey} progress`} meta="Consistency" />
@@ -232,7 +237,7 @@ export function Progress({
         </div>
       </section>
       <section className="desktop-progress-insights">
-        {insights(sessions).map((insight) => (
+        {insights(sessions, now).map((insight) => (
           <article key={insight.label}>
             <span>{insight.label}</span>
             <strong>{insight.value}</strong>

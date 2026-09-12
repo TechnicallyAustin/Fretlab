@@ -11,6 +11,7 @@ import { FIFTHS } from "@/lib/fretlab/theory";
 import { ROUTINES, routineKey, routineSteps } from "@/lib/fretlab/library";
 import { cssVars } from "@/lib/fretlab/palette";
 import { usePracticeSessions } from "@/lib/api/hooks";
+import { useClock } from "@/lib/fretlab/useClock";
 import { routineProgress, weekMinutes } from "@/lib/api/progress";
 
 export function Routines({
@@ -23,7 +24,11 @@ export function Routines({
 }) {
   // §5: L1 owns the data. These were literals: 3 sessions, 68 minutes.
   const history = usePracticeSessions({ limit: 100 });
-  const week = weekMinutes(history.data ?? []);
+  // Null on the server: which day a session lands on depends on the viewer's
+  // timezone, so these wait for a client clock rather than guessing with the
+  // server's and disagreeing at hydration.
+  const { now } = useClock();
+  const week = now === null ? [] : weekMinutes(history.data ?? [], now);
   const weekTotal = week.reduce((sum, day) => sum + day.minutes, 0);
   const weekSessions = week.filter((day) => day.minutes > 0).length;
   return (
@@ -68,10 +73,14 @@ export function Routines({
       <div className="routine-list">
         {ROUTINES.map((routine, index) => {
           const steps = routineSteps(routine);
-          const progress = routineProgress(
-            history.data ?? [],
-            routine.drills.map((step) => step.drillId),
-          );
+          const progress =
+            now === null
+              ? { completed: 0, last: null }
+              : routineProgress(
+                  history.data ?? [],
+                  routine.drills.map((step) => step.drillId),
+                  now,
+                );
           const total = steps.reduce((sum, step) => sum + step.mins, 0);
           const practisedIn = routineKey(routine, selectedKey);
           return (

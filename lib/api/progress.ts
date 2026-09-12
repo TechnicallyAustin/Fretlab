@@ -4,6 +4,16 @@
  *
  * Pure functions over the §4 wire shape: no fetching, no React, so they are
  * testable on their own and the screens stay thin.
+ *
+ * **`now` is a required argument, never a `Date.now()` default.** Every
+ * function here answers a question about the user's local calendar — which day
+ * is today, how long the streak is, which months the graph spans — and the
+ * server has neither the user's clock nor their timezone. When these defaulted
+ * to `Date.now()` they were read during render, so the server produced one
+ * week of day labels and the browser produced another, and React threw a
+ * hydration mismatch on the Today screen. Taking the clock as an argument
+ * makes that impossible to write by accident: a caller has to get one from
+ * `useClock`, which returns null until the client has one.
  */
 import type { PracticeSessionWire } from "./client";
 
@@ -36,7 +46,7 @@ function startOfToday(now: number): number {
 export function accuracySeries(
   sessions: readonly PracticeSessionWire[],
   range: RangeLabel,
-  now = Date.now(),
+  now: number,
 ): number[] {
   const cutoff = startOfToday(now) - (RANGE_DAYS[range] - 1) * DAY_MS;
   const byDay = new Map<string, number[]>();
@@ -66,7 +76,7 @@ export type ProgressSummary = {
 
 export function summarise(
   sessions: readonly PracticeSessionWire[],
-  now = Date.now(),
+  now: number,
 ): ProgressSummary {
   const accuracies = sessions.map((s) => s.accuracy).filter((a): a is number => a !== null);
   const reps = sessions.reduce((sum, session) => sum + (session.reps ?? 0), 0);
@@ -101,8 +111,8 @@ export function summarise(
  */
 export function consistencyLevels(
   sessions: readonly PracticeSessionWire[],
-  weeks = 26,
-  now = Date.now(),
+  weeks: number,
+  now: number,
 ): number[] {
   const totalDays = weeks * 7;
   const minutesByDay = new Map<string, number>();
@@ -139,7 +149,7 @@ export function recentForDrill(
 }
 
 /** "Today", "Tue", "Sun" — the short label the history bars use. */
-export function dayLabel(iso: string, now = Date.now()): string {
+export function dayLabel(iso: string, now: number): string {
   const date = new Date(iso);
   if (dayKey(iso) === dayKey(new Date(startOfToday(now)).toISOString())) return "Today";
   return date.toLocaleDateString(undefined, { weekday: "short" });
@@ -154,8 +164,11 @@ export type Insight = { label: string; value: string; detail: string; percent: n
  * Per-string and per-fret breakdowns are deliberately absent: FretLab does not
  * store which notes were missed, so claiming that detail would be invention.
  */
-export function insights(sessions: readonly PracticeSessionWire[]): Insight[] {
-  const stats = summarise(sessions);
+export function insights(
+  sessions: readonly PracticeSessionWire[],
+  now: number,
+): Insight[] {
+  const stats = summarise(sessions, now);
   const tempos = sessions.map((s) => s.bpm).filter((b): b is number => b !== null);
   const bestTempo = tempos.length ? Math.max(...tempos) : null;
 
@@ -205,7 +218,7 @@ export function insights(sessions: readonly PracticeSessionWire[]): Insight[] {
  */
 export function weekMinutes(
   sessions: readonly PracticeSessionWire[],
-  now = Date.now(),
+  now: number,
 ): { label: string; minutes: number; isToday: boolean }[] {
   const LABELS = ["S", "M", "T", "W", "T", "F", "S"];
   const byDay = new Map<string, number>();
@@ -255,7 +268,7 @@ export function lastAccuracyByDrill(
  * that always ends today, so the axis was wrong on every day of the year bar a
  * handful.
  */
-export function consistencyMonths(weeks = 26, now = Date.now()): string[] {
+export function consistencyMonths(weeks: number, now: number): string[] {
   const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const today = startOfToday(now);
   const seen: string[] = [];
@@ -289,7 +302,7 @@ export type RoutineProgress = {
 export function routineProgress(
   sessions: readonly PracticeSessionWire[],
   drillIds: readonly string[],
-  now = Date.now(),
+  now: number,
 ): RoutineProgress {
   const ids = new Set(drillIds);
   const mine = sessions.filter((session) => ids.has(session.drill_id));

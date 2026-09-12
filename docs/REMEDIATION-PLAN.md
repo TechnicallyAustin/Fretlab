@@ -486,6 +486,39 @@ have verified each one fails against the pre-fix code.
 
 ---
 
+## Found during Stage 2
+
+### - [x] FL-H1 — Today threw a hydration mismatch
+**Status:** `DONE` · **Severity:** Blocker · **Found:** reported from the browser
+
+**Problem.** React threw on the Today screen: the server rendered a week of day
+labels beginning `S` and the browser rendered one beginning `M`, so the tree was
+discarded and regenerated on the client.
+
+Every date helper in `lib/api/progress.ts` defaulted its `now` parameter to
+`Date.now()` — seven of them — so the wall clock was read *during render*. The
+server has neither the user's clock nor their timezone, so `startOfToday()` and
+`getDay()` answered differently on each side. `weekMinutes()` was the one that
+surfaced because its seven labels come from the clock alone: the chart
+disagreed even on a brand-new account with no sessions at all.
+
+`Progress` was hiding the same bug behind its loading state; `Routines`,
+`DrillDetail` and my own `routineProgress()` from FL-07's follow-up were all
+latent.
+
+**Change.** `now` is a required argument everywhere — no defaults — so the
+compiler names every call site that reads a clock during render. Screens get it
+from `useClock()`, which returns null until the client has one and already
+existed for exactly this ("the time of day for a greeting **and the date for a
+week chart**"). Today's week section waits for that clock rather than rendering
+an empty chart the browser then disagrees with.
+
+**Guards.** Two, both confirmed by reintroducing the defect: a render test that
+fails if anything clock-derived appears in Today's server HTML, and a source
+test that fails if a `Date.now()` default comes back.
+
+---
+
 ## Stage 2 — Make the practice loop real
 
 **Goal:** the app can be practised with, not just read. Do not start before Stage 1 is

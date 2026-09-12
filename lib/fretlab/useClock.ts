@@ -51,13 +51,21 @@ export type Clock = {
   dayName: string;
   /** "Good morning" / "Good afternoon" / "Good evening", or "" on the server. */
   greeting: string;
+  /**
+   * Milliseconds, for the date helpers in `lib/api/progress`, or null on the
+   * server. Those used to default to `Date.now()` and so were read during
+   * render: the server's week of day labels disagreed with the browser's and
+   * React threw a hydration mismatch. They take a clock as an argument now,
+   * and this is where a screen gets one.
+   */
+  now: number | null;
 };
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export function useClock(): Clock {
   const stamp = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  if (!stamp) return { date: null, dayName: "", greeting: "" };
+  if (!stamp) return { date: null, dayName: "", greeting: "", now: null };
 
   const [year, month, day, hour] = stamp.split("-").map(Number);
   const date = new Date(year, month, day, hour);
@@ -65,5 +73,6 @@ export function useClock(): Clock {
     date,
     dayName: DAYS[date.getDay()],
     greeting: hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening",
+    now: date.getTime(),
   };
 }

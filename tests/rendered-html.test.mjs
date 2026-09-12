@@ -257,6 +257,30 @@ test("a run that recorded nothing shows no summary figures", async () => {
   }
 });
 
+/**
+ * The Today screen threw a hydration mismatch: the server rendered a week of
+ * day labels beginning "S" and the browser rendered one beginning "M".
+ *
+ * `weekMinutes()` defaulted its `now` to `Date.now()`, so it was read during
+ * render — and the seven labels come from the clock alone, with or without any
+ * sessions, so the chart disagreed even on a brand-new account. The server has
+ * neither the user's clock nor their timezone, so the only correct answer is
+ * not to render it there at all.
+ */
+test("nothing clock-derived is server-rendered on Today", async () => {
+  const html = await (await render("/")).text();
+  const visible = html
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ");
+
+  assert.ok(!/week-chart/.test(visible), "the week chart server-rendered");
+  assert.ok(!/This week/.test(visible), "the week section server-rendered");
+  // The greeting has always waited for a client clock; it still must.
+  for (const greeting of ["Good morning", "Good afternoon", "Good evening"]) {
+    assert.ok(!visible.includes(greeting), `"${greeting}" server-rendered`);
+  }
+});
+
 test("screens handle the loading state §1 requires", async () => {
   const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   // These two screens own data, so their first paint is a loading state rather
