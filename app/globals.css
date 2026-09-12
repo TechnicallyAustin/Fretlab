@@ -1539,6 +1539,146 @@ p {
   font-size: 13px;
 }
 
+/* The tuner. The needle is positioned from cents off the target, clamped at
+   the ends so a slack string pins rather than drawing outside the meter. */
+.tuner-dial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 20px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  text-align: center;
+}
+
+.tuner-dial>strong {
+  font-size: 62px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+
+.tuner-dial>strong small {
+  font-size: 24px;
+  color: var(--quiet);
+}
+
+.tuner-dial>strong.in-tune {
+  color: var(--key-ink);
+}
+
+.tuner-waiting {
+  color: var(--quiet);
+}
+
+.tuner-cents {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.tuner-meter {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 40px;
+  margin-top: 6px;
+  border-radius: 10px;
+  background: linear-gradient(90deg,
+      color-mix(in oklch, var(--line-strong) 60%, transparent),
+      var(--key-fill),
+      color-mix(in oklch, var(--line-strong) 60%, transparent));
+}
+
+.tuner-centre {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--line-strong);
+}
+
+.tuner-needle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: var(--ink);
+  transition: left .09s linear;
+}
+
+.tuner-needle.in-tune {
+  background: var(--key-bright);
+}
+
+.tuner-hz {
+  margin: 0;
+  color: var(--quiet);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-strings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tuner-strings li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+}
+
+.tuner-strings li.current {
+  border-color: var(--key-bright);
+  background: var(--key-fill);
+}
+
+.tuner-strings span {
+  color: var(--quiet);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-strings strong {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.tuner-strings strong small {
+  color: var(--quiet);
+  font-size: 13px;
+}
+
+.tuner-strings em {
+  color: var(--quiet);
+  font-size: 13px;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-note {
+  margin: 10px 0 0;
+  color: var(--quiet);
+  font-size: 13px;
+}
+
 .key-conflict {
   display: flex;
   flex-wrap: wrap;

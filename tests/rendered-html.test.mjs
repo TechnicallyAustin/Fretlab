@@ -281,6 +281,54 @@ test("nothing clock-derived is server-rendered on Today", async () => {
   }
 });
 
+/**
+ * FL-15. The tuner is the one screen whose main job is usually *not* running:
+ * it is waiting for permission, being refused it, or finding no microphone.
+ * §7 wants each of those to be a state with a way out, so the screen has to
+ * render usefully before any microphone exists — including on the server,
+ * where one never will.
+ */
+test("the tuner is useful before the microphone is", async () => {
+  const visible = (html) =>
+    html
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ");
+
+  const text = visible(await (await render("/tuner")).text());
+
+  // It says what it is about to do with the microphone before asking.
+  assert.match(text, /Turn on the microphone/);
+  assert.match(text, /Nothing is recorded or sent anywhere/);
+
+  // And the reference pitches are there whether or not it can ever listen,
+  // because that is the whole feature when there is no microphone to be had.
+  for (const [name, hz] of [
+    ["E", "82.41"],
+    ["A", "110.00"],
+    ["D", "146.83"],
+    ["G", "196.00"],
+    ["B", "246.94"],
+    ["E", "329.63"],
+  ]) {
+    assert.ok(text.includes(hz), `the ${name} string's pitch is missing`);
+  }
+});
+
+test("the tuner's every state names a way out", async () => {
+  const source = await readProjectFile("app/_screens/Tuner.tsx");
+  // Permission refused and no microphone are different problems. Collapsing
+  // them into one message leaves half the readers with no way forward.
+  for (const state of ["denied", "unavailable", "unsupported", "requesting"]) {
+    assert.ok(source.includes(`"${state}"`), `no branch for ${state}`);
+  }
+  assert.ok(
+    !/tone="error"/.test(source),
+    "a refused permission is a state, not an error",
+  );
+});
+
 test("screens handle the loading state §1 requires", async () => {
   const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   // These two screens own data, so their first paint is a loading state rather

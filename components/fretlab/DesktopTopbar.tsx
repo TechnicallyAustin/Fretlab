@@ -33,6 +33,7 @@ export function DesktopTopbar({
     songs: "Song library",
     "song-detail": "Song practice",
     progress: "Your progress",
+    tuner: "Tuner",
     routines: "Routines",
     runner: "Session runner",
     summary: "Session summary",

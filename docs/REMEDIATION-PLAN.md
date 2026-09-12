@@ -559,7 +559,7 @@ test that fails if a `Date.now()` default comes back.
 **Goal:** the app can be practised with, not just read. Do not start before Stage 1 is
 `DONE`.
 
-**Progress:** 6 / 7 done
+**Progress:** 7 / 7 done
 
 | ID | Task | Status |
 |---|---|---|
@@ -569,7 +569,7 @@ test that fails if a `Date.now()` default comes back.
 | FL-12 | Scale position tables (CAGED) | `DONE` |
 | FL-13 | Fix the key-scoped streak | `DONE` |
 | FL-14 | Give drills patterns instead of pitch-class sets | `DONE` |
-| FL-15 | Tuner | `TODO` |
+| FL-15 | Tuner | `DONE` |
 
 ---
 
@@ -965,8 +965,8 @@ against a hand-checked expected first eight notes in the key of C.
 
 ---
 
-### - [ ] FL-15 — Tuner
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** competitive gap table
+### - [x] FL-15 — Tuner
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** competitive gap table
 
 **Files:** new `lib/fretlab/pitch.ts`, new screen
 
@@ -984,6 +984,67 @@ Handle permission denial and no-microphone as first-class states, not as errors.
 detected pitch is within 2 cents.
 
 **Done when.** It tunes a real guitar.
+
+> **Done.** `lib/fretlab/pitch.ts` detects pitch by normalised square
+> difference (McLeod) rather than plain autocorrelation. That choice is the
+> whole reliability of the thing: on a wound bass string the second harmonic is
+> often louder than the fundamental, and a plain autocorrelation locks onto it
+> and reports the octave above — a tuner that confidently tells you the low E
+> is an E, twelve semitones out. There is a test for exactly that case.
+>
+> Accuracy against synthesised reference tones is **under 0.01 cents** on all
+> six strings, against a 2-cent requirement. Removing the sub-sample parabolic
+> interpolation — the ordinary way a tuner ends up *nearly* right — fails three
+> assertions, so the bar is enforced rather than merely met.
+>
+> String pitches derive from `OPEN_PC`, the board's own table, with only the
+> octave added here; a test asserts the tuner and the fretboard agree about
+> what an open string is, so FL-19's alternate tunings change one place.
+>
+> **The four states are the feature.** Most of what a tuner does is not tuning:
+> it is waiting for permission, being refused it, finding no microphone, or
+> hearing nothing. Permission-denied and no-microphone are separate states with
+> separate ways out — collapsing them leaves half the readers stuck — and none
+> of them renders as an error. The reference pitches are always on screen,
+> because they are the whole feature when there is no microphone to be had.
+>
+> Capture disables echo cancellation, auto gain and noise suppression: all
+> three exist to make speech intelligible and all three mangle a sustained
+> tone. Tracks are released on stop and on unmount, so the browser's recording
+> indicator goes out when the screen says it has.
+>
+> 18 assertions in `tests/pitch.test.mjs`, plus two render tests that the
+> screen is useful before a microphone exists.
+
+---
+
+## Stage 2 is complete
+
+Seven of seven. The practice loop is real: a metronome you can play to, routines
+whose steps are drills, a runner that records what it measured, scale shapes a
+guitarist recognises, a streak that counts days, drills that play what their
+names say, and a tuner.
+
+Three defects found along the way that the audit had not listed are recorded
+under the tasks that turned them up: routines shipping invented progress
+(FL-07), the accuracy chart drawn out of date order (FL-13), and a seventh
+mis-taught drill (FL-14). Two runtime faults reported from the browser are
+under **Found during Stage 2**.
+
+Carried forward into Stage 3, logged rather than fixed:
+
+- `Guided` is a second runner — hardcoded to one routine, records nothing, and
+  unreachable since FL-11 pointed the routine screen at the real one. Merge it
+  into `Runner` or delete it.
+- `RoutineDetail` hardcodes `ROUTINES[1]`, so `/routines/current` shows the same
+  routine whichever card you opened.
+- Position tables exist for three scales; the other eight still use a sliding
+  window, labelled honestly.
+- The integration suite contends on the shared local D1 when run in parallel
+  with the rest of `npm test`, so a run occasionally fails a write test that
+  passes on its own.
+
+---
 
 ---
 

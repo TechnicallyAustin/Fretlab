@@ -34,6 +34,7 @@ export const VIEW_PATHS: Record<View, string> = {
   songs: "/songs",
   "song-detail": "/songs/:id",
   progress: "/progress",
+  tuner: "/tuner",
   routines: "/routines",
   "routine-detail": "/routines/current",
   runner: "/routines/runner/:id",
@@ -109,7 +110,15 @@ export function viewForPath(pathname: string): View {
 export function primaryViewFor(view: View): View {
   if (view === "today") return "today";
   if (view === "theory") return "theory";
-  if (view === "train" || view === "routines" || view === "guided" || view === "runner") {
+  // The tuner belongs with practice: it is what you do before a session, not
+  // something you browse.
+  if (
+    view === "train" ||
+    view === "routines" ||
+    view === "guided" ||
+    view === "runner" ||
+    view === "tuner"
+  ) {
     return "train";
   }
   if (
