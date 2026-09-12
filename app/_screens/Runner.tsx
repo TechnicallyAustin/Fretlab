@@ -57,7 +57,7 @@ export function Runner({
 
   if (!plan || plan.steps.length === 0) {
     return (
-      <div className="screen-content flow-screen">
+      <div className="screen-content flow-screen runner-screen">
         <StatusBar end="Practice run" />
         <StateNotice
           tone="error"
@@ -190,7 +190,7 @@ function RunnerBody({
   };
 
   return (
-    <div className="screen-content flow-screen">
+    <div className="screen-content flow-screen runner-screen">
       <StatusBar end={`Step ${index + 1} of ${steps.length}`} />
       <div className="step-bar" aria-label={`Step ${index + 1} of ${steps.length}`}>
         {steps.map((each, i) => (
@@ -221,6 +221,23 @@ function RunnerBody({
         </span>
       </div>
       <MetronomeBar metronome={metronome} />
+      {/* Carried over from Guided, which was deleted in FD-03. Knowing what is
+          coming is the one thing that screen did that this one did not, and it
+          is what stops a routine feeling like an unmarked queue. */}
+      {steps.length > 1 && !last && (
+        <section className="up-next">
+          <div className="section-head">
+            <h2>Up next · all in {practisedIn}</h2>
+          </div>
+          {steps.slice(index + 1).map((step, i) => (
+            <div key={`${step.drillId}${i}`}>
+              <i />
+              <strong>{step.drill.name}</strong>
+              <span>{step.mins} min</span>
+            </div>
+          ))}
+        </section>
+      )}
       <div className="runner-advance">
         {last ? (
           <button className="primary-action" onClick={finish} disabled={saving}>

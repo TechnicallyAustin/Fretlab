@@ -53,7 +53,6 @@ export function DesktopTopbar({
     "key-detail": "Key detail",
     "scale-detail": "Scale position",
     "routine-detail": "Routine detail",
-    guided: "Guided routine",
   };
   const section: Partial<Record<View, string>> = {
     today: "Home",

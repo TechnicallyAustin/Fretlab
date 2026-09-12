@@ -42,7 +42,6 @@ export type View =
   | "key-detail"
   | "scale-detail"
   | "routine-detail"
-  | "guided"
   | "signin"
   | "onboarding";
 

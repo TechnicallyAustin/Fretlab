@@ -683,7 +683,6 @@ p {
 .view-drill-detail .tab-bar,
 .view-scale-detail .tab-bar,
 .view-routine-detail .tab-bar,
-.view-guided .tab-bar,
 .view-chord-detail .tab-bar,
 .view-scale-library-detail .tab-bar,
 .view-song-detail .tab-bar {
@@ -2708,51 +2707,12 @@ p {
   width: 100%;
 }
 
-.guided-hero {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 22px;
-  border: 1px solid var(--key-edge);
-  border-radius: 20px;
-  background: radial-gradient(circle at 50% 46%, var(--key-glow), transparent 38%), var(--card);
-  text-align: center;
-}
 
-.guided-hero h1 {
-  margin-top: 8px;
-  font-size: 1.812rem;
-  font-weight: 500;
-  letter-spacing: -.03em;
-}
 
-.guided-hero .ring {
-  margin-top: 20px;
-}
 
-.guided-hero .ring::after {
-  inset: 10px;
-}
 
-.guided-hero .ring>span {
-  font-size: 1.688rem;
-}
 
-.guided-hero>strong {
-  margin-top: -98px;
-  z-index: 2;
-  font-size: 1.562rem;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
 
-.guided-hero>span {
-  z-index: 2;
-  margin-bottom: 53px;
-  color: var(--quiet);
-  font-size: 0.8125rem;
-}
 
 .up-next {
   display: grid;
@@ -2778,9 +2738,6 @@ p {
   font-size: 0.8125rem;
 }
 
-.guided-actions {
-  grid-template-columns: 1fr 1.4fr;
-}
 
 .library-launchpad {
   display: grid;
@@ -5395,7 +5352,6 @@ p {
   .view-drill-detail .tab-bar,
   .view-scale-detail .tab-bar,
   .view-routine-detail .tab-bar,
-  .view-guided .tab-bar,
   .view-chord-detail .tab-bar,
   .view-scale-library-detail .tab-bar,
   .view-song-detail .tab-bar {
@@ -7203,13 +7159,8 @@ p {
     align-self: center;
   }
 
-  .guided-hero {
-    width: min(700px, 100%);
-    align-self: center;
-  }
-
-  .guided-screen .up-next,
-  .guided-screen .transport {
+  .runner-screen .up-next,
+  .runner-screen .transport {
     width: min(700px, 100%);
     align-self: center;
   }

@@ -40,7 +40,6 @@ export const VIEW_PATHS: Record<View, string> = {
   "routine-detail": "/routines/:id",
   runner: "/routines/runner/:id",
   summary: "/routines/summary",
-  guided: "/routines/guided",
   signin: "/signin",
   onboarding: "/onboarding",
 };
@@ -124,7 +123,6 @@ export function primaryViewFor(view: View): View {
     view === "train" ||
     view === "drills" ||
     view === "routines" ||
-    view === "guided" ||
     view === "runner" ||
     view === "tuner"
   ) {

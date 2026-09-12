@@ -61,7 +61,7 @@ export function RoutineDetail({
         </div>
       )}
       <SegmentTabs
-        labels={["Drills", "Guided", "Settings"]}
+        labels={["Drills", "How it runs", "Settings"]}
         active={tab}
         onChange={setTab}
       />
@@ -94,12 +94,13 @@ export function RoutineDetail({
           })}
         </ol>
       )}
-      {tab === "Guided" && (
+      {tab === "How it runs" && (
         <article className="tab-copy">
           <h2>Stay in the flow</h2>
           <p>
-            Guided mode keeps time, moves you between drills, and shows what is
-            coming next so your hands never cool down.
+            The runner keeps time, moves you between drills, and shows what is
+            coming next so your hands never cool down. Each drill you finish is
+            recorded against the key you practised it in.
           </p>
         </article>
       )}
