@@ -49,6 +49,9 @@ export function Today({
   const stats = typeof now !== "number" ? null : summarise(sessions, now);
   const week = typeof now !== "number" ? null : weekMinutes(sessions, now);
   const weekTotal = week?.reduce((sum, day) => sum + day.minutes, 0) ?? 0;
+  // The tallest bar in the week, so a light week still reads as a shape rather
+  // than as five slivers. Never zero, or every bar divides by it.
+  const peak = Math.max(1, ...(week ?? []).map((day) => day.minutes));
   const contributionLevels =
     typeof now !== "number" ? null : workweekContributionLevels(sessions, 5, now);
 
@@ -111,14 +114,41 @@ export function Today({
           rendering an empty chart the browser then disagrees with. */}
       {week && (
       <section className="section">
-        {/* The heading used to read "This week" over a grid of five, and the
-            minutes beside it are a different window again. Both are labelled
-            now: the grid says what it spans, the figure says what it counts. */}
         <div className="section-head">
-          <h2>Last five weeks</h2>
-          <span>{weekTotal} min this week</span>
+          <h2>This week</h2>
+          <span>{weekTotal} min</span>
+        </div>
+        {/* Seven bars, one per day, at the minutes actually practised. This was
+            replaced by the five-level contribution grid below, which lost both
+            the weekend and the magnitude: a 40-minute Tuesday and a 10-minute
+            one are the same square. The bars answer "how much", the grid below
+            answers "how often" — they are different questions. */}
+        <div className="week-chart">
+          {week.map((day, i) => (
+            <div className="day" key={i}>
+              <div
+                className={`bar-track ${day.isToday ? "today" : ""}`}
+                title={`${day.minutes} minutes`}
+              >
+                <span
+                  style={{
+                    height: day.minutes
+                      ? `${Math.max(18, Math.round((day.minutes / peak) * 100))}%`
+                      : 0,
+                  }}
+                />
+              </div>
+              <span>{day.label}</span>
+            </div>
+          ))}
         </div>
         {contributionLevels && (
+          <>
+          {/* Its own heading: the bars above are this week, this is five. One
+              section heading cannot be true of both. */}
+          <div className="section-head section-head-sub">
+            <h3>Last five weeks</h3>
+          </div>
           <div className="contribution-wrap">
             <div className="contribution-days" aria-hidden="true">
               {[
@@ -153,6 +183,7 @@ export function Today({
               Weekdays only. Weekend practice still counts towards your streak.
             </p>
           </div>
+          </>
         )}
       </section>
       )}

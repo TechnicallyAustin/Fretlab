@@ -451,6 +451,19 @@ p {
   margin-top: 9px;
 }
 
+/* A second heading inside one section: the bars are this week, the grid is
+   five. Quieter than the section heading so the section still reads as one. */
+.section-head-sub {
+  margin-top: 14px;
+}
+
+.section-head-sub h3 {
+  margin: 0;
+  color: var(--quiet);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 .contribution-wrap {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr);

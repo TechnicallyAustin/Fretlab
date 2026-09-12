@@ -273,11 +273,14 @@ test("Today uses a contribution graph and fretboards keep stable viewports", asy
   assert.match(css, /\.contribution-graph\s*\{[^}]*grid-auto-flow: column/,
     "weeks should run as columns");
 
-  // The heading said "This week" over five weeks of data, and the minutes
-  // beside it count a different window again. Both must say what they are.
-  assert.match(today, /Last five weeks/, "the heading should match the grid");
-  assert.match(today, /min this week/, "the figure should say what it counts");
-  assert.ok(!/<h2>This week<\/h2>/.test(today), "the mismatched heading is back");
+  // Today shows two windows and each must be labelled with its own. The bars
+  // are this week at real minutes; the grid is five weeks at five levels. An
+  // earlier version of this test asserted "This week" was *absent*, which was
+  // only right while the bars were missing — the mismatch was never the words,
+  // it was one heading standing over two different spans of time.
+  assert.match(today, /<h2>This week<\/h2>/, "the week bars need their heading");
+  assert.match(today, /week-chart/, "the weekly bars are the Today view");
+  assert.match(today, /<h3>Last five weeks<\/h3>/, "the grid needs its own");
   // Five rows is a choice, not a missing weekend, and a beginner counting rows
   // should not have to guess which.
   assert.match(today, /Weekdays only/);
