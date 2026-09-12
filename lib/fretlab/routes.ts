@@ -31,7 +31,6 @@ export const VIEW_PATHS: Record<View, string> = {
   "chord-detail": "/chords/:id",
   scales: "/scales",
   "scale-library-detail": "/scales/:id",
-  "scale-detail": "/scales/current",
   songs: "/songs",
   "song-detail": "/songs/:id",
   progress: "/progress",

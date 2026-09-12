@@ -25,7 +25,7 @@ test("server-renders FretLab", async () => {
 
 test("ships every handoff screen and computed music logic", async () => {
   const source = await frontendSource();
-  for (const view of ["today","drills","train","keys","progress","routines","runner","summary","grouped","drill-detail","key-detail","scale-detail","routine-detail"]) {
+  for (const view of ["today","drills","train","keys","progress","routines","runner","summary","grouped","drill-detail","key-detail","routine-detail"]) {
     assert.match(source, new RegExp(`"${view}"`), `missing view: ${view}`);
   }
   for (const fn of ["majorScale", "targetNotes", "scaleShape", "CircleOfFifths"]) {

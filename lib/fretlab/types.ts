@@ -40,7 +40,6 @@ export type View =
   | "grouped"
   | "drill-detail"
   | "key-detail"
-  | "scale-detail"
   | "routine-detail"
   | "signin"
   | "onboarding";

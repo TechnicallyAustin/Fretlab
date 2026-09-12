@@ -51,7 +51,6 @@ export function DesktopTopbar({
     grouped: "Grouped drills",
     "drill-detail": "Drill detail",
     "key-detail": "Key detail",
-    "scale-detail": "Scale position",
     "routine-detail": "Routine detail",
   };
   const section: Partial<Record<View, string>> = {

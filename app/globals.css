@@ -704,7 +704,6 @@ p {
 .view-runner .tab-bar,
 .view-summary .tab-bar,
 .view-drill-detail .tab-bar,
-.view-scale-detail .tab-bar,
 .view-routine-detail .tab-bar,
 .view-chord-detail .tab-bar,
 .view-scale-library-detail .tab-bar,
@@ -5373,8 +5372,7 @@ p {
   .view-runner .tab-bar,
   .view-summary .tab-bar,
   .view-drill-detail .tab-bar,
-  .view-scale-detail .tab-bar,
-  .view-routine-detail .tab-bar,
+    .view-routine-detail .tab-bar,
   .view-chord-detail .tab-bar,
   .view-scale-library-detail .tab-bar,
   .view-song-detail .tab-bar {
