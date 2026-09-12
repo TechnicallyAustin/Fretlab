@@ -1,0 +1,74 @@
+"use client";
+
+/**
+ * App Template Contract v1 §5 — L3 element.
+ * Single purpose. Props in, events out. Pure presentation. May not import the
+ * API client, the auth store, the router, or anything from L1 or L2.
+ */
+import type { View } from "@/lib/fretlab/types";
+import { CHORDS, SCALES, SONGS } from "@/lib/fretlab/library";
+
+export function BottomNav({ active, go }: { active: View; go: (view: View) => void }) {
+  const items: { label: string; view: View }[] = [
+    { label: "Today", view: "today" },
+    { label: "Learn", view: "drills" },
+    { label: "Practice", view: "train" },
+    { label: "Theory", view: "theory" },
+  ];
+  return (
+    <nav className="tab-bar" aria-label="Primary navigation">
+      <div className="desktop-brand" aria-label="FretLab">
+        <span>F</span>
+        <div>
+          <strong>FretLab</strong>
+          <small>
+            Practice one key.
+            <br />
+            Know the whole neck.
+          </small>
+        </div>
+      </div>
+      <div className="nav-items">
+        {items.map((item, index) => (
+          <button
+            key={item.label}
+            onClick={() => go(item.view)}
+            className={item.view === active ? "active" : ""}
+          >
+            <i />
+            {item.label}
+            <small>0{index + 1}</small>
+          </button>
+        ))}
+      </div>
+      <div className="desktop-library-nav">
+        <span>Explore</span>
+        <button onClick={() => go("keys")}>
+          Key map <small>12</small>
+        </button>
+        <button onClick={() => go("chords")}>
+          Chords <small>{CHORDS.length}</small>
+        </button>
+        <button onClick={() => go("scales")}>
+          Scales <small>{SCALES.length}</small>
+        </button>
+        <button onClick={() => go("songs")}>
+          Songs <small>{SONGS.length}</small>
+        </button>
+      </div>
+      <div className="desktop-side-progress">
+        <div>
+          <span>Weekly goal</span>
+          <strong>68 / 90 min</strong>
+        </div>
+        <i>
+          <b />
+        </i>
+        <small>Three sessions this week</small>
+      </div>
+      <p className="desktop-nav-note">
+        One connected practice system for the entire fretboard.
+      </p>
+    </nav>
+  );
+}

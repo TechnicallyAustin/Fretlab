@@ -1,0 +1,240 @@
+"use client";
+
+/**
+ * App Template Contract v1 §5 — L1 screen.
+ * Owns its data and page-level layout, and composes L2 sections. FretLab
+ * renders these from the shell in app/page.tsx; see the README on routing.
+ */
+import type { KeyName } from "@/lib/fretlab/types";
+import { FIFTHS, STRING_NAMES, intervalShape } from "@/lib/fretlab/theory";
+import { Fretboard } from "@/components/fretlab/Fretboard";
+import { StatusBar } from "@/components/fretlab/StatusBar";
+import { TRAINING_MODULES } from "@/lib/fretlab/library";
+import { playTones } from "@/lib/fretlab/audio";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { api, ApiClientError } from "@/lib/api/client";
+
+export function Train({
+  selectedKey,
+  setSelectedKey,
+}: {
+  selectedKey: KeyName;
+  setSelectedKey: (key: KeyName) => void;
+}) {
+  const [moduleId, setModuleId] =
+    useState<(typeof TRAINING_MODULES)[number]["id"]>("locator");
+  const moduleIndex = TRAINING_MODULES.findIndex(
+    (item) => item.id === moduleId,
+  );
+  const trainingModule = TRAINING_MODULES[moduleIndex];
+  const notes = useMemo(
+    () => intervalShape(selectedKey, [...trainingModule.intervals], 1, 7),
+    [selectedKey, trainingModule],
+  );
+  const solved = () => new Set(notes.slice(0, -1).map((note) => `${note.s}:${note.f}`));
+  const signature = notes.map((note) => `${note.s}:${note.f}`).join(",");
+  const [found, setFound] = useState<Set<string>>(solved);
+  const [misses, setMisses] = useState(0);
+  const [renderedFor, setRenderedFor] = useState(signature);
+  // Changing key or module starts the drill over. Adjusting during render
+  // avoids the extra committed frame an effect would cause.
+  if (renderedFor !== signature) {
+    setRenderedFor(signature);
+    setFound(solved());
+    setMisses(0);
+  }
+  const hit = (s: number, f: number) => {
+    const id = `${s}:${f}`;
+    if (notes.some((note) => note.s === s && note.f === f))
+      setFound((current) => new Set(current).add(id));
+    else setMisses((n) => n + 1);
+  };
+  const accuracy = Math.round(
+    (found.size / Math.max(1, found.size + misses)) * 100,
+  );
+
+  // When the module started, so a recorded session carries a real duration.
+  // Set from an effect: reading the clock during render is not pure.
+  const startedAt = useRef(0);
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, [trainingModule.id, selectedKey]);
+  const [recordError, setRecordError] = useState<string | null>(null);
+
+  /**
+   * §1 Resource: a completed module is a practice session.
+   *
+   * Only the figures this screen actually measures are sent: hits, misses and
+   * elapsed time. Nothing is invented to fill a column.
+   */
+  const record = async (complete: boolean) => {
+    if (!complete) return;
+    try {
+      await api.createPracticeSession({
+        title: trainingModule.name,
+        drill_id: trainingModule.id,
+        music_key: selectedKey,
+        accuracy,
+        reps: found.size + misses,
+        duration_seconds: startedAt.current
+          ? Math.max(1, Math.round((Date.now() - startedAt.current) / 1000))
+          : undefined,
+        tags: [selectedKey, "training"],
+      });
+      setRecordError(null);
+    } catch (error) {
+      // A signed-out visitor can still practise; only the saving fails, and
+      // saying so is better than a silent no-op.
+      if (error instanceof ApiClientError && error.code === "unauthenticated") {
+        setRecordError("Sign in to save this session to your history.");
+        return;
+      }
+      setRecordError(
+        error instanceof ApiClientError
+          ? error.message
+          : "That session was not saved. Your practice still counted.",
+      );
+    }
+  };
+
+  const next = () => {
+    void record(found.size === notes.length);
+    if (moduleIndex === TRAINING_MODULES.length - 1)
+      setSelectedKey(FIFTHS[(FIFTHS.indexOf(selectedKey) + 1) % FIFTHS.length]);
+    setModuleId(
+      TRAINING_MODULES[(moduleIndex + 1) % TRAINING_MODULES.length].id,
+    );
+    setMisses(0);
+    startedAt.current = Date.now();
+  };
+
+  return (
+    <div className="screen-content train-screen">
+      <StatusBar end="Training modules" />
+      <section className="train-module-picker">
+        <div className="section-head">
+          <h2>Your module path</h2>
+          <span>
+            {moduleIndex + 1} of {TRAINING_MODULES.length}
+          </span>
+        </div>
+        <div>
+          {TRAINING_MODULES.map((item, index) => (
+            <button
+              className={item.id === moduleId ? "active" : ""}
+              onClick={() => setModuleId(item.id)}
+              key={item.id}
+            >
+              <span>0{index + 1}</span>
+              <strong>{item.name}</strong>
+              <small>
+                {item.level} · {item.minutes} min
+              </small>
+              <i>
+                <b
+                  style={{
+                    width: `${item.id === moduleId ? Math.round((found.size / Math.max(1, notes.length)) * 100) : index < moduleIndex ? 100 : 12}%`,
+                  }}
+                />
+              </i>
+            </button>
+          ))}
+        </div>
+      </section>
+      <div className="train-hero">
+        <p className="kicker">{trainingModule.name}</p>
+        <strong>{selectedKey}</strong>
+        <span>{trainingModule.instruction}</span>
+        <div>
+          <span>{trainingModule.target}</span>
+          <button
+            onClick={() => playTones(selectedKey, [...trainingModule.intervals], true)}
+          >
+            ▶ Hear target
+          </button>
+        </div>
+      </div>
+      <div className="train-board">
+        <div className="section-head">
+          <h2>Tap each target</h2>
+          <span>Every note has a consistent color</span>
+        </div>
+        <Fretboard
+          notes={notes}
+          low={1}
+          high={7}
+          interactive
+          found={found}
+          onCell={hit}
+          rootKey={selectedKey}
+        />
+      </div>
+      <div className="stat-grid">
+        <article>
+          <strong>
+            {found.size}/{notes.length}
+          </strong>
+          <span>found</span>
+        </article>
+        <article>
+          <strong>0:24</strong>
+          <span>elapsed</span>
+        </article>
+        <article>
+          <strong>{accuracy || 0}%</strong>
+          <span>accuracy</span>
+        </article>
+      </div>
+      <button
+        className={
+          found.size === notes.length ? "primary-action" : "secondary-action"
+        }
+        onClick={next}
+      >
+        {found.size === notes.length
+          ? "Complete module"
+          : "Move to next module"}{" "}
+        <span>→</span>
+      </button>
+      {recordError && (
+        <p className="record-notice" role="status">
+          {recordError}
+        </p>
+      )}
+      <aside className="desktop-train-guide">
+        <div>
+          <p className="kicker">Live target map</p>
+          <strong>{notes.length - found.size}</strong>
+          <span>locations remain</span>
+        </div>
+        <div className="target-lanes">
+          {[6, 5, 4, 3, 2, 1].map((string) => {
+            const total = notes.filter((note) => note.s === string).length;
+            const complete = notes.filter(
+              (note) => note.s === string && found.has(`${note.s}:${note.f}`),
+            ).length;
+            return (
+              <div key={string}>
+                <span>{STRING_NAMES[string]}</span>
+                <i>
+                  <b
+                    style={{
+                      width: `${total ? (complete / total) * 100 : 100}%`,
+                    }}
+                  />
+                </i>
+                <small>
+                  {complete}/{total}
+                </small>
+              </div>
+            );
+          })}
+        </div>
+        <p>
+          Work string by string. Say each pitch or degree before you tap it,
+          then repeat without fret numbers.
+        </p>
+      </aside>
+    </div>
+  );
+}

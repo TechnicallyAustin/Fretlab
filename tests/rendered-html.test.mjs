@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { frontendSource, readProjectFile, squash } from "./helpers/sources.mjs";
 
 async function render(path = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}-${path}`);
   const { default: worker } = await import(workerUrl.href);
-  return worker.fetch(new Request(`http://localhost${path}`, { headers: { accept: "text/html" } }), { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } }, { waitUntil() {}, passThroughOnException() {} });
+  return worker.fetch(
+    new Request(`http://localhost${path}`, { headers: { accept: "text/html" } }),
+    { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+    { waitUntil() {}, passThroughOnException() {} },
+  );
 }
 
 test("server-renders FretLab", async () => {
@@ -20,98 +24,206 @@ test("server-renders FretLab", async () => {
 });
 
 test("ships every handoff screen and computed music logic", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  for (const view of ["today","drills","train","keys","progress","routines","runner","summary","grouped","drill-detail","key-detail","scale-detail","routine-detail","guided"]) assert.match(page, new RegExp(`\\"${view}\\"`));
-  assert.match(page, /function majorScale/);
-  assert.match(page, /function targetNotes/);
-  assert.match(page, /function scaleShape/);
-  assert.match(page, /function CircleOfFifths/);
-  assert.match(page, /localStorage\.setItem\("fretlab-key"/);
+  const source = await frontendSource();
+  for (const view of ["today","drills","train","keys","progress","routines","runner","summary","grouped","drill-detail","key-detail","scale-detail","routine-detail","guided"]) {
+    assert.match(source, new RegExp(`"${view}"`), `missing view: ${view}`);
+  }
+  for (const fn of ["majorScale", "targetNotes", "scaleShape", "CircleOfFifths"]) {
+    assert.match(source, new RegExp(`function ${fn}`), `missing function: ${fn}`);
+  }
+  // The global key is still persisted per device, now through useStoredKey.
+  assert.match(source, /"fretlab-key"/);
 });
 
 test("ships complete chord, scale, and song library flows", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  for (const view of ["chords","chord-detail","scales","scale-library-detail","songs","song-detail"]) assert.match(page, new RegExp(`\\"${view}\\"`));
-  for (const component of ["ChordLibrary","ChordDetail","ScaleLibrary","ScaleLibraryDetail","SongLibrary","SongDetail"]) assert.match(page, new RegExp(`function ${component}`));
-  assert.match(page, /const CHORDS/);
-  assert.match(page, /const SCALES/);
-  assert.match(page, /const SONGS/);
-  assert.match(page, /function intervalShape/);
+  const source = await frontendSource();
+  for (const view of ["chords","chord-detail","scales","scale-library-detail","songs","song-detail"]) {
+    assert.match(source, new RegExp(`"${view}"`), `missing view: ${view}`);
+  }
+  for (const component of ["ChordLibrary","ChordDetail","ScaleLibrary","ScaleLibraryDetail","SongLibrary","SongDetail"]) {
+    assert.match(source, new RegExp(`function ${component}`), `missing component: ${component}`);
+  }
+  for (const data of ["CHORDS", "SCALES", "SONGS"]) {
+    assert.match(source, new RegExp(`const ${data}`), `missing library: ${data}`);
+  }
+  assert.match(source, /function intervalShape/);
 });
 
 test("includes visual theory, piano comparison, and drill history systems", async () => {
-  const [page,css] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),readFile(new URL("../app/globals.css", import.meta.url), "utf8")]);
-  assert.match(page,/function PianoMap/);
-  assert.match(page,/function TheoryLesson/);
-  assert.match(page,/function DrillHistory/);
-  assert.match(page,/Same notes on a piano/);
-  assert.match(css,/\.drill-card \.fretboard\.mini/);
-  assert.match(css,/\.view-drill-detail \.drill-detail-screen\.tab-practice/);
+  const source = await frontendSource();
+  const css = await readProjectFile("app/globals.css");
+  for (const fn of ["PianoMap", "TheoryLesson", "DrillHistory"]) {
+    assert.match(source, new RegExp(`function ${fn}`), `missing component: ${fn}`);
+  }
+  assert.match(source, /Same notes on a piano/);
+  assert.match(css, /\.drill-card \.fretboard\.mini/);
+  assert.match(css, /\.view-drill-detail \.drill-detail-screen\.tab-practice/);
 });
 
 test("ships modular training, playable libraries, and a dedicated theory hub", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /const TRAINING_MODULES/);
-  assert.match(page, /Note locator/);
-  assert.match(page, /Chord tones/);
-  assert.match(page, /function playTones/);
-  assert.match(page, /Hear chord/);
-  assert.match(page, /Hear scale/);
-  assert.match(page, /function TheoryHub/);
-  assert.match(page, /Fretboard foundations/);
-  assert.match(page, /Rhythm & phrasing/);
-  assert.match(page, /level:"Advanced"/);
+  const source = await frontendSource();
+  assert.match(source, /const TRAINING_MODULES/);
+  assert.match(source, /Note locator/);
+  assert.match(source, /Chord tones/);
+  assert.match(source, /function playTones/);
+  assert.match(source, /Hear chord/);
+  assert.match(source, /Hear scale/);
+  assert.match(source, /function TheoryHub/);
+  assert.match(source, /Fretboard foundations/);
+  assert.match(source, /Rhythm & phrasing/);
+  assert.match(squash(source), /level:"Advanced"/);
 });
 
-test("renders detailed pitch-colored fretboards", async () => {
-  const page = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
-  assert.match(page, /const PC_KEY/);
-  assert.match(page, /noteAccent/);
-  assert.match(page, /linearGradient/);
-  assert.match(page, /\[3,5,7,9\]/);
-  assert.match(page, /strokeWidth=\{\.55\+string\*\.13\}/);
+test("notes are coloured by function, not by pitch class", async () => {
+  const source = await frontendSource();
+
+  // The old board coloured every dot by its pitch class, so a seven-note scale
+  // arrived as seven unrelated hues. That system is gone for good.
+  assert.doesNotMatch(source, /noteAccent/, "pitch-class colouring must not come back");
+  assert.doesNotMatch(
+    source,
+    /palette\(PC_KEY\[/,
+    "a note's colour must not be derived from its pitch class",
+  );
+
+  // Function drives the drawing instead: four roles, one hue per key.
+  const roles = await import("../lib/fretlab/noteRoles.ts");
+  assert.deepEqual(roles.LEGEND_ROLES, ["root", "third", "fifth", "scale"]);
+  assert.equal(roles.roleForDegree(0), "root");
+  assert.equal(roles.roleForDegree(4), "third");
+  assert.equal(roles.roleForDegree(3), "third", "minor thirds are still thirds");
+  assert.equal(roles.roleForDegree(7), "fifth");
+  assert.equal(roles.roleForDegree(2), "scale");
+  assert.equal(roles.roleForDegree(1), "outside");
+
+  // Shape carries the meaning, so the board survives greyscale.
+  const shapes = roles.LEGEND_ROLES.map((role) => roles.ROLE_STYLE[role].shape);
+  assert.equal(new Set(shapes).size >= 3, true, "roles must differ by shape, not only colour");
+
+  // Every role sits in the key's own hue.
+  const hue = (await import("../lib/fretlab/palette.ts")).keyHue("G");
+  for (const role of roles.LEGEND_ROLES) {
+    assert.match(roles.roleColor(role, "G"), new RegExp(`oklch\\([0-9.]+ [0-9.]+ ${hue}\\)`));
+  }
+
+  assert.match(source, /linearGradient/);
+  assert.match(squash(source), /strokeWidth=\{0\.55\+string\*0\.13\}/);
+});
+
+test("every board states its fret window, including mini boards", async () => {
+  const source = await frontendSource();
+  // A board starting at fret 7 used to show no numbers and no string names,
+  // which is what made drill boards unreadable.
+  assert.doesNotMatch(source, /const showLabels = !mini/);
+  assert.doesNotMatch(source, /const showStringNames = !mini/);
+  assert.match(source, /Position \$\{low\}/);
+  assert.match(source, /Open position/);
+
+  // Fret markers are at their real neck positions.
+  const { default: _ } = { default: null };
+  void _;
+  assert.match(squash(source), /SINGLE_INLAYS=newSet\(\[3,5,7,9,15,17,19,21\]\)/);
+  assert.match(squash(source), /DOUBLE_INLAYS=newSet\(\[12,24\]\)/);
+});
+
+test("text is readable: nothing ships below 12px", async () => {
+  const css = await readProjectFile("app/globals.css");
+  const sizes = [...css.matchAll(/font-size:\s*([0-9.]+)px/g)].map((match) => Number(match[1]));
+  assert.ok(sizes.length > 100, "expected the full stylesheet");
+  const tiny = sizes.filter((size) => size < 12);
+  assert.deepEqual(tiny, [], `found text below 12px: ${[...new Set(tiny)].join(", ")}`);
+  assert.match(css, /font: 400 16px\/1\.6 Inter/, "body copy should be 16px");
 });
 
 test("keeps one global key across guided drills, routines, and harmony", async () => {
-  const [page, css] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8")]);
-  assert.match(page, /function KeySelectorModal/);
-  assert.match(page, /Global key/);
-  assert.match(page, /const \[selectedKey,setSelectedKey\]/);
-  assert.match(page, /const \[selectedDrill,setSelectedDrill\]/);
-  assert.match(page, /function drillNotes/);
-  assert.match(page, /Why this drill/);
-  assert.match(page, /Scale → chord → music/);
-  assert.match(page, /A scale is the source; chords are selected stacks/);
-  assert.match(page, /practice routines/);
+  const source = await frontendSource();
+  const css = await readProjectFile("app/globals.css");
+  assert.match(source, /function KeySelectorModal/);
+  assert.match(source, /Global key/);
+  // One global key, now held in a single store rather than in the shell, so it
+  // survives navigation between routes and across tabs.
+  assert.match(squash(source), /const\[selectedKey,setSelectedKey\]=useStoredKey\(\)/);
+  assert.match(source, /useSyncExternalStore/);
+  // The selected drill moved from component state into the URL.
+  assert.match(squash(source), /"\/drills\/:id"/);
+  assert.doesNotMatch(source, /setSelectedDrill/);
+  assert.match(source, /function drillNotes/);
+  assert.match(source, /Why this drill/);
+  assert.match(source, /Scale → chord → music/);
+  assert.match(source, /A scale is the source; chords are selected stacks/);
+  assert.match(source, /practice routines/);
   assert.match(css, /\.drill-board-stage/);
   assert.match(css, /\.key-modal-backdrop/);
 });
 
 test("clarifies practice studio, keeps one key button, and tracks consistency", async () => {
-  const [page, css] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8")]);
-  assert.match(page, /Choose practice studio lesson/);
-  assert.match(page, /Goal · find all/);
-  assert.match(page, /Circle of fifths/);
-  assert.doesNotMatch(page, /global-key-select/);
-  assert.match(page, /Practice consistency/);
-  assert.match(page, /commit-graph/);
-  assert.match(css, /@media \(max-width:899px\)/);
+  const source = await frontendSource();
+  const css = await readProjectFile("app/globals.css");
+  assert.match(source, /Choose practice studio lesson/);
+  assert.match(source, /Goal · find all/);
+  assert.match(source, /Circle of fifths/);
+  assert.doesNotMatch(source, /global-key-select/);
+  assert.match(source, /Practice consistency/);
+  assert.match(source, /commit-graph/);
+  assert.match(squash(css), /@media\(max-width:899px\)/);
   assert.match(css, /\.drill-filter-stack \.segment-tabs/);
 });
 
 test("uses the paper theme and key-color token system", async () => {
-  const [page, css, layout] = await Promise.all([readFile(new URL("../app/page.tsx", import.meta.url), "utf8"), readFile(new URL("../app/globals.css", import.meta.url), "utf8"), readFile(new URL("../app/layout.tsx", import.meta.url), "utf8")]);
-  assert.match(page, /oklch\(0\.58 0\.155/);
-  assert.match(css, /--paper:#f4f0e7/);
-  assert.match(css, /--card:#fbf8f2/);
+  const source = await frontendSource();
+  const css = await readProjectFile("app/globals.css");
+  const layout = await readProjectFile("app/layout.tsx");
+  assert.match(source, /oklch\(0\.58 0\.155/);
+  assert.match(squash(css), /--paper:#f4f0e7/);
+  assert.match(squash(css), /--card:#fbf8f2/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(layout, /FretLab — Practice one key/);
   assert.match(layout, /\/og\.png/);
 });
 
-test("keeps catch-all routes renderable", async () => {
-  const response = await render("/drills");
-  assert.equal(response.status, 200);
-  const catchAll = await readFile(new URL("../app/[...slug]/page.tsx", import.meta.url), "utf8");
-  assert.match(catchAll, /export \{ default \} from "\.\.\/page"/);
+test("every view has its own route and renders there", async () => {
+  const { VIEW_PATHS } = await import("../lib/fretlab/routes.ts");
+
+  // Each view now owns a URL, so §5's "L1 owns URL state" is literally true.
+  const paths = Object.entries(VIEW_PATHS).map(([view, path]) => [
+    view,
+    path
+      .replace("/drills/:id", "/drills/position-one")
+      .replace("/chords/:id", "/chords/c-major")
+      .replace("/scales/:id", "/scales/blues")
+      .replace("/songs/:id", "/songs/stand-by-me"),
+  ]);
+
+  for (const [view, path] of paths) {
+    const response = await render(path);
+    assert.equal(response.status, 200, `${view} did not render at ${path}`);
+    const html = await response.text();
+    assert.match(
+      html,
+      new RegExp(`app-frame view-${view}\\b`),
+      `${path} rendered, but not as the ${view} view`,
+    );
+  }
+});
+
+test("detail routes render the entity named in the URL", async () => {
+  const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  for (const [path, expected] of [
+    ["/chords/c-major", "C major"],
+    ["/chords/a-minor", "A minor"],
+    ["/songs/dreams", "Dreams"],
+    ["/scales/blues", "Blues"],
+    ["/drills/thirds", "Thirds"],
+  ]) {
+    const text = strip(await (await render(path)).text());
+    assert.ok(text.includes(expected), `${path} should name "${expected}"`);
+  }
+});
+
+test("screens handle the loading state §1 requires", async () => {
+  const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  // These two screens own data, so their first paint is a loading state rather
+  // than an empty shell or fabricated numbers.
+  assert.match(strip(await (await render("/progress")).text()), /Loading your practice history/);
+  assert.match(strip(await (await render("/signin")).text()), /Checking your session/);
 });

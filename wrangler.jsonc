@@ -1,0 +1,28 @@
+{
+  // Wrangler config for CLI operations: D1 migrations and seeding
+  // (`npm run db:migrate`, `npm run db:seed`).
+  //
+  // The Cloudflare Vite plugin merges this file with the inline `config` object
+  // in vite.config.ts, so anything that plugin already supplies is deliberately
+  // absent here. `main` and `compatibility_flags` in particular must NOT be
+  // repeated: duplicating `nodejs_compat` stops the Workers runtime from
+  // starting at all.
+  //
+  // Keep the binding and database names in step with vite.config.ts.
+  "name": "site-creator-vinext-starter",
+  "compatibility_date": "2025-11-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "site-creator-d1",
+      "database_id": "00000000-0000-4000-8000-000000000000",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "site-creator-r2"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FretLabFrame } from "@/app/_screens/FretLabFrame";
 import { headers } from "next/headers";
 import "./globals.css";
 
@@ -27,5 +28,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>{children}</body></html>;
+  // The frame is the shell every route renders inside: phone chrome, the global
+  // key, and the navigation. Routes supply only their screen.
+  return (
+    <html lang="en">
+      <body>
+        <FretLabFrame>{children}</FretLabFrame>
+      </body>
+    </html>
+  );
 }
