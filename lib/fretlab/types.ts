@@ -43,7 +43,9 @@ export type View =
   | "scale-detail"
   | "routine-detail"
   | "guided"
-  | "signin";
+  | "signin"
+  | "onboarding";
+
 export type Note = { s: number; f: number };
 export type Tuning = {
   id: string;

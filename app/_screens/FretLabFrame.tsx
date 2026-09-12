@@ -40,9 +40,6 @@ export function FretLabFrame({ children }: { children: ReactNode }) {
         >
           {standMode ? "Stand mode on" : "Stand mode"}
         </button>
-        <button className="theme-mode-toggle" type="button" onClick={() => setThemeMode(themeMode === "dark" ? "light" : "dark")} aria-label="Change colour theme">
-          {themeMode === "dark" ? "Light theme" : "Dark theme"}
-        </button>
         <DesktopTopbar
           view={view}
           selectedKey={selectedKey}
@@ -55,7 +52,7 @@ export function FretLabFrame({ children }: { children: ReactNode }) {
           <b>⌄</b>
         </button>
         {children}
-        <BottomNav active={primaryViewFor(view)} go={go} />
+        <BottomNav active={primaryViewFor(view)} go={go} themeMode={themeMode} onToggleTheme={() => setThemeMode(themeMode === "dark" ? "light" : "dark")} />
         {keyPickerOpen && (
           <KeySelectorModal
             selectedKey={selectedKey}

@@ -22,6 +22,7 @@ export function DesktopTopbar({
   const labels: Record<View, string> = {
     today: "Today",
     signin: "Your account",
+    onboarding: "Getting started",
     drills: "Drill library",
     train: "Training modules",
     keys: "Key explorer",

@@ -234,6 +234,19 @@ test("theme preference has system, light, and dark modes", async () => {
   assert.match(css, /prefers-color-scheme: light/);
 });
 
+test("first-run onboarding chooses a path and skips after completion", async () => {
+  const screen = await readProjectFile("app/_screens/Onboarding.tsx");
+  const store = await readProjectFile("lib/fretlab/useOnboarding.ts");
+  const root = await readProjectFile("app/page.tsx");
+  assert.match(screen, /What can you already play/);
+  assert.match(screen, /What do you want to work on/);
+  assert.match(screen, /Which way do you hold the guitar/);
+  assert.match(screen, /setSelectedKey\(key\)/);
+  assert.match(store, /fretlab-onboarding-complete/);
+  assert.match(root, /if \(!complete\) return <Onboarding/);
+  assert.match(root, /return <Today/);
+});
+
 test("detail routes render the entity named in the URL", async () => {
   const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   for (const [path, expected] of [

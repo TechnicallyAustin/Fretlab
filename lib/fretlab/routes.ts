@@ -42,6 +42,7 @@ export const VIEW_PATHS: Record<View, string> = {
   summary: "/routines/summary",
   guided: "/routines/guided",
   signin: "/signin",
+  onboarding: "/onboarding",
 };
 
 /** Views whose path carries an id. */
@@ -109,6 +110,7 @@ export function viewForPath(pathname: string): View {
  * from the shell so the nav highlights the same item it always did.
  */
 export function primaryViewFor(view: View): View {
+  if (view === "onboarding") return "today";
   if (view === "today") return "today";
   if (view === "theory") return "theory";
   if (view === "library" || view === "keys" || view.includes("key") || view.includes("scale") || view.includes("chord") || view.includes("song")) return "library";
@@ -116,6 +118,7 @@ export function primaryViewFor(view: View): View {
   // something you browse.
   if (
     view === "train" ||
+    view === "drills" ||
     view === "routines" ||
     view === "guided" ||
     view === "runner" ||
@@ -123,11 +126,7 @@ export function primaryViewFor(view: View): View {
   ) {
     return "train";
   }
-  if (
-    view === "drills" ||
-    view === "grouped" ||
-    view.includes("drill")
-  ) {
+  if (view === "grouped" || view.includes("drill")) {
     return "drills";
   }
   return "today";

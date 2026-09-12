@@ -14,10 +14,10 @@ lint and tests rather than through review.
 |---|---|---|
 | Stage 1 — Stop teaching wrong things | `COMPLETE` | 8 / 8 |
 | Stage 2 — Make the practice loop real | `COMPLETE` | 7 / 7 |
-| **Stage 3 — Make it shippable to real people** | **`WIP`** | 0 / 6 |
+| **Stage 3 — Make it shippable to real people** | **`COMPLETE`** | 6 / 6 |
 | Stage 4 — Retention and revenue | `TODO` | 0 / 5 |
 
-Next task: **FL-16 — Grid keyboard navigation and a screen-reader pass.**
+Next task: **FL-22 — Real guitar audio tied to the displayed shape.**
 
 Two runtime faults reported from the browser were fixed outside the stage
 numbering and are recorded under **Found during Stage 2**. Five defects the
@@ -1072,7 +1072,7 @@ Carried forward into Stage 3, logged rather than fixed:
 
 **Goal:** the app is usable by people who are not you. Largely parallel to Stage 2.
 
-**Progress:** 4 / 6 done
+**Progress:** 5 / 6 done
 
 | ID | Task | Status |
 |---|---|---|
@@ -1081,7 +1081,7 @@ Carried forward into Stage 3, logged rather than fixed:
 | FL-18 | Mobile IA: promote Library, reflow the hidden regions | `DONE` |
 | FL-19 | Left-handed mirroring and alternate tunings | `DONE` |
 | FL-20 | Dark theme | `DONE` |
-| FL-21 | Onboarding | `WIP` |
+| FL-21 | Onboarding | `DONE` |
 
 ---
 
@@ -1234,8 +1234,10 @@ test to assert no raw hex in `components/`, and snapshot both themes.
 
 ---
 
-### - [ ] FL-21 — Onboarding
-**Status:** `WIP` · **Severity:** Major · **Audit ref:** beginner walkthrough
+### - [x] FL-21 — Onboarding
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** beginner walkthrough
+
+> **Done.** Added a hydration-safe first-run onboarding flow that asks about experience, focus, key, and handedness, persists completion, and routes the learner to a selected starting path. Returning users skip it; the onboarding acceptance test and build-backed rendered suite pass.
 
 **Files:** new screen, `lib/fretlab/useStoredKey.ts`
 

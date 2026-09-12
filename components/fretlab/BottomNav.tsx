@@ -6,13 +6,14 @@
  * API client, the auth store, the router, or anything from L1 or L2.
  */
 import type { View } from "@/lib/fretlab/types";
+import type { ThemeMode } from "@/lib/fretlab/useStoredTheme";
 import { CHORDS, SCALES, SONGS } from "@/lib/fretlab/library";
 import { FIFTHS } from "@/lib/fretlab/theory";
 
-export function BottomNav({ active, go }: { active: View; go: (view: View) => void }) {
+export function BottomNav({ active, go, themeMode, onToggleTheme }: { active: View; go: (view: View) => void; themeMode: ThemeMode; onToggleTheme: () => void }) {
   const items: { label: string; view: View }[] = [
     { label: "Today", view: "today" },
-    { label: "Practice", view: "train" },
+    { label: "Practice", view: "drills" },
     { label: "Library", view: "library" },
     { label: "Progress", view: "progress" },
   ];
@@ -41,6 +42,9 @@ export function BottomNav({ active, go }: { active: View; go: (view: View) => vo
             <small>0{index + 1}</small>
           </button>
         ))}
+        <button className="nav-theme-toggle" type="button" onClick={onToggleTheme} aria-label="Toggle colour theme">
+          {themeMode === "dark" ? "Light" : "Dark"}
+        </button>
       </div>
       <div className="desktop-library-nav">
         <span>Explore</span>
