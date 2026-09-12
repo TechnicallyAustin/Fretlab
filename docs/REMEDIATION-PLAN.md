@@ -481,11 +481,11 @@ have verified each one fails against the pre-fix code.
 **Goal:** the app can be practised with, not just read. Do not start before Stage 1 is
 `DONE`.
 
-**Progress:** 0 / 7 done
+**Progress:** 1 / 7 done
 
 | ID | Task | Status |
 |---|---|---|
-| FL-09 | Audio metronome on the Web Audio clock | `TODO` |
+| FL-09 | Audio metronome on the Web Audio clock | `DONE` |
 | FL-10 | Routine steps become drill ids | `TODO` |
 | FL-11 | Runner renders the real drill and records a session | `TODO` |
 | FL-12 | Scale position tables (CAGED) | `TODO` |
@@ -495,8 +495,8 @@ have verified each one fails against the pre-fix code.
 
 ---
 
-### - [ ] FL-09 — Audio metronome on the Web Audio clock
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** B-03
+### - [x] FL-09 — Audio metronome on the Web Audio clock
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** B-03
 
 **Files:** `lib/fretlab/audio.ts`, `app/_screens/Runner.tsx:46-52`,
 `app/_screens/Guided.tsx`, `app/_sections/DesktopPracticeStudio.tsx`
@@ -526,6 +526,28 @@ scheduled at 0.5s intervals ±1ms; changing to 60 BPM after beat 3 leaves beats 
 untouched and spaces the rest at 1.0s.
 
 **Done when.** A metronome you can practise to, audible on iOS Safari.
+
+> **Done.** The timing is a pure `MetronomeScheduler` in
+> `lib/fretlab/metronome.ts`, so it could be tested against a fake clock rather
+> than a soundcard; `audio.ts` owns one long-lived `AudioContext` unlocked on a
+> gesture; `useMetronome.ts` runs the 25ms/100ms lookahead loop and holds each
+> scheduled click until the audio clock reaches it, which is what drives the
+> visual pulse. `tests/metronome.test.mjs` has the 13 assertions, including the
+> acceptance case to ±1ms.
+>
+> Three things the task did not call out, found while doing it:
+>
+> - `playTones` had the same iOS defect — a context per call, never resumed, so
+>   no tone ever sounded on an iPhone. It now shares the unlocked context.
+> - `DesktopPracticeStudio` had a *second* fake metronome: a `setInterval` beat
+>   counter, silent and drifting separately from the Runner's. Both now run off
+>   the one scheduler.
+> - The `@keyframes pulse` animation is deleted rather than left orphaned.
+>
+> Not done here: nothing in the app reads a drill's `bpm` yet, so the metronome
+> still starts at a default 84 rather than at the tempo the drill asks for.
+> That wiring belongs to FL-11, which is where the runner learns which drill it
+> is running.
 
 ---
 

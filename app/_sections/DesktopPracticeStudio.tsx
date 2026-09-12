@@ -10,7 +10,8 @@ import { Fretboard } from "@/components/fretlab/Fretboard";
 import { playTones } from "@/lib/fretlab/audio";
 import { scaleShape, targetNotes } from "@/lib/fretlab/theory";
 import { roleForDegree, degreeAt, type NoteGroup } from "@/lib/fretlab/noteRoles";
-import { useEffect, useState } from "react";
+import { useMetronome } from "@/lib/fretlab/useMetronome";
+import { useState } from "react";
 
 export function DesktopPracticeStudio({
   go,
@@ -20,18 +21,12 @@ export function DesktopPracticeStudio({
   sessionKey: KeyName;
 }) {
   const [mode, setMode] = useState<"Notes" | "Degrees" | "Roots">("Roots");
-  const [bpm, setBpm] = useState(84);
-  const [running, setRunning] = useState(false);
-  const [meter, setMeter] = useState<3 | 4>(4);
-  const [beat, setBeat] = useState(0);
-  useEffect(() => {
-    if (!running) return;
-    const timer = window.setInterval(
-      () => setBeat((value) => (value + 1) % meter),
-      60000 / bpm,
-    );
-    return () => window.clearInterval(timer);
-  }, [running, bpm, meter]);
+  // The beat used to come from a `setInterval` that was silent and drifted:
+  // `setInterval` guarantees no worse than "not before", so the click and the
+  // dot wandered apart over a practice session. Both now come off the audio
+  // clock, which is the only one in the browser that does not drift.
+  const metronome = useMetronome({ bpm: 84, meter: 4 });
+  const { beat, bpm, meter, running } = metronome;
   // A stopped metronome always reads as beat one, derived rather than stored.
   const currentBeat = running ? beat : 0;
   const notes =
@@ -154,10 +149,7 @@ export function DesktopPracticeStudio({
             {([3, 4] as const).map((value) => (
               <button
                 className={meter === value ? "active" : ""}
-                onClick={() => {
-                  setMeter(value);
-                  setBeat(0);
-                }}
+                onClick={() => metronome.setMeter(value)}
                 key={value}
               >
                 {value}
@@ -195,24 +187,21 @@ export function DesktopPracticeStudio({
           max="180"
           step="1"
           value={bpm}
-          onChange={(event) => setBpm(Number(event.target.value))}
+          onChange={(event) => metronome.setBpm(Number(event.target.value))}
           aria-label="Tempo"
         />
         <div className="tempo-controls">
-          <button
-            onClick={() => setBpm((value) => Math.max(40, value - 4))}
-            aria-label="Decrease tempo"
-          >
+          <button onClick={() => metronome.nudge(-4)} aria-label="Decrease tempo">
             −4
           </button>
-          <button className="tempo-play" onClick={() => setRunning(!running)}>
+          <button className="tempo-play" onClick={metronome.toggle}>
             {running ? "Pause" : "Start click"}
           </button>
-          <button
-            onClick={() => setBpm((value) => Math.min(180, value + 4))}
-            aria-label="Increase tempo"
-          >
+          <button onClick={() => metronome.nudge(4)} aria-label="Increase tempo">
             +4
+          </button>
+          <button onClick={metronome.tap} aria-label="Tap tempo">
+            Tap
           </button>
         </div>
         <button className="studio-train" onClick={() => go("train")}>

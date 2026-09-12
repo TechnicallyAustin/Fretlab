@@ -8,9 +8,10 @@
 import type { KeyName, View } from "@/lib/fretlab/types";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { StatusBar } from "@/components/fretlab/StatusBar";
+import { MetronomeBar } from "@/components/fretlab/MetronomeBar";
 import { scaleShape } from "@/lib/fretlab/theory";
 import { useElapsed } from "@/lib/fretlab/useElapsed";
-import { useState } from "react";
+import { useMetronome } from "@/lib/fretlab/useMetronome";
 
 export function Runner({
   go,
@@ -20,8 +21,9 @@ export function Runner({
   sessionKey: KeyName;
 }) {
   const { label: elapsedLabel } = useElapsed(sessionKey);
-  const [bpm, setBpm] = useState(84);
-  const [paused, setPaused] = useState(false);
+  // A bar of count-in, because the drill starts on beat one and you cannot
+  // start on a beat you have not heard yet.
+  const metronome = useMetronome({ bpm: 84, meter: 4, countInBars: 1 });
   const notes = scaleShape(sessionKey, 1, 5);
   return (
     <div className="screen-content flow-screen">
@@ -41,33 +43,11 @@ export function Runner({
         labelMode="degree"
         rootKey={sessionKey}
       />
-      <div className={`metronome ${paused ? "paused" : ""}`}>
-        {[0, 1, 2, 3].map((n) => (
-          <i
-            style={{
-              animationDelay: `${n * (60 / bpm)}s`,
-              animationDuration: `${60 / bpm}s`,
-            }}
-            key={n}
-          />
-        ))}
-      </div>
       <div className="elapsed">
         <strong>{elapsedLabel}</strong>
         <span>elapsed</span>
       </div>
-      <div className="transport">
-        <button onClick={() => setBpm((n) => Math.max(40, n - 4))}>
-          −4<small>bpm</small>
-        </button>
-        <button className="pause" onClick={() => setPaused(!paused)}>
-          {paused ? "Resume" : "Pause"}
-          <small>{bpm} bpm</small>
-        </button>
-        <button onClick={() => setBpm((n) => Math.min(180, n + 4))}>
-          +4<small>bpm</small>
-        </button>
-      </div>
+      <MetronomeBar metronome={metronome} />
       <button className="finish-link" onClick={() => go("summary")}>
         Finish session
       </button>

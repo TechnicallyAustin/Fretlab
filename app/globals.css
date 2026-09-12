@@ -1423,17 +1423,63 @@ p {
   padding: 10px 0;
 }
 
+/* The dots are lit from the audio clock, not by a CSS animation: an
+   `animation-delay` pulse showed a beat whether or not one was sounding, and
+   drifted against the click over a practice session. */
 .metronome i {
   width: 11px;
   height: 11px;
   border-radius: 50%;
   background: var(--key-bright);
-  opacity: .55;
-  animation: pulse .71s ease-in-out infinite;
+  opacity: .3;
+  transform: scale(1);
+  transition: opacity .06s linear, transform .06s linear;
 }
 
-.metronome.paused i {
-  animation-play-state: paused;
+.metronome i.active {
+  opacity: 1;
+  transform: scale(1.45);
+}
+
+/* The first dot reads as the downbeat even while stopped. */
+.metronome.idle i:first-child {
+  opacity: .55;
+}
+
+.metronome-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.metronome-countin {
+  margin: 0;
+  color: var(--quiet);
+  font-size: 13px;
+  text-align: center;
+}
+
+.metronome-options {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+}
+
+.metronome-options button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--quiet);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.metronome-options button.active {
+  border-color: var(--key-bright);
+  background: var(--key-fill);
+  color: var(--key-ink);
 }
 
 .elapsed {
@@ -3858,25 +3904,6 @@ p {
 
   50% {
     opacity: .1;
-  }
-}
-
-@keyframes pulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: .55;
-  }
-
-  12% {
-    transform: scale(1.32);
-    opacity: 1;
-  }
-
-  40% {
-    transform: scale(1);
-    opacity: .55;
   }
 }
 

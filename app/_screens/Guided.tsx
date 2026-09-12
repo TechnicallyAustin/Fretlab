@@ -7,9 +7,11 @@
  */
 import type { KeyName, View } from "@/lib/fretlab/types";
 import { ROUTINES } from "@/lib/fretlab/library";
+import { MetronomeBar } from "@/components/fretlab/MetronomeBar";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { cssVars } from "@/lib/fretlab/palette";
 import { useElapsed } from "@/lib/fretlab/useElapsed";
+import { useMetronome } from "@/lib/fretlab/useMetronome";
 import { useState } from "react";
 
 export function Guided({
@@ -20,7 +22,7 @@ export function Guided({
   selectedKey: KeyName;
 }) {
   const { label: elapsedLabel } = useElapsed(selectedKey);
-  const [paused, setPaused] = useState(false);
+  const metronome = useMetronome({ bpm: 84, meter: 4, countInBars: 1 });
   const [step, setStep] = useState(1);
   const routine = ROUTINES[1];
   const current = routine.drills[step];
@@ -41,11 +43,7 @@ export function Guided({
         <strong>{elapsedLabel}</strong>
         <span>elapsed</span>
       </div>
-      <div className={`metronome ${paused ? "paused" : ""}`}>
-        {[0, 1, 2, 3].map((n) => (
-          <i style={{ animationDelay: `${n * 0.71}s` }} key={n} />
-        ))}
-      </div>
+      <MetronomeBar metronome={metronome} subdivisions={false} />
       <section className="up-next">
         <div className="section-head">
           <h2>Up next · all in {selectedKey}</h2>
@@ -63,10 +61,6 @@ export function Guided({
           onClick={() => setStep(Math.min(routine.drills.length - 1, step + 1))}
         >
           Skip<small>next drill</small>
-        </button>
-        <button className="pause" onClick={() => setPaused(!paused)}>
-          {paused ? "Resume" : "Pause"}
-          <small>84 bpm</small>
         </button>
       </div>
       <button className="finish-link" onClick={() => go("routine-detail")}>
