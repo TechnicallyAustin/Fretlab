@@ -11,7 +11,7 @@ import { FIFTHS } from "@/lib/fretlab/theory";
 import { ROUTINES, routineKey, routineSteps } from "@/lib/fretlab/library";
 import { cssVars } from "@/lib/fretlab/palette";
 import { usePracticeSessions } from "@/lib/api/hooks";
-import { weekMinutes } from "@/lib/api/progress";
+import { routineProgress, weekMinutes } from "@/lib/api/progress";
 
 export function Routines({
   go,
@@ -67,6 +67,10 @@ export function Routines({
       <div className="routine-list">
         {ROUTINES.map((routine, index) => {
           const steps = routineSteps(routine);
+          const progress = routineProgress(
+            history.data ?? [],
+            routine.drills.map((step) => step.drillId),
+          );
           const total = steps.reduce((sum, step) => sum + step.mins, 0);
           const practisedIn = routineKey(routine, selectedKey);
           return (
@@ -100,11 +104,21 @@ export function Routines({
                 ))}
               </div>
               <div className="routine-foot">
+                {/* Dots and a date used to be literals: three filled and
+                    "Yesterday" on an account with no history at all. They
+                    count days these drills were actually practised, and say
+                    nothing when that is nothing. */}
                 <span>
-                  {[1, 2, 3].map((n) => (
-                    <i className={n <= routine.completed ? "on" : ""} key={n} />
-                  ))}{" "}
-                  {routine.last}
+                  {progress.last ? (
+                    <>
+                      {[1, 2, 3].map((n) => (
+                        <i className={n <= progress.completed ? "on" : ""} key={n} />
+                      ))}{" "}
+                      Drills last practised {progress.last}
+                    </>
+                  ) : (
+                    "Not practised yet"
+                  )}
                 </span>
                 <button onClick={() => go("routine-detail")}>
                   Start routine

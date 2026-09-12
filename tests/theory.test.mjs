@@ -437,6 +437,49 @@ test("the open string check draws the six open strings and nothing else", () => 
  * Numbers inside JSX text are the shape that bug takes, so this fails on any
  * of them. A figure belongs in an expression that derives it, not in markup.
  */
+/**
+ * `ROUTINES` carried `completed: 3` and `last: "Yesterday"` as literals, so a
+ * brand-new account saw three filled progress dots and a practice history it
+ * did not have. The guard above could not see it: the numbers reached the
+ * screen through library data rather than through JSX text.
+ */
+test("a routine with no history reports no history", async () => {
+  const { routineProgress } = await import("../lib/api/progress.ts");
+  assert.deepEqual(routineProgress([], ["position-one"]), {
+    completed: 0,
+    last: null,
+  });
+  // Sessions for somebody else's drills are not this routine's progress.
+  const other = [{ drill_id: "thirds", created_at: new Date().toISOString() }];
+  assert.deepEqual(routineProgress(other, ["position-one"]), {
+    completed: 0,
+    last: null,
+  });
+});
+
+test("routine progress counts practice days, not sessions", async () => {
+  const { routineProgress } = await import("../lib/api/progress.ts");
+  const now = new Date("2026-09-11T18:00:00Z").getTime();
+  const day = (iso, drill) => ({ drill_id: drill, created_at: iso });
+  const sessions = [
+    // Two sessions on one day is one day of practice, not two.
+    day("2026-09-11T09:00:00Z", "position-one"),
+    day("2026-09-11T17:00:00Z", "position-one"),
+    day("2026-09-09T09:00:00Z", "thirds"),
+    day("2026-09-08T09:00:00Z", "not-in-this-routine"),
+  ];
+  const progress = routineProgress(sessions, ["position-one", "thirds"], now);
+  assert.equal(progress.completed, 2);
+  assert.equal(progress.last, "Today");
+});
+
+test("no routine ships a progress figure of its own", () => {
+  for (const routine of ROUTINES) {
+    assert.ok(!("completed" in routine), `${routine.name} ships a count`);
+    assert.ok(!("last" in routine), `${routine.name} ships a practice date`);
+  }
+});
+
 test("screens render no hardcoded figures", async () => {
   const files = await screenSources();
   const offenders = [];

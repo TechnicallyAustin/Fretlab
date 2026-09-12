@@ -442,6 +442,16 @@ test("screens render no hardcoded figures", () => {
 
 **Done when.** A fresh account sees no number it did not create.
 
+> **Reopened and fixed during Stage 2.** The guard test greps JSX text nodes,
+> so it could not see numbers that reach a screen through library data.
+> `ROUTINES` carried `completed: 3` and `last: "Yesterday"`, which
+> `Routines.tsx` rendered as three filled progress dots and a practice date on
+> an account with no history. Both fields are deleted; the dots now come from
+> `routineProgress()`, which counts distinct days the routine's drills were
+> actually practised and says "Not practised yet" when there are none. Three
+> assertions cover it, including one that fails if a routine ever ships a
+> progress figure again.
+
 ---
 
 ### - [x] FL-08 — Write `tests/theory.test.mjs`

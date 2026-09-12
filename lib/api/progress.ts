@@ -265,3 +265,38 @@ export function consistencyMonths(weeks = 26, now = Date.now()): string[] {
   }
   return seen;
 }
+
+export type RoutineProgress = {
+  /** Distinct days this routine's drills were practised, in the window. */
+  completed: number;
+  /** "Today" / "Tue", or null when it has never been practised. */
+  last: string | null;
+};
+
+/**
+ * How much of a routine has actually been practised.
+ *
+ * `ROUTINES` used to carry `completed: 3` and `last: "Yesterday"` as literals,
+ * so a brand-new account saw three filled dots and a practice history it did
+ * not have — the same class of invention FL-07 removed everywhere else, missed
+ * because the numbers came from library data rather than from JSX.
+ *
+ * A routine has no id in the session table, so this counts sessions against
+ * the drills the routine is made of. That is an approximation and is labelled
+ * as one in the UI: it says the drills were practised, not that the routine
+ * was completed end to end. Recording a routine properly is FL-11's job.
+ */
+export function routineProgress(
+  sessions: readonly PracticeSessionWire[],
+  drillIds: readonly string[],
+  now = Date.now(),
+): RoutineProgress {
+  const ids = new Set(drillIds);
+  const mine = sessions.filter((session) => ids.has(session.drill_id));
+  if (mine.length === 0) return { completed: 0, last: null };
+  const days = new Set(mine.map((session) => dayKey(session.created_at)));
+  const newest = mine.reduce((latest, session) =>
+    session.created_at > latest.created_at ? session : latest,
+  );
+  return { completed: days.size, last: dayLabel(newest.created_at, now) };
+}

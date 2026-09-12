@@ -420,8 +420,6 @@ export type Routine = {
   id: string;
   name: string;
   cadence: string;
-  last: string;
-  completed: number;
   /**
    * The key this routine is written for, or null to follow whatever key the
    * user has chosen.
@@ -441,8 +439,6 @@ export const ROUTINES: Routine[] = [
     id: "warm-up",
     name: "Ten minute warm-up",
     cadence: "Every morning",
-    last: "Yesterday",
-    completed: 3,
     key: null,
     drills: [
       { drillId: "open-strings", mins: 4, phase: "warm" },
@@ -454,8 +450,6 @@ export const ROUTINES: Routine[] = [
     id: "one-key-deep",
     name: "One key, deep",
     cadence: "Three times a week",
-    last: "2 days ago",
-    completed: 2,
     // The only routine that declares a key: staying in one is the whole point
     // of it, so it overrides rather than inherits.
     key: "G",
@@ -471,8 +465,6 @@ export const ROUTINES: Routine[] = [
     id: "neck-knowledge",
     name: "Neck knowledge",
     cadence: "Weekends",
-    last: "Last Sunday",
-    completed: 1,
     key: null,
     drills: [
       { drillId: "pentatonic-one", mins: 4, phase: "warm" },
