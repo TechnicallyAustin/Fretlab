@@ -9,7 +9,7 @@
 | FD-02 | Contribution graph | `DONE` |
 | FD-03 | Delete `Guided` | `DONE` |
 | FD-04 | Board density | `CLOSED` — premise was wrong, nothing to do |
-| FD-05 | A full neck that fits a phone | `PARTIAL` — opens on the notes; still scrolls |
+| FD-05 | A full neck that fits a phone | `DONE` |
 | FD-06 | Fretboard fingerings | `DONE` |
 | FD-07 | Text contrast | `DONE` |
 
@@ -281,7 +281,7 @@ Checked during this audit and deliberately left alone:
 
 ## FD-05 — A full neck that fits a phone
 
-**Status:** `PARTIAL` · **Severity:** Major · **Was:** FD-01 step 2
+**Status:** `DONE` · **Severity:** Major · **Was:** FD-01 step 2
 
 **Problem.** FD-01 fixed legibility by never scaling a board below its own
 width. The full 0–12 board is 860 units and a phone column is 354, so it is now
@@ -321,7 +321,37 @@ is the honest statement of what is left.
 **Done when.** A beginner can see the whole neck on a phone without scrolling,
 at readable size.
 
-> **Option 3 taken, options 1 and 2 still open.** An overflowing board now
+> **Done via option 2. Option 1 was ranked first here and that ranking was
+> wrong** — the reasoning is below, because it is the more useful half of this
+> entry.
+>
+> A narrow board now draws one slice of neck, sized to the column it is
+> actually in, with a control to move along the neck. The column is measured
+> with a `ResizeObserver`, so the server renders the whole board and a narrow
+> client windows it after mount; nothing guesses at a viewport.
+>
+> About four frets fit a phone column at legible size. That is a hand span,
+> and it is what a CAGED position occupies — so the narrow view shows one
+> position at a time, which is the unit the neck is actually learned in.
+>
+> **Why not option 1, stacking the neck across two rows.** A fretboard diagram
+> works because it maps onto the instrument: six strings, left to right along
+> the neck. Split into two stacked rows it reads as twelve strings, and the
+> spatial correspondence that makes the diagram legible to a beginner at all
+> is the thing that breaks. It also doubles the board's height — 254px becomes
+> roughly 500px on a phone — which is the opposite of compact. It was ranked
+> first for being the most thorough, without asking whether thorough was
+> right here.
+>
+> **Two things this turned up.** The caption still described the window the
+> *caller* asked for, so a board showing frets 7–11 captioned itself "full
+> neck"; it describes what is on screen now. And `fretsThatFit` sized against
+> the narrow open-string column, which is only correct for a window that turns
+> out to contain the nut — the window is chosen afterwards, from where the
+> notes are, so frets 7–11 came out needing 357px of a 354px column. It costs
+> every column at full width now.
+>
+> **Earlier, option 3, still in place:** An overflowing board now
 > opens centred on its own notes rather than at the nut, so a drill at frets
 > 7–10 no longer opens on an empty stretch of board with the lesson off the
 > right-hand edge. Clamped to both ends, and a board that fits is never

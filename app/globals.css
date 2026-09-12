@@ -470,6 +470,52 @@ p {
   font-weight: 500;
 }
 
+/* Moves the board along the neck when the whole of it will not fit at legible
+   size — a phone column holds about four frets, which is a hand span and a
+   CAGED position. Named rather than numbered: the neck has regions, and moving
+   between them is the thing being learned. */
+.neck-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+
+.neck-pager button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: 11px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.neck-pager button:disabled {
+  color: var(--quiet);
+  cursor: default;
+  opacity: .5;
+}
+
+.neck-pager>span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.neck-pager>span small {
+  color: var(--quiet);
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
 .contribution-wrap {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr);

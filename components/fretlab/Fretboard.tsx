@@ -24,7 +24,12 @@ import {
 } from "@/lib/fretlab/noteRoles";
 import { FretboardLegend } from "./FretboardLegend";
 import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
-import { boardGeometry, scrollTargetFor } from "@/lib/fretlab/boardGeometry";
+import {
+  boardGeometry,
+  fretsThatFit,
+  scrollTargetFor,
+  windowFor,
+} from "@/lib/fretlab/boardGeometry";
 import { useEffect, useId, useRef, useState } from "react";
 
 
@@ -115,13 +120,48 @@ export function Fretboard({
   // Chord boards carry a marker row above the nut. It only means anything when
   // the nut is in frame: further up the neck there is no open string to mark.
   const showsMarkers = (muted?.length ?? 0) > 0 || Boolean(notes?.some((n) => n.f === 0));
+
+  // How wide the board's column actually is. Null until measured, and the
+  // server never measures, so the first paint is the whole board and a narrow
+  // client then windows it.
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const [columnWidth, setColumnWidth] = useState<number | null>(null);
+  useEffect(() => {
+    const host = scrollRef.current;
+    if (!host || typeof ResizeObserver === "undefined") return;
+    // setState in the observer's callback, not in the effect body — the lint
+    // forbids the second and this is the pattern it points at instead.
+    const observer = new ResizeObserver(([entry]) => {
+      setColumnWidth(entry.contentRect.width);
+    });
+    observer.observe(host);
+    return () => observer.disconnect();
+  }, []);
+
+  // Thirteen frets at legible size need 860 units and a phone column has 354,
+  // so on a narrow screen the board shows one slice of neck rather than a
+  // squinting view of all of it. Four frets is a hand span and a CAGED
+  // position, which is the unit the neck is actually learned in.
+  const noteFrets = (notes ?? []).map((note) => note.f)
+    .concat((groups ?? []).flatMap((group) => group.notes.map((note) => note.f)));
+  const fits = columnWidth === null
+    ? high - low + 1
+    : fretsThatFit(columnWidth, { mini });
+  const [shift, setShift] = useState(0);
+  const windowed = windowFor(low, high, noteFrets, fits);
+  const canShift = windowed.high - windowed.low < high - low;
+  const viewLow = canShift
+    ? Math.max(low, Math.min(windowed.low + shift, high - (windowed.high - windowed.low)))
+    : windowed.low;
+  const viewHigh = viewLow + (windowed.high - windowed.low);
+
   // The sizing arithmetic lives in lib/ so a test can reach it: every type size
   // below is clamped to 13, but those are viewBox units, and the board used to
   // be allowed to scale down until a "13px" label drew at 8 screen pixels.
-  const geo = boardGeometry({ low, high, mini, showsMarkers });
+  const geo = boardGeometry({ low: viewLow, high: viewHigh, mini, showsMarkers });
   const { unit, gap, openWidth, nameGutter } = geo;
 
-  const fretsAscending = Array.from({ length: high - low + 1 }, (_, index) => low + index);
+  const fretsAscending = Array.from({ length: viewHigh - viewLow + 1 }, (_, index) => viewLow + index);
   let cursor = nameGutter;
   const naturalColumns = fretsAscending.map((fret) => {
     const width = fret === 0 ? openWidth : unit;
@@ -140,7 +180,7 @@ export function Fretboard({
     : naturalColumns;
   const frets = columns.map((column) => column.fret);
   const { markerRow, top } = geo;
-  const includesOpen = low === 0;
+  const includesOpen = viewLow === 0;
   const playingWidth = width - nameGutter - (includesOpen ? openWidth : 0);
   const boardX = isLeftHanded ? 0 : nameGutter + (includesOpen ? openWidth : 0);
   const boardEnd = boardX + playingWidth;
@@ -151,7 +191,7 @@ export function Fretboard({
       ? top + (6 - string + 0.5) * gap
       : top + (string - 0.5) * gap;
   const { dotRadius } = geo;
-  const showsNut = low <= 1;
+  const showsNut = viewLow <= 1;
   const strings = isLeftHanded ? [6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6];
   const firstCell = `${strings[0]}:${frets[0]}`;
   const [activeCell, setActiveCell] = useState(firstCell);
@@ -175,24 +215,25 @@ export function Fretboard({
       });
   })();
 
+  // Labels describe what is *on screen*, not what was asked for. A windowed
+  // board showing frets 7-11 must not caption itself "full neck".
   const windowLabel =
-    low === 0 && high >= 12
+    viewLow === 0 && viewHigh >= 12
       ? "full neck"
-      : low === 0
+      : viewLow === 0
         ? "open position"
-        : `frets ${low} to ${high}`;
+        : `frets ${viewLow} to ${viewHigh}`;
   const positionLabel =
-    low === 0 && high >= 12
+    viewLow === 0 && viewHigh >= 12
       ? "Full neck"
-      : low === 0
+      : viewLow === 0
         ? "Open position"
-        : `Starts at fret ${low}`;
+        : `Starts at fret ${viewLow}`;
 
   // A board too wide for its column opens at the nut, which for a drill at
   // frets 7-10 is an empty stretch with the shape off the right-hand edge. It
   // opens on the notes instead. Runs after layout, because it needs the real
   // column width, and does nothing when the board fits.
-  const scrollRef = useRef<HTMLDivElement | null>(null);
   // Dependencies are primitives on purpose. `geo` is a fresh object every
   // render, so depending on it would re-run this after any state change — and
   // this writes scrollLeft, so it would snap the board back while the reader
@@ -224,6 +265,30 @@ export function Fretboard({
             </small>
           </span>
         </figcaption>
+      )}
+      {canShift && !mini && (
+        <div className="neck-pager" role="group" aria-label="Move along the neck">
+          <button
+            onClick={() => setShift((n) => n - (viewHigh - viewLow))}
+            disabled={viewLow <= low}
+            aria-label="Towards the nut"
+          >
+            ←
+          </button>
+          {/* Named, not numbered. The neck has regions and moving between them
+              is the thing being taught; a bare pager would only move it. */}
+          <span>
+            {viewLow === 0 ? "Open position" : `Frets ${viewLow}\u2013${viewHigh}`}
+            <small>of {low}\u2013{high}</small>
+          </span>
+          <button
+            onClick={() => setShift((n) => n + (viewHigh - viewLow))}
+            disabled={viewHigh >= high}
+            aria-label="Towards the body"
+          >
+            →
+          </button>
+        </div>
       )}
       <div
         ref={scrollRef}

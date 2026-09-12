@@ -168,3 +168,62 @@ test("a board that fits is never scrolled at all", () => {
 test("an empty board asks for no scrolling", () => {
   assert.equal(scrollTargetFor([], boardGeometry({ low: 0, high: 12 }), 354), 0);
 });
+
+// ----------------------------------------- FD-05: a neck that fits the column
+
+const { fretsThatFit, windowFor } = await import("../lib/fretlab/boardGeometry.ts");
+
+/**
+ * FD-05's acceptance, which failed by design until the board learned to window
+ * itself: at phone widths, the board a caller asks for may be 13 frets, but
+ * what is *drawn* must fit the column at legible size.
+ */
+test("a windowed board fits the column it is drawn in", () => {
+  for (const width of [324, 354]) {
+    for (const request of [
+      { low: 0, high: 12, frets: [0, 1, 2] },
+      { low: 0, high: 12, frets: [7, 8, 9, 10] },
+      { low: 0, high: 12, frets: [10, 11, 12] },
+      { low: 1, high: 7, frets: [3, 4, 5] },
+    ]) {
+      const size = fretsThatFit(width);
+      const view = windowFor(request.low, request.high, request.frets, size);
+      const geometry = boardGeometry(view);
+      assert.ok(
+        geometry.width <= width,
+        `frets ${view.low}-${view.high} need ${geometry.width}px in a ${width}px column`,
+      );
+      assert.ok(
+        smallestTypeOnScreen(geometry, width) >= TYPE_FLOOR,
+        `frets ${view.low}-${view.high} at ${width}px are not legible`,
+      );
+    }
+  }
+});
+
+test("a window always holds at least a hand span", () => {
+  // Below four frets a board stops being a shape and becomes a list of notes,
+  // and four is what a CAGED position occupies.
+  for (const width of [200, 280, 324, 354]) {
+    assert.ok(fretsThatFit(width) >= 4, `${width}px offered ${fretsThatFit(width)} frets`);
+  }
+});
+
+test("a window stays inside the neck it is windowing", () => {
+  for (const frets of [[0], [6], [12], []]) {
+    const view = windowFor(0, 12, frets, 5);
+    assert.ok(view.low >= 0, `window starts at ${view.low}`);
+    assert.ok(view.high <= 12, `window ends at ${view.high}`);
+    assert.equal(view.high - view.low + 1, 5, "a window near an end should stay full");
+  }
+});
+
+test("a board that already fits is not windowed", () => {
+  const view = windowFor(1, 4, [1, 2, 3], fretsThatFit(1100));
+  assert.deepEqual(view, { low: 1, high: 4 }, "a four-fret box needs no window");
+});
+
+test("the window opens on the notes", () => {
+  const view = windowFor(0, 12, [7, 8, 9, 10], 5);
+  assert.ok(view.low <= 7 && view.high >= 10, `frets 7-10 are not inside ${view.low}-${view.high}`);
+});

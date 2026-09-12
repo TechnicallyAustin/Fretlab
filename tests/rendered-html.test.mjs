@@ -116,8 +116,17 @@ test("every board states its fret window, including mini boards", async () => {
   // which is what made drill boards unreadable.
   assert.doesNotMatch(source, /const showLabels = !mini/);
   assert.doesNotMatch(source, /const showStringNames = !mini/);
-  assert.match(source, /Starts at fret \$\{low\}/);
+  // Pinned to `${low}` until FD-05, which is the fret window the caller asked
+  // for. A narrow board now shows a slice of that, so the label has to state
+  // the frets actually on screen — a windowed board showing 7-11 must not
+  // caption itself "full neck".
+  assert.match(source, /Starts at fret \$\{viewLow\}/);
   assert.match(source, /Open position/);
+  assert.doesNotMatch(
+    source,
+    /positionLabel =\s*\n?\s*low === 0 && high >= 12/,
+    "the caption must describe the visible window, not the requested one",
+  );
 
   // Fret markers are at their real neck positions.
   const { default: _ } = { default: null };

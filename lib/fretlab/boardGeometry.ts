@@ -153,3 +153,59 @@ export function scrollTargetFor(
   // and pixels are one to one — that is what FD-01's minimum width buys.
   return Math.max(0, Math.min(overflow, Math.round(centre - containerWidth / 2)));
 }
+
+/**
+ * How many frets fit a container at legible size.
+ *
+ * The board may never be scaled below its own width (see `renderedScale`), so
+ * "fits" is a question about the viewBox, not about the screen: how many fret
+ * columns can be laid out before the natural width passes the container.
+ *
+ * Returns at least 4, which is a hand span and the width of a CAGED position —
+ * below that the board stops being a shape and becomes a list of notes.
+ */
+export function fretsThatFit(
+  containerWidth: number,
+  { mini = false }: { mini?: boolean } = {},
+): number {
+  // Every column is costed at full width, including fret zero, which is
+  // narrower. Sizing against the narrow open column would be right only for a
+  // window that actually contains it — and the window is chosen *after* this,
+  // from where the notes are. Asking for five frets on the strength of a nut
+  // that then turns out not to be in frame overflows by exactly one column's
+  // difference, which is how frets 7-11 came to need 357px of a 354px column.
+  const probe = boardGeometry({ low: 1, high: 1, mini });
+  const unit = mini ? 40 : 66;
+  const fretted = Math.floor((containerWidth - probe.nameGutter) / unit);
+  return Math.max(4, fretted);
+}
+
+/**
+ * The slice of neck to show when the whole of it will not fit.
+ *
+ * Centred on the notes, then pushed back inside the board's own range, so a
+ * shape near the nut or near the 12th fret still gets a full window rather
+ * than a half-empty one running off the end.
+ *
+ * A four-fret window is exactly a CAGED position, which is the point: the
+ * narrow view shows one position at a time rather than a squinting view of
+ * twelve frets, and moving between them is the thing the neck is made of.
+ */
+export function windowFor(
+  low: number,
+  high: number,
+  frets: readonly number[],
+  size: number,
+): { low: number; high: number } {
+  const span = high - low + 1;
+  if (size >= span) return { low, high };
+
+  const played = frets.filter((fret) => fret >= low && fret <= high);
+  const centre = played.length
+    ? (Math.min(...played) + Math.max(...played)) / 2
+    : low + size / 2;
+
+  let start = Math.round(centre - (size - 1) / 2);
+  start = Math.max(low, Math.min(start, high - size + 1));
+  return { low: start, high: start + size - 1 };
+}
