@@ -50,6 +50,7 @@ export function Fretboard({
   legend = false,
   muted,
   scale,
+  hideTargets = false,
 }: {
   notes?: (Note | FingeredNote)[];
   /** Named layers, for showing a chord inside a scale without them merging. */
@@ -70,6 +71,11 @@ export function Fretboard({
   muted?: readonly number[];
   /** The scale on show, so degree labels use its own spelling (Lydian's ♯4). */
   scale?: { formula: string; intervals: readonly number[] };
+  /**
+   * Draw nothing where an unfound target is. A drill that marks every answer
+   * and asks you to tap them tests nothing; recall starts from a blank neck.
+   */
+  hideTargets?: boolean;
 }) {
   const gradientId = `board-${useId().replaceAll(":", "")}`;
   const degreeName = degreeLabels(scale);
@@ -389,7 +395,11 @@ export function Fretboard({
                 tabIndex={interactive ? 0 : undefined}
                 aria-label={
                   interactive
-                    ? `${STRING_NAMES[string]} string, fret ${column.fret}${hasNote ? `, ${label}, ${style.legend}` : ""}`
+                    ? `${STRING_NAMES[string]} string, fret ${column.fret}${
+                        hasNote && (isFound || !hideTargets)
+                          ? `, ${label}, ${style.legend}`
+                          : ""
+                      }`
                     : undefined
                 }
                 onKeyDown={
@@ -411,7 +421,7 @@ export function Fretboard({
                   />
                 )}
 
-                {hasNote && !isFound && (
+                {hasNote && !isFound && !hideTargets && (
                   <circle
                     cx={column.center}
                     cy={yFor(string)}

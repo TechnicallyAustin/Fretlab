@@ -31,34 +31,41 @@ export function Train({
     () => intervalShape(selectedKey, [...trainingModule.intervals], 1, 7),
     [selectedKey, trainingModule],
   );
-  const solved = () => new Set(notes.slice(0, -1).map((note) => `${note.s}:${note.f}`));
   const signature = notes.map((note) => `${note.s}:${note.f}`).join(",");
-  const [found, setFound] = useState<Set<string>>(solved);
+  // Nothing is found until the player finds it. This used to open with every
+  // target but one already marked, so the drill was a single tap and the
+  // accuracy it recorded was near-perfect before anyone had played a note.
+  const [found, setFound] = useState<Set<string>>(() => new Set());
   const [misses, setMisses] = useState(0);
+  // Targets hit before any wrong guess. Tapping a dot you were shown is not
+  // recall, so first-attempt correctness is the only figure worth keeping.
+  const [clean, setClean] = useState(0);
   const [renderedFor, setRenderedFor] = useState(signature);
   // Changing key or module starts the drill over. Adjusting during render
   // avoids the extra committed frame an effect would cause.
   if (renderedFor !== signature) {
     setRenderedFor(signature);
-    setFound(solved());
+    setFound(new Set());
     setMisses(0);
+    setClean(0);
   }
+  const [missedSince, setMissedSince] = useState(false);
   const hit = (s: number, f: number) => {
     const id = `${s}:${f}`;
-    if (notes.some((note) => note.s === s && note.f === f))
+    if (found.has(id)) return;
+    if (notes.some((note) => note.s === s && note.f === f)) {
       setFound((current) => new Set(current).add(id));
-    else setMisses((n) => n + 1);
+      if (!missedSince) setClean((n) => n + 1);
+      setMissedSince(false);
+    } else {
+      setMisses((n) => n + 1);
+      setMissedSince(true);
+    }
   };
-  const accuracy = Math.round(
-    (found.size / Math.max(1, found.size + misses)) * 100,
-  );
+  const accuracy = found.size
+    ? Math.round((clean / found.size) * 100)
+    : 0;
 
-  // When the module started, so a recorded session carries a real duration.
-  // Set from an effect: reading the clock during render is not pure.
-  const startedAt = useRef(0);
-  useEffect(() => {
-    startedAt.current = Date.now();
-  }, [trainingModule.id, selectedKey]);
   const [recordError, setRecordError] = useState<string | null>(null);
 
   /**
@@ -67,6 +74,27 @@ export function Train({
    * Only the figures this screen actually measures are sent: hits, misses and
    * elapsed time. Nothing is invented to fill a column.
    */
+  /**
+   * A real clock, so the figure on screen is the one that gets recorded.
+   *
+   * The wall clock is read only inside the interval callback — subscribing to
+   * an external source and calling setState from it — because reading it during
+   * render is impure and calling setState in an effect body cascades. The start
+   * time lives in a ref, which the effect may write and the recorder may read,
+   * and which render never touches.
+   */
+  const startedAt = useRef(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  useEffect(() => {
+    startedAt.current = Date.now();
+    const id = window.setInterval(
+      () => setElapsedSeconds(Math.round((Date.now() - startedAt.current) / 1000)),
+      500,
+    );
+    return () => window.clearInterval(id);
+  }, [signature]);
+  const elapsedLabel = `${Math.floor(elapsedSeconds / 60)}:${String(elapsedSeconds % 60).padStart(2, "0")}`;
+
   const record = async (complete: boolean) => {
     if (!complete) return;
     try {
@@ -76,9 +104,7 @@ export function Train({
         music_key: selectedKey,
         accuracy,
         reps: found.size + misses,
-        duration_seconds: startedAt.current
-          ? Math.max(1, Math.round((Date.now() - startedAt.current) / 1000))
-          : undefined,
+        duration_seconds: startedAt.current ? Math.max(1, elapsedSeconds) : undefined,
         tags: [selectedKey, "training"],
       });
       setRecordError(null);
@@ -105,7 +131,6 @@ export function Train({
       TRAINING_MODULES[(moduleIndex + 1) % TRAINING_MODULES.length].id,
     );
     setMisses(0);
-    startedAt.current = Date.now();
   };
 
   return (
@@ -133,7 +158,7 @@ export function Train({
               <i>
                 <b
                   style={{
-                    width: `${item.id === moduleId ? Math.round((found.size / Math.max(1, notes.length)) * 100) : index < moduleIndex ? 100 : 12}%`,
+                    width: `${item.id === moduleId ? Math.round((found.size / Math.max(1, notes.length)) * 100) : index < moduleIndex ? 100 : 0}%`,
                   }}
                 />
               </i>
@@ -156,14 +181,17 @@ export function Train({
       </div>
       <div className="train-board">
         <div className="section-head">
-          <h2>Tap each target</h2>
-          <span>Every note has a consistent color</span>
+          <h2>Find {trainingModule.target}</h2>
+          <span>
+            {notes.length - found.size} left · the board does not show you where
+          </span>
         </div>
         <Fretboard
           notes={notes}
           low={1}
           high={7}
           interactive
+          hideTargets
           found={found}
           onCell={hit}
           rootKey={selectedKey}
@@ -177,7 +205,7 @@ export function Train({
           <span>found</span>
         </article>
         <article>
-          <strong>0:24</strong>
+          <strong>{elapsedLabel}</strong>
           <span>elapsed</span>
         </article>
         <article>
