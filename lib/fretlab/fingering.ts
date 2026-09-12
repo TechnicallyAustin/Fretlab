@@ -202,13 +202,16 @@ export function fingerBarreShape(shape: readonly Note[]): FingeredNote[] {
   const fretted = shape.filter((note) => note.f > 0);
   if (!fretted.length) return shape.map((note) => ({ ...note, finger: 0 }));
 
-  const frets = [...new Set(fretted.map((note) => note.f))].sort((a, b) => a - b);
-  const fingerByFret = new Map(frets.map((fret, index) => [fret, Math.min(4, index + 1)]));
+  // The barre is the lowest fretted note; every finger is placed relative to
+  // it. This used to number by *rank* of distinct fret — first fret found gets
+  // finger 1, second gets 2 — which ignores how far apart they are. A C barre
+  // sits at fret 3 with its triad at fret 5, two frets up, and rank called
+  // that the middle finger. Two frets above the index is the ring finger, and
+  // the middle finger cannot comfortably reach it while the index holds a
+  // barre.
+  const barre = Math.min(...fretted.map((note) => note.f));
 
-  return shape.map((note) => ({
-    ...note,
-    finger: note.f === 0 ? 0 : (fingerByFret.get(note.f) ?? 1),
-  }));
+  return shape.map((note) => ({ ...note, finger: fingerFor(note.f, barre) }));
 }
 
 /**
@@ -230,8 +233,21 @@ export function withPlayOrder(notes: readonly FingeredNote[]): (FingeredNote & {
 /** The fingers a shape actually uses, for the caption under the board. */
 export function fingersUsed(
   notes: readonly FingeredNote[],
-  boxLow: number,
 ): { finger: number; fret: number }[] {
-  const fingers = [...new Set(notes.map((note) => note.finger).filter((f): f is number => !!f))];
-  return fingers.sort((a, b) => a - b).map((finger) => ({ finger, fret: boxLow + finger - 1 }));
+  // Read from the notes rather than recomputed from the box.
+  //
+  // This used to derive the fret as `boxLow + finger - 1`, which is the
+  // inverse of the numbering rule written out a second time — so the caption
+  // could disagree with the board, and did: a shape reaching the nut has a box
+  // low of 0, and the caption read "Index on fret 0", which is the nut and
+  // takes no finger at all. The notes already know which fret they are on.
+  const byFinger = new Map<number, number>();
+  for (const note of notes) {
+    if (!note.finger) continue;
+    const lowest = byFinger.get(note.finger);
+    if (lowest === undefined || note.f < lowest) byFinger.set(note.finger, note.f);
+  }
+  return [...byFinger]
+    .sort(([a], [b]) => a - b)
+    .map(([finger, fret]) => ({ finger, fret }));
 }

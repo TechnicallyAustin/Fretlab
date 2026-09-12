@@ -80,7 +80,7 @@ export function DrillDetail({
   const ordered = cells.length
     ? patternRoute(shape.notes, cells, sessionKey, tuning)
     : withPlayOrder(shape.notes);
-  const fingers = fingersUsed(shape.notes, shape.low);
+  const fingers = fingersUsed(shape.notes);
   const fullNeck = drillShape(drill, sessionKey, true, tuning);
   const shapeIds = new Set(shape.notes.map((note) => `${note.s}:${note.f}`));
   // A comparison drill draws what it is against what it is not. "Major to

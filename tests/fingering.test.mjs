@@ -10,7 +10,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 const { DRILLS } = await import("../lib/fretlab/library.ts");
-const { drillShape, drillKind, fingerBarreShape, BOX_SPAN } = await import(
+const { drillShape, drillKind, fingerBarreShape, fingersUsed, BOX_SPAN } = await import(
   "../lib/fretlab/fingering.ts"
 );
 const { CHORDS } = await import("../lib/fretlab/library.ts");
@@ -271,6 +271,62 @@ test("a scale position fingers its notes the same way a drill does", () => {
             `${scaleId} ${position.id} in ${key}: string ${note.s} fret ${note.f}`,
           );
         }
+      }
+    }
+  }
+});
+
+const { chordVoicing } = await import("../lib/fretlab/theory.ts");
+
+/**
+ * `fingerBarreShape` numbered by *rank* of distinct fret — first fret found
+ * takes finger 1, second takes 2 — which ignores how far apart they are. A C
+ * barre sits at fret 3 with its triad at fret 5, and rank called that the
+ * middle finger. Two frets above an index barre is the ring finger; the middle
+ * cannot reach it while the index holds the barre.
+ */
+test("a barre shape fingers by distance from the barre, not by order", () => {
+  for (const chord of CHORDS) {
+    for (const voicing of ["Barre", "Triad"]) {
+      let notes;
+      try {
+        notes = chordVoicing(chord, voicing);
+      } catch {
+        continue;
+      }
+      if (!notes?.length) continue;
+      const shaped = fingerBarreShape(notes);
+      const fretted = shaped.filter((note) => note.f > 0);
+      if (!fretted.length) continue;
+      const barre = Math.min(...fretted.map((note) => note.f));
+      for (const note of fretted) {
+        assert.equal(
+          note.finger,
+          Math.min(4, note.f - barre + 1),
+          `${chord.id} ${voicing}: fret ${note.f} over a barre at ${barre} asks for finger ${note.finger}`,
+        );
+      }
+    }
+  }
+});
+
+/**
+ * The caption under a drill board ("Index on fret 5 · Ring on fret 7") derived
+ * its frets as `boxLow + finger - 1` — the numbering rule written out a second
+ * time, inverted. So it could disagree with the board, and did: a shape
+ * reaching the nut has a box low of 0 and the caption read "Index on fret 0",
+ * which is the nut and takes no finger.
+ */
+test("the fingering caption says what the board shows", () => {
+  for (const drill of DRILLS) {
+    for (const key of FIFTHS) {
+      const shape = drillShape(drill, key);
+      for (const { finger, fret } of fingersUsed(shape.notes)) {
+        assert.ok(
+          shape.notes.some((note) => note.finger === finger && note.f === fret),
+          `${drill.id} in ${key}: caption puts finger ${finger} on fret ${fret}, which is on no note`,
+        );
+        assert.ok(fret > 0, `${drill.id} in ${key}: caption fingers the nut`);
       }
     }
   }
