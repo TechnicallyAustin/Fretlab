@@ -20,7 +20,8 @@ export function Today({
   go,
   sessionKey,
 }: {
-  go: (view: View) => void;
+  /** Takes an id too: the runner needs to know what it is running. */
+  go: (view: View, id?: string) => void;
   sessionKey: KeyName;
 }) {
   // §5: L1 owns the data. Every figure on this screen is the player's own or
@@ -68,7 +69,12 @@ export function Today({
             <span>drills</span>
           </div>
         </div>
-        <button className="primary-action" onClick={() => go("runner")}>
+        {/* The runner needs to know which routine: it used to render the
+            same hardcoded drill whichever one you started. */}
+        <button
+          className="primary-action"
+          onClick={() => go("runner", routine.id)}
+        >
           Start session <span>→</span>
         </button>
       </article>

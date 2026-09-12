@@ -17,7 +17,8 @@ export function Routines({
   go,
   selectedKey,
 }: {
-  go: (view: View) => void;
+  /** Takes an id too: the runner needs to know what it is running. */
+  go: (view: View, id?: string) => void;
   selectedKey: KeyName;
 }) {
   // §5: L1 owns the data. These were literals: 3 sessions, 68 minutes.
@@ -120,7 +121,7 @@ export function Routines({
                     "Not practised yet"
                   )}
                 </span>
-                <button onClick={() => go("routine-detail")}>
+                <button onClick={() => go("runner", routine.id)}>
                   Start routine
                 </button>
               </div>

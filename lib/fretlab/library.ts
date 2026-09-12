@@ -975,3 +975,47 @@ export const SONGS = [
   },
 ];
 
+
+export type RunStepPlan = { drillId: DrillId; drill: Drill; mins: number };
+
+/**
+ * What the runner is about to run.
+ *
+ * The runner is reached from two places that mean different things: a routine
+ * card, and the "Start this drill" button on a drill, chord or scale page.
+ * Both used to land on a runner that rendered the same hardcoded drill
+ * regardless, so "Start 4-minute drill" started something else entirely.
+ * Resolving the id against both lists lets one screen serve both honestly.
+ */
+export type RunPlan = {
+  id: string;
+  name: string;
+  key: KeyName;
+  steps: RunStepPlan[];
+};
+
+export function runPlanFor(id: string, selectedKey: KeyName): RunPlan | null {
+  const routine = ROUTINES.find((each) => each.id === id);
+  if (routine) {
+    return {
+      id: routine.id,
+      name: routine.name,
+      key: routineKey(routine, selectedKey),
+      steps: routineSteps(routine).map((step) => ({
+        drillId: step.drillId,
+        drill: step.drill,
+        mins: step.mins,
+      })),
+    };
+  }
+
+  // A single drill is a one-step run, in whatever key you are working in.
+  const drill = drillById(id);
+  if (!drill) return null;
+  return {
+    id: drill.id,
+    name: drill.name,
+    key: selectedKey,
+    steps: [{ drillId: drill.id, drill, mins: drill.minutes }],
+  };
+}

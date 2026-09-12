@@ -307,3 +307,71 @@ test("§1 notification preferences round trip", options, async () => {
     body: JSON.stringify({ category: "streak", enabled: true }),
   });
 });
+
+/**
+ * FL-11. Running a routine used to record nothing at all: `Runner` ignored
+ * every input, and "Finish session" navigated away without a write. The knock-
+ * on was that `Progress`'s empty state said "Start a routine", which led to the
+ * runner, which left the progress screen empty forever.
+ *
+ * This walks the routine the way the runner does — one session per step, in
+ * order — and checks the two things the task insists on: every step is
+ * recorded against its own drill, and accuracy is null rather than invented.
+ * The runner is a timer; it measures no accuracy and must claim none.
+ */
+test("§1 a routine run records one session per step and no fake accuracy", options, async () => {
+  const call = await signedIn();
+  const { ROUTINES, routineSteps } = await import("../lib/fretlab/library.ts");
+
+  const routine = ROUTINES.find((each) => each.id === "one-key-deep");
+  const steps = routineSteps(routine);
+  assert.ok(steps.length > 1, "the routine under test needs several steps");
+
+  const runTag = `run-${crypto.randomUUID()}`;
+  const created = [];
+  for (const step of steps) {
+    const response = await call("/practice-sessions", {
+      method: "POST",
+      body: JSON.stringify({
+        title: `${routine.name} · ${step.drill.name}`,
+        drill_id: step.drillId,
+        music_key: routine.key ?? "G",
+        bpm: step.drill.bpm || undefined,
+        duration_seconds: step.mins * 60,
+        tags: [runTag, "routine", routine.id],
+      }),
+    });
+    assert.equal(response.status, 201, `${step.drillId} was not recorded`);
+    created.push((await response.json()).data);
+  }
+
+  assert.equal(created.length, steps.length, "one session per step");
+  assert.deepEqual(
+    created.map((row) => row.drill_id),
+    steps.map((step) => step.drillId),
+    "sessions recorded against the wrong drills",
+  );
+
+  for (const [i, row] of created.entries()) {
+    assert.equal(
+      row.accuracy,
+      null,
+      `${row.drill_id}: the runner measures no accuracy and must record none`,
+    );
+    assert.ok(
+      row.duration_seconds >= 60,
+      `${row.drill_id}: implausible duration ${row.duration_seconds}`,
+    );
+    assert.equal(row.music_key, routine.key ?? "G");
+    assert.ok(row.title.includes(steps[i].drill.name));
+  }
+
+  // The run is visible to the screen that said it never would be.
+  const list = await (await call("/practice-sessions?limit=100")).json();
+  const mine = list.data.filter((row) => row.tags?.includes(runTag));
+  assert.equal(mine.length, steps.length, "the run is not in the history");
+
+  for (const row of created) {
+    await call(`/practice-sessions/${row.id}`, { method: "DELETE" });
+  }
+});

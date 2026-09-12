@@ -491,13 +491,13 @@ have verified each one fails against the pre-fix code.
 **Goal:** the app can be practised with, not just read. Do not start before Stage 1 is
 `DONE`.
 
-**Progress:** 2 / 7 done
+**Progress:** 3 / 7 done
 
 | ID | Task | Status |
 |---|---|---|
 | FL-09 | Audio metronome on the Web Audio clock | `DONE` |
 | FL-10 | Routine steps become drill ids | `DONE` |
-| FL-11 | Runner renders the real drill and records a session | `TODO` |
+| FL-11 | Runner renders the real drill and records a session | `DONE` |
 | FL-12 | Scale position tables (CAGED) | `TODO` |
 | FL-13 | Fix the key-scoped streak | `TODO` |
 | FL-14 | Give drills patterns instead of pitch-class sets | `TODO` |
@@ -634,8 +634,8 @@ test("every routine step names a drill that exists", () => {
 
 ---
 
-### - [ ] FL-11 — Runner renders the real drill and records a session
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** B-03, G-04
+### - [x] FL-11 — Runner renders the real drill and records a session
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** B-03, G-04
 
 **Files:** `app/_screens/Runner.tsx`, `app/_screens/Guided.tsx`,
 `app/_screens/Summary.tsx`, `app/_screens/Progress.tsx:85-90`
@@ -668,6 +668,41 @@ per step with the right `drill_id` and a plausible `duration_seconds`, and that
 `accuracy` is null rather than fabricated.
 
 **Done when.** Completing a routine makes the Progress screen change.
+
+> **Done.** The runner takes the run from the URL — `/routines/runner/:id` —
+> and renders that drill's real name, shape, key, cue and tempo, with a step
+> bar at the real position and a clock counting the step's own `mins`.
+> Finishing writes one `practice_session` per step with `duration_seconds`,
+> `bpm`, `drill_id` and `music_key`, and **no accuracy**: the runner is a timer
+> and measures nothing to be accurate about, so the column stays null. The
+> integration test asserts that null specifically, and it ran against a live
+> server rather than skipping.
+>
+> `Summary` reports that run — total time, each drill and what it was played
+> to — read through `useLastRun()`. Its 92% ring and four invented per-drill
+> percentages are gone, and a render test fails if any of them return.
+>
+> **Beyond the task, because the buttons were lying:** `runPlanFor()` resolves
+> the URL id against routines *and* drills, so a drill id runs as a one-step
+> run. `DrillDetail`'s "Start 4-minute drill" said one drill and started
+> another; it starts the named one now. `Today`, `Routines` and `RoutineDetail`
+> pass the routine they display instead of relying on a default.
+>
+> `Progress`'s empty state needed no interim change: it already points at
+> `routines`, and that path now records.
+>
+> **Left for a later task, deliberately:**
+>
+> - `Guided` is a second runner — hardcoded to `ROUTINES[1]`, records nothing,
+>   and is now unreachable because `RoutineDetail`'s primary action goes to the
+>   runner. It should be merged into `Runner` or deleted outright; leaving a
+>   dead screen wired into the view union and the route table is not the state
+>   to stop in, but removing a screen is more than FL-11 asked for.
+> - `RoutineDetail` still hardcodes `ROUTINES[1]`, so `/routines/current` shows
+>   "One key, deep" whichever card you opened. Same shape of defect as the one
+>   this task fixed in the runner, one screen along.
+> - `test:integration` was missing the module loader `npm test` uses, so it
+>   could not import app source. Fixed in `package.json`.
 
 ---
 

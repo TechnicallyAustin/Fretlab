@@ -19,7 +19,7 @@
     "setup": "npm run db:migrate && npm run db:seed",
     "typecheck": "tsc --noEmit",
     "test:unit": "node --import ./tests/helpers/register.mjs --test \"tests/*.test.mjs\"",
-    "test:integration": "node --test \"tests/integration.test.mjs\""
+    "test:integration": "node --import ./tests/helpers/register.mjs --test \"tests/integration.test.mjs\""
   },
   "dependencies": {
     "drizzle-orm": "0.45.2",

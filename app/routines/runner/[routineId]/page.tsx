@@ -6,6 +6,7 @@
  * Thin by design: it resolves URL state and hands the L1 screen the props it
  * already took, so screens stay independent of the router.
  */
+import { useParams } from "next/navigation";
 import { useStoredKey } from "@/lib/fretlab/useStoredKey";
 import { useFretLabNav } from "@/app/_screens/useFretLabNav";
 import { Runner } from "@/app/_screens/Runner";
@@ -13,5 +14,6 @@ import { Runner } from "@/app/_screens/Runner";
 export default function Page() {
   const nav = useFretLabNav();
   const [selectedKey] = useStoredKey();
-  return <Runner go={nav.go} sessionKey={selectedKey} />;
+  const routineId = String(useParams().routineId ?? "");
+  return <Runner go={nav.go} sessionKey={selectedKey} routineId={routineId} />;
 }

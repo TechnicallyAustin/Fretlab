@@ -36,7 +36,7 @@ export const VIEW_PATHS: Record<View, string> = {
   progress: "/progress",
   routines: "/routines",
   "routine-detail": "/routines/current",
-  runner: "/routines/runner",
+  runner: "/routines/runner/:id",
   summary: "/routines/summary",
   guided: "/routines/guided",
   signin: "/signin",
@@ -44,6 +44,9 @@ export const VIEW_PATHS: Record<View, string> = {
 
 /** Views whose path carries an id. */
 export const DETAIL_VIEWS = new Set<View>([
+  // The runner carries the routine it is running: it used to render the same
+  // hardcoded drill whichever routine you started from.
+  "runner",
   "drill-detail",
   "chord-detail",
   "scale-library-detail",
@@ -55,6 +58,7 @@ export const DETAIL_VIEWS = new Set<View>([
  * still lands somewhere real rather than on `/chords/:id`.
  */
 export const DEFAULT_DETAIL_ID: Record<string, string> = {
+  runner: "warm-up",
   "drill-detail": "position-one",
   "chord-detail": "g-major",
   "scale-library-detail": "major",
@@ -80,6 +84,9 @@ export function viewForPath(pathname: string): View {
   if (exact) return exact;
 
   const segments = path.split("/").filter(Boolean);
+  if (segments.length === 3 && segments[0] === "routines" && segments[1] === "runner") {
+    return "runner";
+  }
   if (segments.length === 2) {
     switch (segments[0]) {
       case "drills":

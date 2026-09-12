@@ -191,7 +191,8 @@ test("every view has its own route and renders there", async () => {
       .replace("/drills/:id", "/drills/position-one")
       .replace("/chords/:id", "/chords/c-major")
       .replace("/scales/:id", "/scales/blues")
-      .replace("/songs/:id", "/songs/stand-by-me"),
+      .replace("/songs/:id", "/songs/stand-by-me")
+      .replace("/routines/runner/:id", "/routines/runner/warm-up"),
   ]);
 
   for (const [view, path] of paths) {
@@ -214,9 +215,45 @@ test("detail routes render the entity named in the URL", async () => {
     ["/songs/dreams", "Dreams"],
     ["/scales/blues", "Blues"],
     ["/drills/thirds", "Thirds"],
+    // The runner rendered a hardcoded drill whichever routine you started, so
+    // that it names the one in the URL is the whole of FL-11's first claim.
+    ["/routines/runner/warm-up", "Ten minute warm-up"],
+    ["/routines/runner/one-key-deep", "One key, deep"],
+    // A drill id runs as a single step, so "Start this drill" starts this one.
+    ["/routines/runner/thirds", "Thirds through the shape"],
   ]) {
     const text = strip(await (await render(path)).text());
     assert.ok(text.includes(expected), `${path} should name "${expected}"`);
+  }
+});
+
+test("the runner opens each routine on its own first drill", async () => {
+  const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  // Every routine used to open on "Position one, up and back".
+  const warm = strip(await (await render("/routines/runner/warm-up")).text());
+  assert.ok(warm.includes("Open string check"), "warm-up opened on the wrong drill");
+  const deep = strip(await (await render("/routines/runner/one-key-deep")).text());
+  assert.ok(deep.includes("Position one, up and back"), "one-key-deep opened wrong");
+  assert.ok(!warm.includes("Position one, up and back"), "still the hardcoded drill");
+});
+
+test("a run that recorded nothing shows no summary figures", async () => {
+  // Script and style contents are dropped first: the RSC payload embedded in
+  // the page carries build hashes full of digits, and stripping tags alone
+  // would let those stand in for rendered figures.
+  const visible = (html) =>
+    html
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ");
+
+  // The summary shipped a 92% ring and four invented per-drill percentages
+  // for a run that measured nothing and saved nothing.
+  const text = visible(await (await render("/routines/summary")).text());
+  assert.ok(text.includes("No finished run to show"), "summary is not empty");
+  for (const invented of ["92", "96%", "88%", "84%", "Strong work"]) {
+    assert.ok(!text.includes(invented), `summary still shows "${invented}"`);
   }
 });
 

@@ -26,7 +26,8 @@ export function DrillDetail({
   sessionKey,
   drillId,
 }: {
-  go: (view: View) => void;
+  /** Takes an id too: the runner needs to know what it is running. */
+  go: (view: View, id?: string) => void;
   sessionKey: KeyName;
   drillId: string;
 }) {
@@ -160,7 +161,12 @@ export function DrillDetail({
         )}
 
         <div className="practice-controls">
-          <button className="practice-start" onClick={() => go("runner")}>
+          {/* This button named a drill and started an unrelated one. The
+              runner takes a drill id as readily as a routine id. */}
+          <button
+            className="practice-start"
+            onClick={() => go("runner", drill.id)}
+          >
             ▶ Start {drill.minutes}-minute drill
           </button>
           <div className="practice-tempo">

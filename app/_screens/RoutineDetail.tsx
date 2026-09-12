@@ -18,7 +18,8 @@ export function RoutineDetail({
   sessionKey,
   onAdoptKey,
 }: {
-  go: (view: View) => void;
+  /** Takes an id too: the runner needs to know what it is running. */
+  go: (view: View, id?: string) => void;
   sessionKey: KeyName;
   /** Switch the global key to the routine's, when the two disagree. */
   onAdoptKey?: (key: KeyName) => void;
@@ -109,8 +110,14 @@ export function RoutineDetail({
       )}
       <div className="action-row sticky-action">
         <button className="secondary-action">Edit</button>
-        <button className="primary-action" onClick={() => go("guided")}>
-          Start guided
+        {/* This led to Guided, which is hardcoded to one routine and records
+            nothing, so the primary action on the routine screen left Progress
+            empty. It starts the runner for this routine now. */}
+        <button
+          className="primary-action"
+          onClick={() => go("runner", routine.id)}
+        >
+          Start routine
         </button>
       </div>
     </div>

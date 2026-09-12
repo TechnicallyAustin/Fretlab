@@ -1448,6 +1448,48 @@ p {
 
 /* Shown when a routine declares a key of its own and it disagrees with the
    one you picked. The screen used to display your key and practise another. */
+/* The runner's per-step advance, and the summary's list of what was actually
+   recorded. The summary used to show a ring of 92% and four invented per-drill
+   percentages for a run that measured nothing. */
+.runner-advance {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.run-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 16px;
+  text-align: left;
+}
+
+.run-step-list>div {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+}
+
+.run-step-list strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.run-step-list small {
+  color: var(--quiet);
+  font-size: 12px;
+}
+
+.summary-screen h1 {
+  font-variant-numeric: tabular-nums;
+}
+
 .key-conflict {
   display: flex;
   flex-wrap: wrap;
