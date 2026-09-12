@@ -26,6 +26,7 @@ const { shapeWindow } = await import("../lib/fretlab/geometry.ts");
 const {
   FIFTHS,
   OPEN_PC,
+  DROP_D_TUNING,
   chordIntervals,
   chordVoicing,
   degreeLabels,
@@ -34,10 +35,31 @@ const {
   pcOfName,
   spellPitchClass,
   voicingIntervals,
+  openPc,
 } =
   await import(
   "../lib/fretlab/theory.ts"
 );
+
+test("alternate tunings change the low string without changing other strings", () => {
+  assert.equal(openPc(DROP_D_TUNING, 6), 2, "Drop D low string should be D");
+  assert.equal(openPc(DROP_D_TUNING, 5), OPEN_PC[5], "Drop D should preserve A");
+  assert.equal(openPc(DROP_D_TUNING, 1), OPEN_PC[1], "Drop D should preserve high e");
+});
+
+test("FL-19 Practice exposes the persisted tuning and handedness setup", async () => {
+  const route = await readProjectFile("app/train/page.tsx");
+  const screen = await readProjectFile("app/_screens/Train.tsx");
+  const store = await readProjectFile("lib/fretlab/useStoredTuning.ts");
+  assert.match(route, /useStoredTuning/);
+  assert.match(screen, /Guitar setup/);
+  assert.match(screen, /Drop D/);
+  assert.match(screen, /Left-handed/);
+  assert.match(screen, /tuning=\{tuning\}/);
+  assert.match(screen, /leftHanded=\{leftHanded\}/);
+  assert.match(store, /fretlab-tuning/);
+  assert.match(store, /fretlab-handedness/);
+});
 
 /** The pitch class a shape sounds on a given string and fret. */
 const soundedPc = (note) => (OPEN_PC[note.s] + note.f) % 12;

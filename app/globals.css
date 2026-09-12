@@ -811,6 +811,49 @@ p {
   cursor: pointer;
 }
 
+.guitar-setup {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.setup-controls {
+  display: grid;
+  gap: 10px;
+}
+
+.setup-controls>div {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) repeat(2, auto);
+  gap: 6px;
+  align-items: center;
+}
+
+.setup-controls span {
+  color: var(--muted);
+  font-size: .875rem;
+}
+
+.setup-controls button {
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--sunken);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .8125rem;
+}
+
+.setup-controls button.active {
+  border-color: var(--key-edge);
+  background: var(--key-fill);
+  color: var(--key-ink);
+}
+
 .train-hero {
   padding: 24px 20px 10px;
   text-align: center;

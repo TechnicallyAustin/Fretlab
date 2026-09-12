@@ -1072,15 +1072,15 @@ Carried forward into Stage 3, logged rather than fixed:
 
 **Goal:** the app is usable by people who are not you. Largely parallel to Stage 2.
 
-**Progress:** 2 / 6 done
+**Progress:** 3 / 6 done
 
 | ID | Task | Status |
 |---|---|---|
 | FL-16 | Grid keyboard navigation and a screen-reader pass | `DONE` |
 | FL-17 | Rem type scale, 16px floor, stand mode | `DONE` |
 | FL-18 | Mobile IA: promote Library, reflow the hidden regions | `DONE` |
-| FL-19 | Left-handed mirroring and alternate tunings | `TODO` |
-| FL-20 | Dark theme | `TODO` |
+| FL-19 | Left-handed mirroring and alternate tunings | `DONE` |
+| FL-20 | Dark theme | `WIP` |
 | FL-21 | Onboarding | `TODO` |
 
 ---
@@ -1183,8 +1183,10 @@ without a mobile equivalent.
 
 ---
 
-### - [ ] FL-19 — Left-handed mirroring and alternate tunings
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** competitive gap table
+### - [x] FL-19 — Left-handed mirroring and alternate tunings
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** competitive gap table
+
+> **Done.** Added persisted Standard and Drop D tuning presets plus left-handed setup controls to Practice. Tuning-aware pitch and degree calculations now drive the fretboard, left-handed mode reverses string and fret coordinates, and the Drop D/setup acceptance tests pass through the full build-backed suite.
 
 **Files:** `lib/fretlab/theory.ts:26` (`OPEN_PC`), `components/fretlab/Fretboard.tsx`
 
@@ -1209,7 +1211,7 @@ roots land where a Drop D player expects.
 ---
 
 ### - [ ] FL-20 — Dark theme
-**Status:** `TODO` · **Severity:** Minor · **Audit ref:** U-06
+**Status:** `WIP` · **Severity:** Minor · **Audit ref:** U-06
 
 **Files:** `app/globals.css`, `lib/fretlab/palette.ts`,
 `components/fretlab/Fretboard.tsx`

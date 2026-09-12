@@ -5,8 +5,8 @@
  * Owns its data and page-level layout, and composes L2 sections. FretLab
  * renders these from the shell in app/page.tsx; see the README on routing.
  */
-import type { KeyName } from "@/lib/fretlab/types";
-import { FIFTHS, STRING_NAMES, intervalShape } from "@/lib/fretlab/theory";
+import type { KeyName, Tuning } from "@/lib/fretlab/types";
+import { DROP_D_TUNING, FIFTHS, STRING_NAMES, intervalShape, STANDARD_TUNING } from "@/lib/fretlab/theory";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { TRAINING_MODULES } from "@/lib/fretlab/library";
@@ -18,9 +18,17 @@ import { api, ApiClientError } from "@/lib/api/client";
 export function Train({
   selectedKey,
   setSelectedKey,
+  tuning = STANDARD_TUNING,
+  leftHanded = false,
+  setTuning,
+  setLeftHanded,
 }: {
   selectedKey: KeyName;
   setSelectedKey: (key: KeyName) => void;
+  tuning?: Tuning;
+  leftHanded?: boolean;
+  setTuning?: (tuning: Tuning) => void;
+  setLeftHanded?: (leftHanded: boolean) => void;
 }) {
   const [moduleId, setModuleId] =
     useState<(typeof TRAINING_MODULES)[number]["id"]>("locator");
@@ -29,8 +37,8 @@ export function Train({
   );
   const trainingModule = TRAINING_MODULES[moduleIndex];
   const notes = useMemo(
-    () => intervalShape(selectedKey, [...trainingModule.intervals], 1, 7),
-    [selectedKey, trainingModule],
+    () => intervalShape(selectedKey, [...trainingModule.intervals], 1, 7, tuning),
+    [selectedKey, trainingModule, tuning],
   );
   const signature = notes.map((note) => `${note.s}:${note.f}`).join(",");
   // Nothing is found until the player finds it. This used to open with every
@@ -153,6 +161,10 @@ export function Train({
           ))}
         </div>
       </section>
+      <section className="guitar-setup" aria-label="Guitar setup">
+        <div className="section-head"><h2>Guitar setup</h2><span>{tuning.name} · {leftHanded ? "Left-handed" : "Right-handed"}</span></div>
+        <div className="setup-controls"><div><span>Tuning</span><button className={tuning.id === STANDARD_TUNING.id ? "active" : ""} onClick={() => setTuning?.(STANDARD_TUNING)}>Standard</button><button className={tuning.id === DROP_D_TUNING.id ? "active" : ""} onClick={() => setTuning?.(DROP_D_TUNING)}>Drop D</button></div><div><span>Handedness</span><button className={!leftHanded ? "active" : ""} onClick={() => setLeftHanded?.(false)}>Right-handed</button><button className={leftHanded ? "active" : ""} onClick={() => setLeftHanded?.(true)}>Left-handed</button></div></div>
+      </section>
       <div className="train-hero">
         <p className="kicker">{trainingModule.name}</p>
         <strong>{selectedKey}</strong>
@@ -182,6 +194,8 @@ export function Train({
           found={found}
           onCell={hit}
           rootKey={selectedKey}
+          tuning={tuning}
+          leftHanded={leftHanded}
         />
       </div>
       <div className="stat-grid">

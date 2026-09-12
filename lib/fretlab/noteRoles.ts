@@ -10,10 +10,10 @@
  * of twelve, identical in every key, and legible without colour vision because
  * the shape alone separates them.
  */
-import type { KeyName } from "./types";
+import type { KeyName, Tuning } from "./types";
 import { keyHue } from "./palette";
 import { keyPc } from "./theory";
-import { OPEN_PC } from "./theory";
+import { openPc, STANDARD_TUNING } from "./theory";
 
 export type NoteRole = "root" | "third" | "fifth" | "seventh" | "scale" | "outside";
 
@@ -40,8 +40,8 @@ export function roleForDegree(degree: number): NoteRole {
   }
 }
 
-export function degreeAt(string: number, fret: number, rootKey: KeyName): number {
-  return ((OPEN_PC[string] + fret - keyPc(rootKey)) % 12 + 12) % 12;
+export function degreeAt(string: number, fret: number, rootKey: KeyName, tuning: Tuning = STANDARD_TUNING): number {
+  return ((openPc(tuning, string) + fret - keyPc(rootKey)) % 12 + 12) % 12;
 }
 
 export function roleAt(string: number, fret: number, rootKey: KeyName): NoteRole {

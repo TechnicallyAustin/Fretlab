@@ -5,7 +5,7 @@
  * under lib/ so L2 sections and L3 elements can use it without importing from
  * a page, and so the boundary lint has somewhere legal to point.
  */
-import type { KeyName, Note } from "./types";
+import type { KeyName, Note, Tuning } from "./types";
 
 export const FIFTHS: KeyName[] = [
   "C",
@@ -24,6 +24,11 @@ export const FIFTHS: KeyName[] = [
 export const LETTERS = "CDEFGAB";
 export const LETTER_PC = [0, 2, 4, 5, 7, 9, 11];
 export const OPEN_PC: Record<number, number> = { 1: 4, 2: 11, 3: 7, 4: 2, 5: 9, 6: 4 };
+export const STANDARD_TUNING: Tuning = { id: "standard", name: "Standard", openMidi: [0, 64, 59, 55, 50, 45, 40] };
+export const DROP_D_TUNING: Tuning = { id: "drop-d", name: "Drop D", openMidi: [0, 64, 59, 55, 50, 45, 38] };
+export function openPc(tuning: Tuning, string: number) {
+  return tuning.openMidi[string] % 12;
+}
 export const STRING_NAMES: Record<number, string> = {
   1: "e",
   2: "B",
@@ -68,20 +73,20 @@ export function majorScale(key: KeyName) {
     );
   });
 }
-export function targetNotes(key: KeyName, low = 1, high = 7) {
+export function targetNotes(key: KeyName, low = 1, high = 7, tuning = STANDARD_TUNING) {
   const root = keyPc(key);
   const notes: Note[] = [];
   for (let s = 6; s >= 1; s -= 1)
     for (let f = low; f <= high; f += 1)
-      if ((OPEN_PC[s] + f) % 12 === root) notes.push({ s, f });
+      if ((openPc(tuning, s) + f) % 12 === root) notes.push({ s, f });
   return notes;
 }
-export function scaleShape(key: KeyName, low: number, high: number) {
+export function scaleShape(key: KeyName, low: number, high: number, tuning = STANDARD_TUNING) {
   const pcs = [0, 2, 4, 5, 7, 9, 11].map((n) => (keyPc(key) + n) % 12);
   const notes: Note[] = [];
   for (let s = 6; s >= 1; s -= 1)
     for (let f = low; f <= high; f += 1)
-      if (pcs.includes((OPEN_PC[s] + f) % 12)) notes.push({ s, f });
+      if (pcs.includes((openPc(tuning, s) + f) % 12)) notes.push({ s, f });
   return notes;
 }
 export function intervalShape(
@@ -89,12 +94,13 @@ export function intervalShape(
   intervals: number[],
   low: number,
   high: number,
+  tuning = STANDARD_TUNING,
 ) {
   const pcs = intervals.map((n) => (keyPc(key) + n) % 12);
   const notes: Note[] = [];
   for (let s = 6; s >= 1; s -= 1)
     for (let f = low; f <= high; f += 1)
-      if (pcs.includes((OPEN_PC[s] + f) % 12)) notes.push({ s, f });
+      if (pcs.includes((openPc(tuning, s) + f) % 12)) notes.push({ s, f });
   return notes;
 }
 /**

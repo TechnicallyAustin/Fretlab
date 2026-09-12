@@ -8,8 +8,10 @@
  */
 import { useStoredKey } from "@/lib/fretlab/useStoredKey";
 import { Train } from "@/app/_screens/Train";
+import { useStoredTuning } from "@/lib/fretlab/useStoredTuning";
 
 export default function Page() {
   const [selectedKey, setSelectedKey] = useStoredKey();
-  return <Train selectedKey={selectedKey} setSelectedKey={setSelectedKey} />;
+  const [tuning, setTuning, leftHanded, setLeftHanded] = useStoredTuning();
+  return <Train selectedKey={selectedKey} setSelectedKey={setSelectedKey} tuning={tuning} setTuning={setTuning} leftHanded={leftHanded} setLeftHanded={setLeftHanded} />;
 }

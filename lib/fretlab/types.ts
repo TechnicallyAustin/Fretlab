@@ -45,3 +45,9 @@ export type View =
   | "guided"
   | "signin";
 export type Note = { s: number; f: number };
+export type Tuning = {
+  id: string;
+  name: string;
+  /** MIDI pitches for strings 1 through 6; index 0 is unused. */
+  openMidi: readonly [number, number, number, number, number, number, number];
+};

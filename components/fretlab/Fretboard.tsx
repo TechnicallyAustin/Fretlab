@@ -10,12 +10,12 @@
  *   - the fret window is always labelled, so a board starting at fret 7 says so
  *   - when `groups` are given, each layer is visually separate and named
  */
-import type { KeyName, Note } from "@/lib/fretlab/types";
+import type { KeyName, Note, Tuning } from "@/lib/fretlab/types";
 import type { FingeredNote } from "@/lib/fretlab/fingering";
 import {
-  OPEN_PC,
   STRING_NAMES,
   degreeLabels,
+  openPc,
   spellPitchClass,
 } from "@/lib/fretlab/theory";
 import { palette } from "@/lib/fretlab/palette";
@@ -51,6 +51,8 @@ export function Fretboard({
   muted,
   scale,
   hideTargets = false,
+  tuning,
+  leftHanded = false,
 }: {
   notes?: (Note | FingeredNote)[];
   /** Named layers, for showing a chord inside a scale without them merging. */
@@ -76,7 +78,10 @@ export function Fretboard({
    * and asks you to tap them tests nothing; recall starts from a blank neck.
    */
   hideTargets?: boolean;
+  tuning?: Tuning;
+  leftHanded?: boolean;
 }) {
+  const activeTuning: Tuning = tuning ?? { id: "standard", name: "Standard", openMidi: [0, 64, 59, 55, 50, 45, 40] };
   const gradientId = `board-${useId().replaceAll(":", "")}`;
   const cellRefs = useRef<Record<string, SVGGElement | null>>({});
   const degreeName = degreeLabels(scale);
@@ -117,6 +122,7 @@ export function Fretboard({
   const nameGutter = Math.round(gap * 0.95);
 
   const frets = Array.from({ length: high - low + 1 }, (_, index) => low + index);
+  if (leftHanded) frets.reverse();
   let cursor = nameGutter;
   const columns = frets.map((fret) => {
     const width = fret === 0 ? openWidth : unit;
@@ -136,7 +142,7 @@ export function Fretboard({
   const yFor = (string: number) => top + (string - 0.5) * gap;
   const dotRadius = Math.round(gap * 0.37);
   const showsNut = low <= 1;
-  const strings = [6, 5, 4, 3, 2, 1];
+  const strings = leftHanded ? [1, 2, 3, 4, 5, 6] : [6, 5, 4, 3, 2, 1];
   const firstCell = `${strings[0]}:${frets[0]}`;
   const [activeCell, setActiveCell] = useState(firstCell);
 
@@ -367,8 +373,8 @@ export function Fretboard({
               const hasNote = Boolean(entry);
               const isFound = !interactive || found.has(id);
 
-              const pc = (OPEN_PC[string] + column.fret) % 12;
-              const degree = degreeAt(string, column.fret, rootKey);
+              const pc = (openPc(activeTuning, string) + column.fret) % 12;
+              const degree = degreeAt(string, column.fret, rootKey, activeTuning);
               const role: NoteRole = roleForDegree(degree);
               const style = ROLE_STYLE[role];
               const label =
