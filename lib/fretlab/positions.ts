@@ -25,6 +25,7 @@
  */
 import type { KeyName, Note, Tuning } from "./types";
 import { keyPc, openPc, STANDARD_TUNING } from "./theory";
+import { fingerFor } from "./hand";
 
 export type ScalePosition = {
   id: string;
@@ -247,9 +248,14 @@ export function positionNotes(
       const f = low + offset + tuningOffset;
       // One finger per fret only holds inside a hand span. A wider shape is
       // played with a shift, and implying a finger for it would be a lie.
+      //
+      // `offset + 1` was wrong whenever the shape reached the nut: it counted
+      // from the window's low, which is fret 0 there, so an open string asked
+      // for the index finger and fret 1 for the middle one. `fingerFor` counts
+      // from where the hand actually sits.
       notes.push(
         position.span <= 3 && tuningOffset === 0
-          ? { s, f, finger: offset + 1 }
+          ? { s, f, finger: fingerFor(f, low) }
           : { s, f },
       );
     }

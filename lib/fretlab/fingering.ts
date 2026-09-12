@@ -16,6 +16,7 @@
 import type { KeyName, Note, Tuning } from "./types";
 import { intervalShape, STANDARD_TUNING } from "./theory";
 import { positionNotes, positionWindow, positionsFor } from "./positions";
+import { fingerFor } from "./hand";
 
 export type FingeredNote = Note & {
   /** 1-4 within the box, 0 for an open string. Absent on map drills. */
@@ -168,7 +169,7 @@ export function drillShape(
     .filter((note) => strings.has(note.s))
     .map((note) =>
       withinHand
-        ? { ...note, finger: note.f === 0 ? 0 : note.f - box.low + 1 }
+        ? { ...note, finger: fingerFor(note.f, box.low) }
         : { ...note },
     );
 

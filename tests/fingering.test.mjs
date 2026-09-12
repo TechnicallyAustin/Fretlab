@@ -173,3 +173,105 @@ test("every drill produces a numbered path a beginner can follow", async () => {
     );
   }
 });
+
+// ------------------------------------------------- which finger, and where
+
+const { fingerFor } = await import("../lib/fretlab/hand.ts");
+const { FIFTHS } = await import("../lib/fretlab/theory.ts");
+const { positionsFor, positionNotes, positionWindow } = await import(
+  "../lib/fretlab/positions.ts"
+);
+
+/**
+ * Fingering was counted from the fret window's low, and a window that reaches
+ * the nut starts at fret 0 — which no finger occupies. So every open-position
+ * shape came out a finger too high: fret 1 asked for the middle finger and
+ * fret 3 for the little one, leaving the index unused and the hand stretched
+ * for nothing. Open strings came out worse, given finger 1, which tells a
+ * beginner to fret the nut.
+ *
+ * Across the library that was 14 open strings fingered and 25 shapes
+ * misnumbered. Both places that numbered fingers had the same bug, which is
+ * why the rule now lives in one module.
+ */
+test("an open string is played with no finger", () => {
+  assert.equal(fingerFor(0, 0), 0);
+  assert.equal(fingerFor(0, 5), 0);
+
+  for (const drill of DRILLS) {
+    for (const key of FIFTHS) {
+      for (const note of drillShape(drill, key).notes) {
+        if (note.f !== 0 || note.finger === undefined) continue;
+        assert.equal(
+          note.finger,
+          0,
+          `${drill.id} in ${key}: open string ${note.s} asks for finger ${note.finger}`,
+        );
+      }
+    }
+  }
+});
+
+test("in open position the index finger plays the first fret", () => {
+  // The hand sits at fret 1, not at fret 0, so the fret number is the finger.
+  assert.equal(fingerFor(1, 0), 1);
+  assert.equal(fingerFor(2, 0), 2);
+  assert.equal(fingerFor(3, 0), 3);
+  // And the same shape further up counts from where the hand actually is.
+  assert.equal(fingerFor(5, 5), 1);
+  assert.equal(fingerFor(8, 5), 4);
+});
+
+test("no shape asks for a fifth finger", () => {
+  for (const drill of DRILLS) {
+    for (const key of FIFTHS) {
+      for (const note of drillShape(drill, key).notes) {
+        if (note.finger === undefined) continue;
+        assert.ok(
+          note.finger >= 0 && note.finger <= 4,
+          `${drill.id} in ${key}: string ${note.s} fret ${note.f} asks for finger ${note.finger}`,
+        );
+      }
+    }
+  }
+});
+
+test("the lowest fretted note in a shape takes the first finger", () => {
+  for (const drill of DRILLS) {
+    for (const key of FIFTHS) {
+      const shape = drillShape(drill, key);
+      if (shape.kind !== "box") continue;
+      const fretted = shape.notes.filter((n) => n.f > 0 && n.finger !== undefined);
+      if (!fretted.length) continue;
+      const hand = Math.max(1, shape.low);
+      for (const note of fretted) {
+        assert.equal(
+          note.finger,
+          Math.min(4, note.f - hand + 1),
+          `${drill.id} in ${key}: fret ${note.f} with the hand at ${hand} should be finger ${Math.min(4, note.f - hand + 1)}`,
+        );
+      }
+    }
+  }
+});
+
+test("a scale position fingers its notes the same way a drill does", () => {
+  // The two used to disagree: positions counted from the window, drills from
+  // the box. Now both go through fingerFor, so a shape is fingered the same
+  // whichever screen draws it.
+  for (const scaleId of ["major", "major-pentatonic", "minor-pentatonic"]) {
+    for (const position of positionsFor(scaleId)) {
+      if (position.span > 3) continue;
+      for (const key of FIFTHS) {
+        const window = positionWindow(position, key);
+        for (const note of positionNotes(position, key)) {
+          assert.equal(
+            note.finger,
+            fingerFor(note.f, window.low),
+            `${scaleId} ${position.id} in ${key}: string ${note.s} fret ${note.f}`,
+          );
+        }
+      }
+    }
+  }
+});
