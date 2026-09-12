@@ -481,12 +481,12 @@ have verified each one fails against the pre-fix code.
 **Goal:** the app can be practised with, not just read. Do not start before Stage 1 is
 `DONE`.
 
-**Progress:** 1 / 7 done
+**Progress:** 2 / 7 done
 
 | ID | Task | Status |
 |---|---|---|
 | FL-09 | Audio metronome on the Web Audio clock | `DONE` |
-| FL-10 | Routine steps become drill ids | `TODO` |
+| FL-10 | Routine steps become drill ids | `DONE` |
 | FL-11 | Runner renders the real drill and records a session | `TODO` |
 | FL-12 | Scale position tables (CAGED) | `TODO` |
 | FL-13 | Fix the key-scoped streak | `TODO` |
@@ -551,8 +551,8 @@ untouched and spaces the rest at 1.0s.
 
 ---
 
-### - [ ] FL-10 — Routine steps become drill ids
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** G-03
+### - [x] FL-10 — Routine steps become drill ids
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** G-03
 
 **Files:** `lib/fretlab/library.ts` (ROUTINES), `app/_screens/RoutineDetail.tsx`,
 `app/_screens/Routines.tsx`
@@ -593,6 +593,34 @@ test("every routine step names a drill that exists", () => {
 ```
 
 **Done when.** Every routine step resolves, and the assertion guards it permanently.
+
+> **Done.** Nine of the twelve steps named nothing. Four were existing drills
+> under another name — "Locate every D" and "Locate every G" are both
+> `root-locator`, "Chord tones only" is `major-triad`, "Sixths on the top two"
+> is `sixths` — and three were authored, as the task preferred:
+> `open-strings`, `open-chord-changes` and `drone-play`.
+>
+> **The key decision:** a routine declares a key or inherits. `key: null` means
+> it follows yours; only "One key, deep" declares one (G), because staying in
+> one key is the whole point of it. `RoutineDetail` shows "Practising in G —
+> your key is D" with a one-tap switch, wired through the route binding so the
+> screen still takes only props. Per-step keys are gone: "Ten minute warm-up"
+> used to run G, D and C in three steps while every screen displayed the user's
+> key regardless, so the field was both incoherent and ignored.
+>
+> `drillId` is typed against the drill ids, so a mistyped step is now a build
+> error as well as a test failure. Both were checked by reintroducing the
+> original "Sixths on the top two" defect: `tsc` rejects it and two assertions
+> fail.
+>
+> Also fixed while in there: `RoutineDetail`'s mini fretboards drew an
+> arbitrary six-note slice of the key's scale — the same notes for every step.
+> They draw each step's own shape now, via `drillShape`. And `Guided` takes its
+> tempo from the drill it is running rather than a hardcoded 84.
+>
+> Found, not fixed here: `ROUTINES` still carries `completed: 3` and
+> `last: "Yesterday"`, which `Routines.tsx` renders as progress dots on a fresh
+> account. That is the FL-07 class of defect and is logged under it.
 
 ---
 

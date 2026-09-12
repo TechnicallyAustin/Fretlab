@@ -1446,6 +1446,36 @@ p {
   opacity: .55;
 }
 
+/* Shown when a routine declares a key of its own and it disagrees with the
+   one you picked. The screen used to display your key and practise another. */
+.key-conflict {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  padding: 11px 13px;
+  border: 1px solid var(--key-bright);
+  border-radius: 13px;
+  background: var(--key-fill);
+}
+
+.key-conflict p {
+  margin: 0;
+  color: var(--key-ink);
+  font-size: 14px;
+}
+
+.key-conflict button {
+  padding: 7px 12px;
+  border: 1px solid var(--key-bright);
+  border-radius: 10px;
+  background: var(--card);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .metronome-bar {
   display: flex;
   flex-direction: column;

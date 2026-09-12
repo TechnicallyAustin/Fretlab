@@ -20,7 +20,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { screenSources } from "./helpers/sources.mjs";
 
-const { CHORDS, SCALES, SONGS } = await import("../lib/fretlab/library.ts");
+const { CHORDS, DRILLS, ROUTINES, SCALES, SONGS, drillNotes, routineSteps } =
+  await import("../lib/fretlab/library.ts");
 const { shapeWindow } = await import("../lib/fretlab/geometry.ts");
 const {
   FIFTHS,
@@ -322,6 +323,106 @@ test("every scale's labels cover every note it contains", () => {
     for (const interval of scale.intervals) {
       assert.ok(labels[interval], `${scale.name}: degree ${interval} unlabelled`);
     }
+  }
+});
+
+// ------------------------------------------------------------------ routines
+
+/**
+ * Routine steps were free text. Nine of the twelve named no drill that existed
+ * — "Sixths on the top two" against a drill called "Sixths on the top strings",
+ * and "Open string check" against nothing at all. A step with no drill behind
+ * it cannot open, draw a shape, or be scored, which is why starting a routine
+ * did nothing whichever routine you started.
+ */
+test("every routine step names a drill that exists", () => {
+  for (const routine of ROUTINES) {
+    for (const step of routine.drills) {
+      assert.ok(
+        DRILLS.some((drill) => drill.id === step.drillId),
+        `${routine.name}: no drill "${step.drillId}"`,
+      );
+    }
+  }
+});
+
+test("resolving a routine drops none of its steps", () => {
+  for (const routine of ROUTINES) {
+    assert.equal(
+      routineSteps(routine).length,
+      routine.drills.length,
+      `${routine.name}: a step resolved to nothing`,
+    );
+  }
+});
+
+/**
+ * The step used to carry a key each, so one routine ran through three of them
+ * while every screen displayed the user's own key regardless. A routine now
+ * declares one key or inherits, and null is what inheriting looks like.
+ */
+test("a routine declares a real key or inherits one", () => {
+  for (const routine of ROUTINES) {
+    assert.ok(
+      routine.key === null || FIFTHS.includes(routine.key),
+      `${routine.name}: key ${routine.key} is not a key`,
+    );
+    for (const step of routine.drills) {
+      assert.ok(!("key" in step), `${routine.name}: a step still carries a key`);
+    }
+  }
+});
+
+test("every routine step is a real length in a real phase", () => {
+  for (const routine of ROUTINES) {
+    for (const step of routine.drills) {
+      assert.ok(step.mins > 0, `${routine.name}: ${step.drillId} takes no time`);
+      assert.ok(
+        ["warm", "core", "cool"].includes(step.phase),
+        `${routine.name}: ${step.drillId} is in phase "${step.phase}"`,
+      );
+    }
+  }
+});
+
+test("no drill id is used twice", () => {
+  const ids = DRILLS.map((drill) => drill.id);
+  assert.equal(new Set(ids).size, ids.length, `duplicate id in ${ids.join(", ")}`);
+});
+
+/**
+ * A drill whose shape comes out empty renders a blank fretboard. The three
+ * drills authored for FL-10 are the ones most at risk: "Open string check" is
+ * a one-fret window, so an off-by-one in the window would empty it.
+ */
+test("every drill draws at least one note in every key", () => {
+  for (const drill of DRILLS) {
+    for (const key of FIFTHS) {
+      const notes = drillNotes(drill, key);
+      assert.ok(
+        notes.length > 0,
+        `${drill.name} draws nothing in ${key}`,
+      );
+      for (const note of notes) {
+        assert.ok(
+          note.f >= drill.low && note.f <= drill.high,
+          `${drill.name}: fret ${note.f} is outside ${drill.low}-${drill.high}`,
+        );
+      }
+    }
+  }
+});
+
+test("the open string check draws the six open strings and nothing else", () => {
+  const drill = DRILLS.find((each) => each.id === "open-strings");
+  for (const key of FIFTHS) {
+    const notes = drillNotes(drill, key);
+    assert.equal(notes.length, 6, `${key}: drew ${notes.length} open strings`);
+    assert.ok(notes.every((note) => note.f === 0));
+    assert.deepEqual(
+      [...notes.map((note) => note.s)].sort((a, b) => a - b),
+      [1, 2, 3, 4, 5, 6],
+    );
   }
 });
 

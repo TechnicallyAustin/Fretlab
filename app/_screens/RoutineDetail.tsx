@@ -8,21 +8,30 @@
 import type { KeyName, View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
 import { Fretboard } from "@/components/fretlab/Fretboard";
-import { ROUTINES } from "@/lib/fretlab/library";
+import { ROUTINES, routineKey, routineSteps } from "@/lib/fretlab/library";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
-import { scaleShape } from "@/lib/fretlab/theory";
+import { drillShape } from "@/lib/fretlab/fingering";
 import { useState } from "react";
 
 export function RoutineDetail({
   go,
   sessionKey,
+  onAdoptKey,
 }: {
   go: (view: View) => void;
   sessionKey: KeyName;
+  /** Switch the global key to the routine's, when the two disagree. */
+  onAdoptKey?: (key: KeyName) => void;
 }) {
   const [tab, setTab] = useState("Drills");
   const routine = ROUTINES[1];
-  const total = routine.drills.reduce((sum, d) => sum + d.mins, 0);
+  const steps = routineSteps(routine);
+  const total = steps.reduce((sum, step) => sum + step.mins, 0);
+  // A routine may be written for a key of its own. Where that disagrees with
+  // the key you chose, the screen says which one wins rather than showing one
+  // and practising the other, which is what it used to do.
+  const practisedIn = routineKey(routine, sessionKey);
+  const borrowed = practisedIn !== sessionKey;
   return (
     <div className="screen-content detail-screen">
       <AppHeader
@@ -31,9 +40,21 @@ export function RoutineDetail({
         onBack={() => go("routines")}
       />
       <p className="detail-lede">
-        {total} minutes · {routine.drills.length} drills · everything in{" "}
-        {sessionKey} major
+        {total} minutes · {steps.length} drills · everything in {practisedIn}{" "}
+        major
       </p>
+      {borrowed && (
+        <div className="key-conflict">
+          <p>
+            Practising in {practisedIn} — your key is {sessionKey}.
+          </p>
+          {onAdoptKey && (
+            <button onClick={() => onAdoptKey(practisedIn)}>
+              Switch my key to {practisedIn}
+            </button>
+          )}
+        </div>
+      )}
       <SegmentTabs
         labels={["Drills", "Guided", "Settings"]}
         active={tab}
@@ -41,25 +62,31 @@ export function RoutineDetail({
       />
       {tab === "Drills" && (
         <ol className="routine-drills">
-          {routine.drills.map((drill, i) => (
-            <li className={i === 1 ? "current" : ""} key={drill.name}>
+          {steps.map((step, i) => {
+            // The mini board used to draw an arbitrary six-note slice of the
+            // key's scale, the same notes whatever the step was. It draws the
+            // step's own shape now, in the window it is actually played in.
+            const shape = drillShape(step.drill, practisedIn);
+            return (
+            <li className={i === 1 ? "current" : ""} key={`${step.drillId}${i}`}>
               <span>{i + 1}</span>
               <Fretboard
-                notes={scaleShape(sessionKey, 1, 4).slice(i, i + 6)}
-                low={1}
-                high={4}
+                notes={shape.notes}
+                low={shape.windowLow}
+                high={shape.windowHigh}
                 mini
-                rootKey={sessionKey}
+                rootKey={practisedIn}
               />
               <div>
-                <strong>{drill.name}</strong>
+                <strong>{step.drill.name}</strong>
                 <small>
-                  {drill.phase} · {drill.mins} min · key {sessionKey}
+                  {step.phase} · {step.mins} min · key {practisedIn}
                 </small>
               </div>
               <em>{i === 0 ? "done" : i === 1 ? "now" : "next"}</em>
             </li>
-          ))}
+            );
+          })}
         </ol>
       )}
       {tab === "Guided" && (

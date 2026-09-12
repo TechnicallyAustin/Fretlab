@@ -12,6 +12,12 @@ import { RoutineDetail } from "@/app/_screens/RoutineDetail";
 
 export default function Page() {
   const nav = useFretLabNav();
-  const [selectedKey] = useStoredKey();
-  return <RoutineDetail go={nav.go} sessionKey={selectedKey} />;
+  const [selectedKey, setSelectedKey] = useStoredKey();
+  return (
+    <RoutineDetail
+      go={nav.go}
+      sessionKey={selectedKey}
+      onAdoptKey={setSelectedKey}
+    />
+  );
 }

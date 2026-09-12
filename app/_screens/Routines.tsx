@@ -8,7 +8,7 @@
 import type { KeyName, View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
 import { FIFTHS } from "@/lib/fretlab/theory";
-import { ROUTINES } from "@/lib/fretlab/library";
+import { ROUTINES, routineKey, routineSteps } from "@/lib/fretlab/library";
 import { cssVars } from "@/lib/fretlab/palette";
 import { usePracticeSessions } from "@/lib/api/hooks";
 import { weekMinutes } from "@/lib/api/progress";
@@ -66,7 +66,9 @@ export function Routines({
       </section>
       <div className="routine-list">
         {ROUTINES.map((routine, index) => {
-          const total = routine.drills.reduce((sum, d) => sum + d.mins, 0);
+          const steps = routineSteps(routine);
+          const total = steps.reduce((sum, step) => sum + step.mins, 0);
+          const practisedIn = routineKey(routine, selectedKey);
           return (
             <article
               className="routine-card"
@@ -77,23 +79,23 @@ export function Routines({
             >
               <div className="routine-title">
                 <div>
-                  <span className="key-chip">Key {selectedKey}</span>
+                  <span className="key-chip">Key {practisedIn}</span>
                   <h2>{routine.name}</h2>
                   <p>
-                    {total} min · {routine.drills.length} linked drills ·{" "}
+                    {total} min · {steps.length} linked drills ·{" "}
                     {routine.cadence}
                   </p>
                 </div>
               </div>
               <div className="routine-sequence">
-                {routine.drills.map((d, i) => (
-                  <div key={`${d.name}${i}`}>
+                {steps.map((step, i) => (
+                  <div key={`${step.drillId}${i}`}>
                     <span>{String(i + 1).padStart(2, "0")}</span>
-                    <strong>{d.name}</strong>
+                    <strong>{step.drill.name}</strong>
                     <small>
-                      {d.phase} · {d.mins} min
+                      {step.phase} · {step.mins} min
                     </small>
-                    {i < routine.drills.length - 1 && <i>→</i>}
+                    {i < steps.length - 1 && <i>→</i>}
                   </div>
                 ))}
               </div>

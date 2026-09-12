@@ -297,6 +297,59 @@ export const DRILLS = [
     goal: "Stay aligned for eight bars",
     cue: "Count aloud through the shift.",
   },
+  {
+    id: "open-strings",
+    kind: "map",
+    name: "Open string check",
+    category: "Technique",
+    level: "Beginner",
+    minutes: 4,
+    bpm: 0,
+    difficulty: 1,
+    // Fret zero only. Every pitch class is listed because an open string is
+    // whatever the tuning makes it, not a degree of the key you are in — the
+    // window, not the interval set, is what selects the six notes here.
+    low: 0,
+    high: 0,
+    intervals: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    reason: "A buzzing open string is a setup problem, not a practice problem.",
+    goal: "Six strings ringing clean",
+    cue: "Pick once and let it decay; listen for the buzz.",
+  },
+  {
+    id: "open-chord-changes",
+    kind: "box",
+    name: "Open chord changes",
+    category: "Chord tones",
+    level: "Beginner",
+    minutes: 3,
+    bpm: 60,
+    difficulty: 1,
+    low: 0,
+    high: 3,
+    // The roots of I, IV and V in open position: the three places your hand
+    // lands when changing between the first chords anyone learns.
+    intervals: [0, 5, 7],
+    reason: "Changing chords in time is the skill that makes songs playable.",
+    goal: "One bar each, no gap at the change",
+    cue: "Move on beat four, not on beat one.",
+  },
+  {
+    id: "drone-play",
+    kind: "map",
+    name: "Free play over a drone",
+    category: "Improvisation",
+    level: "Beginner",
+    minutes: 3,
+    bpm: 0,
+    difficulty: 1,
+    low: 0,
+    high: 12,
+    intervals: [0, 2, 4, 5, 7, 9, 11],
+    reason: "A drone makes the key audible, so your ear leads instead of the shape.",
+    goal: "Phrases that end where they want to",
+    cue: "Leave silence between phrases; land on the root.",
+  },
 ] as const;
 export type Drill = (typeof DRILLS)[number];
 export function drillNotes(drill: Drill, key: KeyName, full = false) {
@@ -345,89 +398,113 @@ export const TRAINING_MODULES = [
     instruction: "Locate the color tones, then name each distance aloud.",
   },
 ] as const;
-export const ROUTINES = [
+export type DrillId = Drill["id"];
+
+/**
+ * One step of a routine.
+ *
+ * Steps used to be free text — "Sixths on the top two", a near-miss for the
+ * drill actually called "Sixths on the top strings" — and nine of the twelve
+ * named nothing in `DRILLS` at all. A step with no id cannot open its drill,
+ * draw its shape or be scored, which is why the runner did nothing. Typing
+ * `drillId` against the drill ids makes a mistyped step a build error, and
+ * `tests/theory.test.mjs` guards it at runtime too.
+ */
+export type RoutineStep = {
+  drillId: DrillId;
+  mins: number;
+  phase: "warm" | "core" | "cool";
+};
+
+export type Routine = {
+  id: string;
+  name: string;
+  cadence: string;
+  last: string;
+  completed: number;
+  /**
+   * The key this routine is written for, or null to follow whatever key the
+   * user has chosen.
+   *
+   * Steps used to carry a key each, so "Ten minute warm-up" ran through G, D
+   * and C while every screen displayed the user's own key regardless — the
+   * field was both incoherent and ignored. The decision is now explicit and
+   * belongs to the routine: a routine whose point is one key declares it and
+   * the UI says so, and everything else inherits.
+   */
+  key: KeyName | null;
+  drills: RoutineStep[];
+};
+
+export const ROUTINES: Routine[] = [
   {
+    id: "warm-up",
     name: "Ten minute warm-up",
     cadence: "Every morning",
     last: "Yesterday",
     completed: 3,
+    key: null,
     drills: [
-      {
-        name: "Open string check",
-        key: "G" as KeyName,
-        mins: 4,
-        phase: "warm",
-      },
-      { name: "Locate every D", key: "D" as KeyName, mins: 3, phase: "core" },
-      {
-        name: "Open chord changes",
-        key: "C" as KeyName,
-        mins: 3,
-        phase: "cool",
-      },
+      { drillId: "open-strings", mins: 4, phase: "warm" },
+      { drillId: "root-locator", mins: 3, phase: "core" },
+      { drillId: "open-chord-changes", mins: 3, phase: "cool" },
     ],
   },
   {
+    id: "one-key-deep",
     name: "One key, deep",
     cadence: "Three times a week",
     last: "2 days ago",
     completed: 2,
+    // The only routine that declares a key: staying in one is the whole point
+    // of it, so it overrides rather than inherits.
+    key: "G",
     drills: [
-      {
-        name: "Position one, up and back",
-        key: "G" as KeyName,
-        mins: 4,
-        phase: "warm",
-      },
-      {
-        name: "Thirds through the shape",
-        key: "G" as KeyName,
-        mins: 5,
-        phase: "core",
-      },
-      { name: "Chord tones only", key: "G" as KeyName, mins: 4, phase: "core" },
-      { name: "Locate every G", key: "G" as KeyName, mins: 3, phase: "cool" },
-      {
-        name: "Free play over a drone",
-        key: "G" as KeyName,
-        mins: 2,
-        phase: "cool",
-      },
+      { drillId: "position-one", mins: 4, phase: "warm" },
+      { drillId: "thirds", mins: 5, phase: "core" },
+      { drillId: "major-triad", mins: 4, phase: "core" },
+      { drillId: "root-locator", mins: 3, phase: "cool" },
+      { drillId: "drone-play", mins: 2, phase: "cool" },
     ],
   },
   {
+    id: "neck-knowledge",
     name: "Neck knowledge",
     cadence: "Weekends",
     last: "Last Sunday",
     completed: 1,
+    key: null,
     drills: [
-      {
-        name: "Pentatonic box one",
-        key: "A" as KeyName,
-        mins: 4,
-        phase: "warm",
-      },
-      {
-        name: "Sixths on the top two",
-        key: "E" as KeyName,
-        mins: 3,
-        phase: "core",
-      },
-      {
-        name: "Open chord changes",
-        key: "C" as KeyName,
-        mins: 4,
-        phase: "core",
-      },
-      {
-        name: "Free play over a drone",
-        key: "F" as KeyName,
-        mins: 3,
-        phase: "cool",
-      },
+      { drillId: "pentatonic-one", mins: 4, phase: "warm" },
+      { drillId: "sixths", mins: 3, phase: "core" },
+      { drillId: "open-chord-changes", mins: 4, phase: "core" },
+      { drillId: "drone-play", mins: 3, phase: "cool" },
     ],
   },
 ];
+
+export function drillById(id: string): Drill | undefined {
+  return DRILLS.find((drill) => drill.id === id);
+}
+
+/**
+ * A routine's steps with their drills attached.
+ *
+ * Unresolvable ids are dropped rather than thrown: the type and the test both
+ * prevent one from existing, and neither is a reason for a bad id to blank a
+ * practice screen mid-session.
+ */
+export function routineSteps(routine: Routine) {
+  return routine.drills.flatMap((step) => {
+    const drill = drillById(step.drillId);
+    return drill ? [{ ...step, drill }] : [];
+  });
+}
+
+/** The key a routine is practised in: its own if it declares one. */
+export function routineKey(routine: Routine, selectedKey: KeyName): KeyName {
+  return routine.key ?? selectedKey;
+}
 
 export const CHORDS = [
   {

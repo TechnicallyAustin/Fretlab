@@ -6,7 +6,7 @@
  * renders these from the shell in app/page.tsx; see the README on routing.
  */
 import type { KeyName, View } from "@/lib/fretlab/types";
-import { ROUTINES } from "@/lib/fretlab/library";
+import { ROUTINES, routineKey, routineSteps } from "@/lib/fretlab/library";
 import { MetronomeBar } from "@/components/fretlab/MetronomeBar";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { cssVars } from "@/lib/fretlab/palette";
@@ -22,15 +22,23 @@ export function Guided({
   selectedKey: KeyName;
 }) {
   const { label: elapsedLabel } = useElapsed(selectedKey);
-  const metronome = useMetronome({ bpm: 84, meter: 4, countInBars: 1 });
   const [step, setStep] = useState(1);
   const routine = ROUTINES[1];
-  const current = routine.drills[step];
+  const steps = routineSteps(routine);
+  const practisedIn = routineKey(routine, selectedKey);
+  const current = steps[step];
+  // The tempo comes from the drill being run, not from a number typed into
+  // the transport. A drill with no tempo of its own is not played to a click.
+  const metronome = useMetronome({
+    bpm: current.drill.bpm || 84,
+    meter: 4,
+    countInBars: 1,
+  });
   return (
     <div className="screen-content flow-screen guided-screen">
-      <StatusBar end={`${selectedKey} · ${step + 1} of 5`} />
+      <StatusBar end={`${practisedIn} · ${step + 1} of ${steps.length}`} />
       <div className="step-bar five">
-        {routine.drills.map((_, i) => (
+        {steps.map((_, i) => (
           <i
             className={i < step ? "done" : i === step ? "current" : ""}
             key={i}
@@ -38,27 +46,27 @@ export function Guided({
         ))}
       </div>
       <div className="guided-hero">
-        <p className="kicker">Now playing · key of {selectedKey}</p>
-        <h1>{current.name}</h1>
+        <p className="kicker">Now playing · key of {practisedIn}</p>
+        <h1>{current.drill.name}</h1>
         <strong>{elapsedLabel}</strong>
         <span>elapsed</span>
       </div>
       <MetronomeBar metronome={metronome} subdivisions={false} />
       <section className="up-next">
         <div className="section-head">
-          <h2>Up next · all in {selectedKey}</h2>
+          <h2>Up next · all in {practisedIn}</h2>
         </div>
-        {routine.drills.slice(step + 1).map((drill) => (
-          <div key={drill.name} style={cssVars(selectedKey)}>
+        {steps.slice(step + 1).map((next, i) => (
+          <div key={`${next.drillId}${i}`} style={cssVars(practisedIn)}>
             <i />
-            <strong>{drill.name}</strong>
-            <span>{drill.mins} min</span>
+            <strong>{next.drill.name}</strong>
+            <span>{next.mins} min</span>
           </div>
         ))}
       </section>
       <div className="transport guided-actions">
         <button
-          onClick={() => setStep(Math.min(routine.drills.length - 1, step + 1))}
+          onClick={() => setStep(Math.min(steps.length - 1, step + 1))}
         >
           Skip<small>next drill</small>
         </button>
