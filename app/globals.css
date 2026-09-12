@@ -487,6 +487,13 @@ p {
 .contribution-graph .level-3, .contribution-legend .level-3 { background: color-mix(in srgb, var(--key-bright) 68%, var(--card)); }
 .contribution-graph .level-4, .contribution-legend .level-4 { background: var(--key-bright); }
 
+.contribution-note {
+  grid-column: 2;
+  margin: 2px 0 0;
+  color: var(--quiet);
+  font-size: 0.8125rem;
+}
+
 .contribution-legend { grid-column: 2; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: var(--quiet); font-size: .8125rem; }
 .contribution-legend i { width: 12px; height: 12px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--sunken); }
 .contribution-legend span:first-child { margin-right: 4px; }

@@ -262,6 +262,25 @@ test("Today uses a contribution graph and fretboards keep stable viewports", asy
   assert.match(today, /Monday through Friday/);
   assert.match(today, /\["Tu", "Tuesday"\]/);
   assert.match(today, /\["Th", "Thursday"\]/);
+
+  // FD-02. The graph was a single row of five cells with a label under each:
+  // five data points, no second axis, and nothing a trend could show in. Days
+  // are rows now, named once down the left.
+  const dayLabels = [...today.matchAll(/\["(M|Tu|W|Th|F)", "\w+"\]/g)];
+  assert.equal(dayLabels.length, 5, "five weekdays, named once each");
+  assert.match(css, /\.contribution-days\s*\{[^}]*grid-template-rows/,
+    "day labels should be a column of rows, beside the grid");
+  assert.match(css, /\.contribution-graph\s*\{[^}]*grid-auto-flow: column/,
+    "weeks should run as columns");
+
+  // The heading said "This week" over five weeks of data, and the minutes
+  // beside it count a different window again. Both must say what they are.
+  assert.match(today, /Last five weeks/, "the heading should match the grid");
+  assert.match(today, /min this week/, "the figure should say what it counts");
+  assert.ok(!/<h2>This week<\/h2>/.test(today), "the mismatched heading is back");
+  // Five rows is a choice, not a missing weekend, and a beginner counting rows
+  // should not have to guess which.
+  assert.match(today, /Weekdays only/);
   assert.match(css, /\.contribution-graph/);
   assert.match(css, /grid-template-rows: repeat\(5, 16px\)/);
   // These two asserted the board's *old* sizing: a width cap at 1.15x natural,

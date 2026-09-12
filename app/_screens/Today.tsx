@@ -111,9 +111,12 @@ export function Today({
           rendering an empty chart the browser then disagrees with. */}
       {week && (
       <section className="section">
+        {/* The heading used to read "This week" over a grid of five, and the
+            minutes beside it are a different window again. Both are labelled
+            now: the grid says what it spans, the figure says what it counts. */}
         <div className="section-head">
-          <h2>This week</h2>
-          <span>{weekTotal} min</span>
+          <h2>Last five weeks</h2>
+          <span>{weekTotal} min this week</span>
         </div>
         {contributionLevels && (
           <div className="contribution-wrap">
@@ -143,6 +146,12 @@ export function Today({
               <i className="level-2" /><i className="level-3" /><i className="level-4" />
               <span>More</span>
             </div>
+            {/* Five rows is an editorial choice, not a missing weekend. Say so:
+                a beginner counting rows should not conclude the app lost two
+                days, or that practising on Sunday did not register. */}
+            <p className="contribution-note">
+              Weekdays only. Weekend practice still counts towards your streak.
+            </p>
           </div>
         )}
       </section>
