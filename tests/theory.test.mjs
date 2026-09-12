@@ -384,6 +384,19 @@ test("every routine step is a real length in a real phase", () => {
     }
   }
 });
+test("FL-16 interactive fretboards expose a keyboard-navigable grid", async () => {
+  const source = await readProjectFile("components/fretlab/Fretboard.tsx");
+  const css = await readProjectFile("app/globals.css");
+  assert.match(source, /role=\{interactive \? "grid" : "img"\}/);
+  assert.match(source, /role=\{interactive \? "row" : undefined\}/);
+  assert.match(source, /role=\{interactive \? "gridcell" : undefined\}/);
+  assert.match(source, /tabIndex=\{interactive && activeCell === id \? 0 : interactive \? -1 : undefined\}/);
+  assert.match(source, /event\.key === "ArrowUp"/);
+  assert.match(source, /event\.key === "ArrowDown"/);
+  assert.match(source, /event\.key === "ArrowLeft"/);
+  assert.match(source, /event\.key === "ArrowRight"/);
+  assert.match(css, /\.fret-hit:focus-visible/);
+});
 
 test("no drill id is used twice", () => {
   const ids = DRILLS.map((drill) => drill.id);

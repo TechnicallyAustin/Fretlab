@@ -28,7 +28,7 @@ import {
   type NoteRole,
 } from "@/lib/fretlab/noteRoles";
 import { FretboardLegend } from "./FretboardLegend";
-import { useId } from "react";
+import { useId, useRef, useState } from "react";
 
 
 /** Frets that carry an inlay dot on a real guitar neck. */
@@ -78,6 +78,7 @@ export function Fretboard({
   hideTargets?: boolean;
 }) {
   const gradientId = `board-${useId().replaceAll(":", "")}`;
+  const cellRefs = useRef<Record<string, SVGGElement | null>>({});
   const degreeName = degreeLabels(scale);
 
   // Layers collapse into one lookup: the first group that claims a cell owns it.
@@ -135,6 +136,9 @@ export function Fretboard({
   const yFor = (string: number) => top + (string - 0.5) * gap;
   const dotRadius = Math.round(gap * 0.37);
   const showsNut = low <= 1;
+  const strings = [6, 5, 4, 3, 2, 1];
+  const firstCell = `${strings[0]}:${frets[0]}`;
+  const [activeCell, setActiveCell] = useState(firstCell);
 
   const fretNumberSize = Math.max(mini ? 11 : 13, Math.round(gap * 0.44));
   const stringNameSize = Math.max(mini ? 11 : 13, Math.round(gap * 0.42));
@@ -183,8 +187,8 @@ export function Fretboard({
           // frets apart until the shape stops looking like the shape.
           ["--board-natural" as string]: `${Math.round(width * (mini ? 1.5 : 1.25))}px`,
         }}
-        role="img"
-      aria-label={
+        role={interactive ? "grid" : "img"}
+        aria-label={
         `Guitar fretboard, ${windowLabel}, frets ${low} to ${high}. ` +
         (muted?.length
           ? `Do not play the ${muted.map((s2) => STRING_NAMES[s2]).join(" and ")} string${muted.length > 1 ? "s" : ""}. `
@@ -355,8 +359,9 @@ export function Fretboard({
           />
         )}
 
-        {[6, 5, 4, 3, 2, 1].flatMap((string) =>
-            columns.map((column) => {
+        {strings.map((string, rowIndex) => (
+          <g key={`row-${string}`} role={interactive ? "row" : undefined}>
+            {columns.map((column, columnIndex) => {
               const id = `${string}:${column.fret}`;
               const entry = cellGroup.get(id);
               const hasNote = Boolean(entry);
@@ -389,10 +394,14 @@ export function Fretboard({
               return (
                 <g
                 key={id}
+                ref={interactive ? (element) => { cellRefs.current[id] = element; } : undefined}
+                onFocus={interactive ? () => setActiveCell(id) : undefined}
                 onClick={interactive ? () => onCell?.(string, column.fret) : undefined}
                 className={interactive ? "fret-hit" : undefined}
-                role={interactive ? "button" : undefined}
-                tabIndex={interactive ? 0 : undefined}
+                role={interactive ? "gridcell" : undefined}
+                tabIndex={interactive && activeCell === id ? 0 : interactive ? -1 : undefined}
+                aria-rowindex={interactive ? rowIndex + 1 : undefined}
+                aria-colindex={interactive ? columnIndex + 1 : undefined}
                 aria-label={
                   interactive
                     ? `${STRING_NAMES[string]} string, fret ${column.fret}${
@@ -405,8 +414,20 @@ export function Fretboard({
                 onKeyDown={
                   interactive
                     ? (event) => {
-                        if (event.key === "Enter" || event.key === " ")
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
                           onCell?.(string, column.fret);
+                          return;
+                        }
+                        const rowDelta = event.key === "ArrowUp" ? -1 : event.key === "ArrowDown" ? 1 : 0;
+                        const columnDelta = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
+                        if (!rowDelta && !columnDelta) return;
+                        event.preventDefault();
+                        const nextRow = Math.max(0, Math.min(strings.length - 1, rowIndex + rowDelta));
+                        const nextColumn = Math.max(0, Math.min(columns.length - 1, columnIndex + columnDelta));
+                        const nextId = `${strings[nextRow]}:${columns[nextColumn].fret}`;
+                        setActiveCell(nextId);
+                        cellRefs.current[nextId]?.focus();
                       }
                     : undefined
                 }
@@ -493,8 +514,9 @@ export function Fretboard({
                 )}
                 </g>
               );
-            }),
-          )}
+            })}
+          </g>
+        ))}
 
           {/* Fret numbers on every board, so the window is never a mystery. */}
           {columns.map((column) => (

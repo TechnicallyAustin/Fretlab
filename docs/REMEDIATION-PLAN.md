@@ -14,7 +14,7 @@ lint and tests rather than through review.
 |---|---|---|
 | Stage 1 — Stop teaching wrong things | `COMPLETE` | 8 / 8 |
 | Stage 2 — Make the practice loop real | `COMPLETE` | 7 / 7 |
-| **Stage 3 — Make it shippable to real people** | **`NEXT`** | 0 / 6 |
+| **Stage 3 — Make it shippable to real people** | **`WIP`** | 0 / 6 |
 | Stage 4 — Retention and revenue | `TODO` | 0 / 5 |
 
 Next task: **FL-16 — Grid keyboard navigation and a screen-reader pass.**
@@ -1072,11 +1072,11 @@ Carried forward into Stage 3, logged rather than fixed:
 
 **Goal:** the app is usable by people who are not you. Largely parallel to Stage 2.
 
-**Progress:** 0 / 6 done
+**Progress:** 1 / 6 done
 
 | ID | Task | Status |
 |---|---|---|
-| FL-16 | Grid keyboard navigation and a screen-reader pass | `TODO` |
+| FL-16 | Grid keyboard navigation and a screen-reader pass | `DONE` |
 | FL-17 | Rem type scale, 16px floor, stand mode | `TODO` |
 | FL-18 | Mobile IA: promote Library, reflow the hidden regions | `TODO` |
 | FL-19 | Left-handed mirroring and alternate tunings | `TODO` |
@@ -1085,8 +1085,10 @@ Carried forward into Stage 3, logged rather than fixed:
 
 ---
 
-### - [ ] FL-16 — Grid keyboard navigation and a screen-reader pass
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** U-01
+### - [x] FL-16 — Grid keyboard navigation and a screen-reader pass
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** U-01
+
+> **Done.** Interactive boards now expose a keyboard-navigable grid with roving focus, arrow-key movement, activation keys, and visible focus treatment. The automated guard passes, and the user confirmed the manual VoiceOver pass on `/train`.
 
 **Files:** `components/fretlab/Fretboard.tsx:166,340-350`, `app/globals.css`
 
