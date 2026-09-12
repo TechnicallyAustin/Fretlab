@@ -559,7 +559,7 @@ test that fails if a `Date.now()` default comes back.
 **Goal:** the app can be practised with, not just read. Do not start before Stage 1 is
 `DONE`.
 
-**Progress:** 4 / 7 done
+**Progress:** 5 / 7 done
 
 | ID | Task | Status |
 |---|---|---|
@@ -567,7 +567,7 @@ test that fails if a `Date.now()` default comes back.
 | FL-10 | Routine steps become drill ids | `DONE` |
 | FL-11 | Runner renders the real drill and records a session | `DONE` |
 | FL-12 | Scale position tables (CAGED) | `DONE` |
-| FL-13 | Fix the key-scoped streak | `TODO` |
+| FL-13 | Fix the key-scoped streak | `DONE` |
 | FL-14 | Give drills patterns instead of pitch-class sets | `TODO` |
 | FL-15 | Tuner | `TODO` |
 
@@ -848,8 +848,8 @@ guitarist would recognise.
 
 ---
 
-### - [ ] FL-13 — Fix the key-scoped streak
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** G-04
+### - [x] FL-13 — Fix the key-scoped streak
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** G-04
 
 **Files:** `app/_screens/Progress.tsx:33`, `lib/api/progress.ts`
 
@@ -876,6 +876,28 @@ test("a streak counts days, not keys", () => {
 
 **Done when.** Practising in three different keys on three consecutive days shows a
 3-day streak.
+
+> **Done.** `Progress` asks for the whole history — `usePracticeSessions({ all:
+> true })` — and the streak, consistency graph, active days and rep total come
+> from all of it. Only accuracy is key-scoped, and every place it appears now
+> says which key it is scoped to; the streak and reps carry "across every key"
+> so the distinction is visible rather than assumed.
+>
+> The hook pages at the server's own 100-row cap until it has the lot, stopping
+> at 20 pages. A 26-week graph built from one page blanked its oldest squares
+> for exactly the players who had earned them.
+>
+> **A second defect turned up while writing the tests.** `accuracySeries` sorts
+> its day keys as strings, and `dayKey` built them unpadded — `2026-8-9`,
+> `2026-10-1`. Sorted lexicographically that puts October before September and
+> the 11th before the 9th, so the daily-accuracy line was drawn **out of
+> order**: the trend it showed was fiction. `dayKey` is zero-padded now. Every
+> other use of it is an equality check, which padding leaves alone.
+>
+> Ten assertions in `tests/streak.test.mjs`, including the plan's own, one that
+> pins the old key-filtered behaviour beside the new so the difference is on
+> the record, and two for the chart order. All three defects were reintroduced
+> to confirm the tests fail on them.
 
 ---
 

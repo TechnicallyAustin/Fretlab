@@ -67,7 +67,26 @@ export type PracticeSessionQuery = {
   musicKey?: string;
   /** Skip the request entirely, e.g. while the session is still resolving. */
   enabled?: boolean;
+  /**
+   * Follow the pages until the whole history is in hand.
+   *
+   * `Progress` draws a 26-week consistency graph and counts a streak, and it
+   * did both from a single `limit: 100` request. The server caps a page at
+   * 100, so an active player's oldest squares silently went blank and their
+   * streak was computed from a truncated history. A figure that quietly
+   * degrades the more you practise is worse than no figure.
+   */
+  all?: boolean;
 };
+
+/** The server's own cap, so a full fetch asks for whole pages. */
+const PAGE = 100;
+
+/**
+ * Stop rather than page forever if the server keeps claiming more. 20 pages is
+ * 2,000 sessions — years of daily practice, and far past what the graph shows.
+ */
+const MAX_PAGES = 20;
 
 /**
  * Practice history. Signed-out visitors get an empty list rather than an error,
@@ -76,7 +95,7 @@ export type PracticeSessionQuery = {
 export function usePracticeSessions(
   query: PracticeSessionQuery = {},
 ): AsyncState<PracticeSessionWire[]> & { signedOut: boolean } {
-  const { limit, drillId, musicKey, enabled = true } = query;
+  const { limit, drillId, musicKey, enabled = true, all = false } = query;
 
   // A disabled query is already resolved: it is an empty list, not a pending
   // request, so the first render must not show a spinner that never resolves.
@@ -87,7 +106,7 @@ export function usePracticeSessions(
 
   // Same reset-during-render rule as useSession: a changed query must not
   // briefly render the previous query's rows as if they were current.
-  const requestKey = `${enabled}|${limit ?? ""}|${drillId ?? ""}|${musicKey ?? ""}`;
+  const requestKey = `${enabled}|${all}|${limit ?? ""}|${drillId ?? ""}|${musicKey ?? ""}`;
   const [renderedFor, setRenderedFor] = useState(requestKey);
   if (renderedFor !== requestKey) {
     setRenderedFor(requestKey);
@@ -100,9 +119,34 @@ export function usePracticeSessions(
 
     const controller = new AbortController();
 
-    api
-      .listPracticeSessions({ limit, drillId, musicKey, sort: "created_at", direction: "desc" }, controller.signal)
-      .then((result) => setState({ status: "ready", data: result.data, error: null }))
+    const fetchPage = (offset: number) =>
+      api.listPracticeSessions(
+        {
+          limit: all ? PAGE : limit,
+          offset,
+          drillId,
+          musicKey,
+          sort: "created_at",
+          direction: "desc",
+        },
+        controller.signal,
+      );
+
+    const fetchAll = async () => {
+      const first = await fetchPage(0);
+      if (!all) return first.data;
+
+      const rows = [...first.data];
+      for (let page = 1; page < MAX_PAGES && rows.length < first.page.total; page += 1) {
+        const next = await fetchPage(page * PAGE);
+        if (next.data.length === 0) break;
+        rows.push(...next.data);
+      }
+      return rows;
+    };
+
+    fetchAll()
+      .then((data) => setState({ status: "ready", data, error: null }))
       .catch((error) => {
         if (controller.signal.aborted) return;
         const clientError = toClientError(error);
@@ -115,7 +159,7 @@ export function usePracticeSessions(
       });
 
     return () => controller.abort();
-  }, [limit, drillId, musicKey, enabled]);
+  }, [limit, drillId, musicKey, enabled, all]);
 
   return { ...state, signedOut };
 }

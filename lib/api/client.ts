@@ -147,11 +147,19 @@ export const api = {
   logout: () => request<{ end_session_url: string | null }>("/auth/logout", { method: "POST" }),
 
   listPracticeSessions: (
-    params: { limit?: number; drillId?: string; musicKey?: string; sort?: string; direction?: "asc" | "desc" } = {},
+    params: {
+      limit?: number;
+      offset?: number;
+      drillId?: string;
+      musicKey?: string;
+      sort?: string;
+      direction?: "asc" | "desc";
+    } = {},
     signal?: AbortSignal,
   ) => {
     const query = new URLSearchParams();
     if (params.limit) query.set("limit", String(params.limit));
+    if (params.offset) query.set("offset", String(params.offset));
     if (params.musicKey) query.set("music_key", params.musicKey);
     if (params.sort) query.set("sort", params.sort);
     if (params.direction) query.set("direction", params.direction);

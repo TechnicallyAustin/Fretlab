@@ -30,18 +30,33 @@ export function Progress({
 }) {
   const [range, setRange] = useState<RangeLabel>("14 days");
 
-  // §5: L1 owns the data. Pulls the whole recent window once and derives every
-  // figure on this screen from it, so the range buttons need no extra request.
-  const history = usePracticeSessions({ limit: 100, musicKey: selectedKey });
+  // §5: L1 owns the data. The whole history, once, so the range buttons need no
+  // extra request — and so the figures below are not computed from a slice.
+  //
+  // This used to be `{ limit: 100, musicKey: selectedKey }`, and every figure
+  // on the screen came from that filtered set. A streak is a fact about days
+  // practised, not about keys: practise daily in a different key each day and
+  // the app congratulated you on a streak of 1. Same for the consistency graph
+  // and the active-day count. The 100-row cap made it worse the longer you
+  // played, silently blanking the oldest squares of a 26-week graph.
+  const history = usePracticeSessions({ all: true });
   const sessions = history.data ?? [];
+
+  // Accuracy is the one figure that *is* key-scoped, because comparing a score
+  // in G to one in F# means nothing. It is filtered here and labelled as such
+  // wherever it is shown.
+  const inKey = sessions.filter((session) => session.music_key === selectedKey);
 
   // Every figure below is relative to the user's own calendar, which only the
   // client knows. The loading state covers the wait, so nothing here is ever
   // rendered against the server's clock.
   const { now } = useClock();
   const activeWeeks = 26;
-  const values = typeof now !== "number" ? [] : accuracySeries(sessions, range, now);
+  // Everything about *practising* comes from the whole history; only accuracy
+  // is read from the selected key.
+  const values = typeof now !== "number" ? [] : accuracySeries(inKey, range, now);
   const stats = typeof now !== "number" ? null : summarise(sessions, now);
+  const keyStats = typeof now !== "number" ? null : summarise(inKey, now);
   const consistency = typeof now !== "number" ? [] : consistencyLevels(sessions, activeWeeks, now);
   const months = typeof now !== "number" ? [] : consistencyMonths(activeWeeks, now);
 
@@ -61,7 +76,7 @@ export function Progress({
     })
     .join(" ");
 
-  if (history.status === "loading" || typeof now !== "number" || stats === null) {
+  if (history.status === "loading" || typeof now !== "number" || stats === null || keyStats === null) {
     return (
       <div className="screen-content">
         <AppHeader title={`${selectedKey} progress`} meta="Consistency" />
@@ -134,18 +149,22 @@ export function Progress({
         </div>
       </div>
       <article className="dial-card">
-        <Ring value={stats.accuracy ?? 0} size={142} />
+        {/* Accuracy is the key-scoped figure and says so. The streak and the
+            reps are not: they count practice, which happens in every key. */}
+        <Ring value={keyStats.accuracy ?? 0} size={142} />
         <div>
           <p className="kicker">Neck knowledge · {selectedKey}</p>
           <h2>
-            {stats.accuracy === null
-              ? "No accuracy logged yet"
-              : `${stats.accuracy}% accurate`}
+            {keyStats.accuracy === null
+              ? `No accuracy logged in ${selectedKey} yet`
+              : `${keyStats.accuracy}% accurate in ${selectedKey}`}
           </h2>
           <p>
-            {stats.sessionCount === 1
-              ? "One session in. Run the routine again to see the trend."
-              : `Averaged across ${stats.sessionCount} sessions in ${selectedKey}.`}
+            {keyStats.sessionCount === 0
+              ? `Scored sessions in ${selectedKey} will show their average here.`
+              : keyStats.sessionCount === 1
+                ? `One session in ${selectedKey}. Run it again to see the trend.`
+                : `Averaged across ${keyStats.sessionCount} sessions in ${selectedKey}.`}
           </p>
           <div className="mini-stats">
             <span>
@@ -154,12 +173,13 @@ export function Progress({
             <span>
               <strong>{stats.reps.toLocaleString()}</strong> reps
             </span>
+            <span className="all-keys">across every key</span>
           </div>
         </div>
       </article>
       <section className="chart-card">
         <div className="section-head">
-          <h2>Daily accuracy</h2>
+          <h2>Daily accuracy · {selectedKey}</h2>
           <span>
             Last {range} · {floor}–{ceiling}%
           </span>
@@ -198,7 +218,7 @@ export function Progress({
           <h2>Practice consistency</h2>
           <span>
             {activeWeeks} weeks · {stats.activeDays} active{" "}
-            {stats.activeDays === 1 ? "day" : "days"}
+            {stats.activeDays === 1 ? "day" : "days"} · every key
           </span>
         </div>
         <div className="commit-months">

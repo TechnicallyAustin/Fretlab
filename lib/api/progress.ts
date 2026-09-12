@@ -27,10 +27,19 @@ export const RANGE_DAYS: Record<RangeLabel, number> = {
 
 const DAY_MS = 86_400_000;
 
-/** Local calendar day, so "today" means the user's today. */
+/**
+ * Local calendar day, so "today" means the user's today.
+ *
+ * Zero-padded, because `accuracySeries` sorts these keys as strings to put the
+ * chart in date order. Unpadded they sorted `2026-10-1` before `2026-8-9` and
+ * the 11th before the 9th, so the accuracy line was drawn out of order across
+ * a month boundary and whenever two days differed in digit count. Every other
+ * use here is an equality check, which padding leaves alone.
+ */
 function dayKey(iso: string): string {
   const date = new Date(iso);
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth())}-${pad(date.getDate())}`;
 }
 
 /**

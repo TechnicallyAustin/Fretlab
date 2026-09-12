@@ -1490,6 +1490,14 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
+/* Marks the figures beside it as counting practice in every key, not just the
+   selected one. The streak used to be computed from key-filtered sessions, so
+   practising daily in a different key each day read as a streak of 1. */
+.mini-stats .all-keys {
+  color: var(--quiet);
+  font-size: 12px;
+}
+
 .key-conflict {
   display: flex;
   flex-wrap: wrap;
