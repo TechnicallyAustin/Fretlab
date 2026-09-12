@@ -66,23 +66,23 @@ These hold for every task. Violating one fails the task even if the feature work
 **Goal:** nothing in the app states a musical falsehood. Until this stage is `DONE`
 the app should not be shown to a learner.
 
-**Progress:** 0 / 8 done
+**Progress:** 8 / 8 done — Stage 1 complete, release gate clear
 
 | ID | Task | Status |
 |---|---|---|
-| FL-01 | Author chord fingerings; delete the generator | `TODO` |
-| FL-02 | Draw muted and open string markers | `TODO` |
-| FL-03 | Repair generated barre voicings | `TODO` |
-| FL-04 | Derive the chord fret window from the voicing | `TODO` |
-| FL-05 | Spell notes from the key, not from a sharps table | `TODO` |
-| FL-06 | Remove the pre-filled answers in Train | `TODO` |
-| FL-07 | Delete every fabricated number | `TODO` |
-| FL-08 | Write `tests/theory.test.mjs` | `TODO` |
+| FL-01 | Author chord fingerings; delete the generator | `DONE` |
+| FL-02 | Draw muted and open string markers | `DONE` |
+| FL-03 | Repair generated barre voicings | `DONE` |
+| FL-04 | Derive the chord fret window from the voicing | `DONE` |
+| FL-05 | Spell notes from the key, not from a sharps table | `DONE` |
+| FL-06 | Remove the pre-filled answers in Train | `DONE` |
+| FL-07 | Delete every fabricated number | `DONE` |
+| FL-08 | Write `tests/theory.test.mjs` | `DONE` |
 
 ---
 
-### - [ ] FL-01 — Author chord fingerings; delete the generator
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** B-01
+### - [x] FL-01 — Author chord fingerings; delete the generator
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** B-01
 
 **Files:** `lib/fretlab/fingering.ts:121`, `lib/fretlab/library.ts` (CHORDS),
 `app/_screens/ChordDetail.tsx:101`, `tests/fingering.test.mjs`
@@ -148,8 +148,8 @@ exists, the assertion above passes, and opening `/chords/g-major` shows `2 1 · 
 
 ---
 
-### - [ ] FL-02 — Draw muted and open string markers
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** G-01
+### - [x] FL-02 — Draw muted and open string markers
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** G-01
 
 **Files:** `lib/fretlab/library.ts` (CHORDS), `components/fretlab/Fretboard.tsx`
 
@@ -193,8 +193,8 @@ contains a mute marker.
 
 ---
 
-### - [ ] FL-03 — Repair generated barre voicings
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** F-01
+### - [x] FL-03 — Repair generated barre voicings
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** F-01
 
 **Files:** `lib/fretlab/theory.ts:100-135` (`chordIntervals`, `chordVoicing`)
 
@@ -246,8 +246,8 @@ test("a generated voicing is the chord it claims to be", () => {
 
 ---
 
-### - [ ] FL-04 — Derive the chord fret window from the voicing
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** F-01
+### - [x] FL-04 — Derive the chord fret window from the voicing
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** F-01
 
 **Files:** `app/_screens/ChordDetail.tsx:33` (`range`)
 
@@ -295,8 +295,8 @@ screen (the boundary lint will otherwise reject it).
 
 ---
 
-### - [ ] FL-05 — Spell notes from the key, not from a sharps table
-**Status:** `TODO` · **Severity:** Major · **Audit ref:** F-02
+### - [x] FL-05 — Spell notes from the key, not from a sharps table
+**Status:** `DONE` · **Severity:** Major · **Audit ref:** F-02
 
 **Files:** `components/fretlab/Fretboard.tsx:28-29`, `lib/fretlab/theory.ts`
 
@@ -351,8 +351,8 @@ test("the board spells notes the way the key does", () => {
 
 ---
 
-### - [ ] FL-06 — Remove the pre-filled answers in Train
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** B-02
+### - [x] FL-06 — Remove the pre-filled answers in Train
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** B-02
 
 **Files:** `app/_screens/Train.tsx:34`
 
@@ -389,8 +389,8 @@ test("a fresh training module has nothing found", () => {
 
 ---
 
-### - [ ] FL-07 — Delete every fabricated number
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** U-04
+### - [x] FL-07 — Delete every fabricated number
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** U-04
 
 **Files:** `app/_screens/Today.tsx:22-56`, `app/_screens/Train.tsx:180`,
 `app/_screens/Runner.tsx:59`, `app/_screens/Guided.tsx:41`,
@@ -444,8 +444,8 @@ test("screens render no hardcoded figures", () => {
 
 ---
 
-### - [ ] FL-08 — Write `tests/theory.test.mjs`
-**Status:** `TODO` · **Severity:** Blocker · **Audit ref:** entire theory section
+### - [x] FL-08 — Write `tests/theory.test.mjs`
+**Status:** `DONE` · **Severity:** Blocker · **Audit ref:** entire theory section
 
 **Files:** `tests/theory.test.mjs` (new)
 
@@ -1064,3 +1064,55 @@ Notes on the choices, so they are not "corrected" back:
 - **Bdim** mutes the high e as well as the low E. It is the only four-string shape in
   the library, which is why `chordVoicing` must be able to return fewer than six notes
   (FL-03).
+
+---
+
+## Execution log
+
+**Stage 1 — complete.** Branch `fretlab-remediation`, seven commits on top of a
+`baseline: FretLab app as audited` commit that captured the previously
+uncommitted app so the work has a rollback point and a readable diff.
+
+| Commit | Covers |
+|---|---|
+| `238b7cb` | FL-01, FL-02 |
+| `48f5cc8` | FL-03, FL-04 |
+| `9fd9070` | FL-05 |
+| `2909083` | FL-06 |
+| `942b02c` | FL-07 |
+| `460dbeb` | FL-08 |
+
+`npm run typecheck`, `npm run lint` and `npm test` are green: 73 tests, up from
+52, with 21 of the new ones in `tests/theory.test.mjs`. Checked out against the
+baseline commit, 11 of those 20 theory assertions fail — the verification FL-08
+asked for.
+
+### Three things worth knowing before Stage 2
+
+1. **A test found a real design hole.** "A generated voicing is the chord it
+   claims to be" failed on D7 Triad: three strings cannot hold a seventh chord,
+   and the old code fell through its search to an arbitrary slice of the neck.
+   The fix is `voicingIntervals`, which drops the fifth and says so — the shell
+   voicing. That decision was previously an accident.
+
+2. **The purity lint shaped the clock work.** `react-hooks` rejects reading
+   `Date.now()` during render *and* calling `setState` in an effect body, which
+   is why three screens had frozen strings instead of clocks. `useClock`
+   (`useSyncExternalStore`, matching `useStoredKey`) and `useElapsed`
+   (subscription callback) are the two shapes that satisfy it. Reuse them rather
+   than reaching for `Date.now()` in FL-09 and FL-11.
+
+3. **Two fabrications survived a manual pass.** `ScaleLibraryDetail` rendered
+   "72 percent learned" on every scale, and `Progress` had a 26-week figure in an
+   aria-label. The mechanical guard in `screens render no hardcoded figures`
+   caught both after I had already read those files. Keep that test.
+
+### Scope notes
+
+- `DRILLS` lost its baked-in `progress` field. `lastAccuracyByDrill` replaces it,
+  so a drill shows progress only where the player recorded some. FL-12 and FL-14
+  touch the same records.
+- `Runner`'s invented step bar and "1 of 4" are gone rather than fixed. The screen
+  cannot know its position until routine steps carry drill ids (FL-10), so FL-11
+  restores a real one.
+- Chord `level` is still derived from array index. That is FL-26's, left alone.
