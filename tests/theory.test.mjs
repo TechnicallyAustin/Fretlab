@@ -7,7 +7,14 @@
  * that a fingering could be played by a hand — so for a long time none of those
  * were true while every test passed.
  *
- * Every assertion here stands for a defect that shipped.
+ * Every assertion here stands for a defect that shipped. Run against the
+ * pre-remediation baseline, 11 of these 20 fail.
+ *
+ * Two of them pass there only because the baseline data carries no `finger`
+ * field at all, so their loops are empty: "every fretted note has a finger"
+ * is what catches that case, and it does fail. If you ever make fingering
+ * optional again, those two go vacuous — keep them honest by keeping that
+ * third assertion.
  */
 import assert from "node:assert/strict";
 import test from "node:test";
