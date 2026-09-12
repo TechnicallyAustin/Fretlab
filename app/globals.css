@@ -7,8 +7,13 @@
   --line: #ded7c7;
   --line-strong: #c9c1b0;
   --ink: #2b2924;
-  --muted: #6f6a5c;
-  --quiet: #7a7466;
+  /* Secondary text carries most of the app's copy — captions, legends, fret
+     numbers, the state notices — and both tiers failed WCAG AA on the paper
+     palette: quiet was 3.64:1 on a sunken panel against a 4.5:1 requirement,
+     and muted 4.22:1. Darkened until the worst pairing clears 4.5, keeping the
+     step between the two tiers so they still read as two. */
+  --muted: #59554a;
+  --quiet: #6a6559;
   --secondary-ink: #3f3c34;
   --bezel: #23242f;
   --board: #232532;
@@ -169,8 +174,9 @@ p {
   --line: rgba(255,255,255,.07);
   --line-strong: rgba(255,255,255,.16);
   --ink: #e6edf3;
-  --muted: #8b949e;
-  --quiet: #6e7681;
+  /* Same correction in dark: quiet sat at 3.77:1 on a sunken panel. */
+  --muted: #99a1aa;
+  --quiet: #7d848e;
   --secondary-ink: #e6edf3;
 }
 
@@ -187,7 +193,7 @@ p {
 }
 
 @media (prefers-color-scheme: light) {
-  .theme-system { --paper: #f4f0e7; --card: #fbf8f2; --sunken: #e9e3d6; --line: #ded7c7; --line-strong: #c9c1b0; --ink: #2b2924; --muted: #6f6a5c; --quiet: #7a7466; --secondary-ink: #3f3c34; }
+  .theme-system { --paper: #f4f0e7; --card: #fbf8f2; --sunken: #e9e3d6; --line: #ded7c7; --line-strong: #c9c1b0; --ink: #2b2924; --muted: #59554a; --quiet: #6a6559; --secondary-ink: #3f3c34; }
 }
 
 .stand-mode .screen-content {
@@ -495,9 +501,13 @@ p {
   line-height: 16px;
 }
 
-.contribution-graph .level-1, .contribution-legend .level-1 { background: color-mix(in srgb, var(--key-bright) 24%, var(--card)); }
-.contribution-graph .level-2, .contribution-legend .level-2 { background: color-mix(in srgb, var(--key-bright) 45%, var(--card)); }
-.contribution-graph .level-3, .contribution-legend .level-3 { background: color-mix(in srgb, var(--key-bright) 68%, var(--card)); }
+/* The ramp was 24/45/68/100, which put only 1.11:1 between "did not practise"
+   and "practised a little" — the lowest signal the graph exists to show was
+   invisible. Evened out across all twelve key hues so every step is the same
+   size and the first one is visible. */
+.contribution-graph .level-1, .contribution-legend .level-1 { background: color-mix(in srgb, var(--key-bright) 38%, var(--card)); }
+.contribution-graph .level-2, .contribution-legend .level-2 { background: color-mix(in srgb, var(--key-bright) 60%, var(--card)); }
+.contribution-graph .level-3, .contribution-legend .level-3 { background: color-mix(in srgb, var(--key-bright) 80%, var(--card)); }
 .contribution-graph .level-4, .contribution-legend .level-4 { background: var(--key-bright); }
 
 .contribution-note {
@@ -1496,17 +1506,17 @@ p {
 
 .commit-graph .level-1,
 .commit-foot .level-1 {
-  background: color-mix(in srgb, var(--key-bright) 24%, var(--card));
+  background: color-mix(in srgb, var(--key-bright) 38%, var(--card));
 }
 
 .commit-graph .level-2,
 .commit-foot .level-2 {
-  background: color-mix(in srgb, var(--key-bright) 45%, var(--card));
+  background: color-mix(in srgb, var(--key-bright) 60%, var(--card));
 }
 
 .commit-graph .level-3,
 .commit-foot .level-3 {
-  background: color-mix(in srgb, var(--key-bright) 68%, var(--card));
+  background: color-mix(in srgb, var(--key-bright) 80%, var(--card));
 }
 
 .commit-graph .level-4,
