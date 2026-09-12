@@ -118,51 +118,23 @@ p {
   box-shadow: 0 16px 40px rgba(0, 0, 0, .4);
 }
 
-.stand-mode-toggle {
-  position: absolute;
-  z-index: 25;
-  top: 12px;
-  right: 16px;
+.topbar-icon-button {
+  width: 40px;
   min-height: 40px;
-  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   background: var(--card);
   color: var(--secondary-ink);
   cursor: pointer;
-  font-size: .8125rem;
+  font-size: 1.125rem;
 }
 
-.nav-theme-toggle {
-  min-height: 40px;
-  margin-top: 8px;
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  background: var(--card);
-  color: var(--secondary-ink);
-  cursor: pointer;
-  font-size: .8125rem;
-}
+.topbar-icon-button.active { border-color: var(--key-edge); background: var(--key-fill); color: var(--key-ink); }
+.topbar-icon-button:focus-visible { outline: 2px solid var(--key-bright); outline-offset: 3px; }
 
-.nav-theme-toggle:focus-visible {
-  outline: 2px solid var(--key-bright);
-  outline-offset: 3px;
-}
-
-.theme-mode-toggle {
-  display: none;
-  position: absolute;
-  z-index: 25;
-  min-height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  background: var(--card);
-  color: var(--secondary-ink);
-  cursor: pointer;
-  font-size: .8125rem;
-}
 
 .theme-dark,
 .theme-system {
@@ -444,6 +416,46 @@ p {
   gap: 8px;
   margin-top: 9px;
 }
+
+.contribution-wrap {
+  display: grid;
+  gap: 9px;
+  margin-top: 12px;
+}
+
+.contribution-graph {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.contribution-day {
+  display: grid;
+  gap: 5px;
+  justify-items: center;
+  color: var(--quiet);
+  font-size: .8125rem;
+}
+
+.contribution-day>span {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 55%, transparent);
+  border-radius: 5px;
+  background: var(--sunken);
+}
+
+.contribution-day small { font-size: .8125rem; }
+
+.contribution-graph .level-1, .contribution-legend .level-1 { background: color-mix(in srgb, var(--key-bright) 24%, var(--card)); }
+.contribution-graph .level-2, .contribution-legend .level-2 { background: color-mix(in srgb, var(--key-bright) 45%, var(--card)); }
+.contribution-graph .level-3, .contribution-legend .level-3 { background: color-mix(in srgb, var(--key-bright) 68%, var(--card)); }
+.contribution-graph .level-4, .contribution-legend .level-4 { background: var(--key-bright); }
+
+.contribution-legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: var(--quiet); font-size: .8125rem; }
+.contribution-legend i { width: 12px; height: 12px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--sunken); }
+.contribution-legend span:first-child { margin-right: 4px; }
+.contribution-legend span:last-child { margin-left: 4px; }
 
 .day {
   display: grid;
@@ -789,7 +801,8 @@ p {
 .fretboard svg {
   width: 100%;
   min-width: var(--board-min, 0);
-  max-width: var(--board-natural, none);
+  max-width: none;
+  height: 220px;
   height: auto;
   display: block;
   overflow: visible;
@@ -806,6 +819,10 @@ p {
   background: transparent;
   box-shadow: none;
   filter: none;
+}
+
+.fretboard.mini svg {
+  height: 112px;
 }
 
 .fret-hit {
@@ -6999,8 +7016,8 @@ p {
 
   .drill-board-stage .fretboard svg {
     width: 100%;
-    height: auto;
-    max-height: 335px;
+    height: 180px;
+    max-height: none;
   }
 
   .drill-coach-grid {

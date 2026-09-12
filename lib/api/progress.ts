@@ -168,6 +168,30 @@ export function consistencyLevels(
   });
 }
 
+/** Practice intensity for the current Monday-Friday week, oldest first. */
+export function weekdayContributionLevels(
+  sessions: readonly PracticeSessionWire[],
+  now: number,
+): number[] {
+  const today = startOfToday(now);
+  const day = new Date(today).getDay();
+  const monday = today - ((day + 6) % 7) * DAY_MS;
+  const minutesByDay = new Map<string, number>();
+  for (const session of sessions) {
+    const key = dayKey(session.created_at);
+    minutesByDay.set(key, (minutesByDay.get(key) ?? 0) + (session.duration_seconds ?? 0) / 60);
+  }
+  return Array.from({ length: 5 }, (_, index) => {
+    const key = dayKey(new Date(monday + index * DAY_MS).toISOString());
+    const minutes = minutesByDay.get(key) ?? 0;
+    if (minutes <= 0) return 0;
+    if (minutes < 6) return 1;
+    if (minutes < 12) return 2;
+    if (minutes < 20) return 3;
+    return 4;
+  });
+}
+
 /** The last N sessions for one drill, newest first, shaped for the history bars. */
 export function recentForDrill(
   sessions: readonly PracticeSessionWire[],

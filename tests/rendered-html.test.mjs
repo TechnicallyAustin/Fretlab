@@ -247,6 +247,17 @@ test("first-run onboarding chooses a path and skips after completion", async () 
   assert.match(root, /return <Today/);
 });
 
+test("Today uses a contribution graph and fretboards keep stable viewports", async () => {
+  const today = await readProjectFile("app/_screens/Today.tsx");
+  const css = await readProjectFile("app/globals.css");
+  assert.match(today, /weekdayContributionLevels\(sessions, now\)/);
+  assert.match(today, /contribution-graph/);
+  assert.match(today, /Monday through Friday/);
+  assert.match(css, /\.contribution-graph/);
+  assert.match(css, /\.fretboard svg[\s\S]*height: 180px/);
+  assert.match(css, /\.fretboard\.mini svg[\s\S]*height: 112px/);
+});
+
 test("detail routes render the entity named in the URL", async () => {
   const strip = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
   for (const [path, expected] of [

@@ -32,19 +32,15 @@ export function FretLabFrame({ children }: { children: ReactNode }) {
         <small>One key-colour system across every practice surface.</small>
       </div>
       <div className={`app-frame view-${view}${standMode ? " stand-mode" : ""}`}>
-        <button
-          className="stand-mode-toggle"
-          type="button"
-          aria-pressed={standMode}
-          onClick={() => setStandMode((enabled) => !enabled)}
-        >
-          {standMode ? "Stand mode on" : "Stand mode"}
-        </button>
         <DesktopTopbar
           view={view}
           selectedKey={selectedKey}
           go={go}
           openKeyPicker={() => setKeyPickerOpen(true)}
+          themeMode={themeMode}
+          onToggleTheme={() => setThemeMode(themeMode === "dark" ? "light" : "dark")}
+          standMode={standMode}
+          onToggleStand={() => setStandMode((enabled) => !enabled)}
         />
         <button className="mobile-key-context" onClick={() => setKeyPickerOpen(true)}>
           <span>Global key</span>
@@ -52,7 +48,7 @@ export function FretLabFrame({ children }: { children: ReactNode }) {
           <b>⌄</b>
         </button>
         {children}
-        <BottomNav active={primaryViewFor(view)} go={go} themeMode={themeMode} onToggleTheme={() => setThemeMode(themeMode === "dark" ? "light" : "dark")} />
+        <BottomNav active={primaryViewFor(view)} go={go} />
         {keyPickerOpen && (
           <KeySelectorModal
             selectedKey={selectedKey}
