@@ -24,8 +24,8 @@ import {
 } from "@/lib/fretlab/noteRoles";
 import { FretboardLegend } from "./FretboardLegend";
 import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
-import { boardGeometry } from "@/lib/fretlab/boardGeometry";
-import { useId, useRef, useState } from "react";
+import { boardGeometry, scrollTargetFor } from "@/lib/fretlab/boardGeometry";
+import { useEffect, useId, useRef, useState } from "react";
 
 
 /** Frets that carry an inlay dot on a real guitar neck. */
@@ -188,6 +188,30 @@ export function Fretboard({
         ? "Open position"
         : `Starts at fret ${low}`;
 
+  // A board too wide for its column opens at the nut, which for a drill at
+  // frets 7-10 is an empty stretch with the shape off the right-hand edge. It
+  // opens on the notes instead. Runs after layout, because it needs the real
+  // column width, and does nothing when the board fits.
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  // Dependencies are primitives on purpose. `geo` is a fresh object every
+  // render, so depending on it would re-run this after any state change — and
+  // this writes scrollLeft, so it would snap the board back while the reader
+  // was dragging it.
+  const fretKey = layers
+    .flatMap((layer) => layer.notes)
+    .map((note) => note.f)
+    .join(",");
+  const { width: boardWidth, unit: fretUnit, nameGutter: gutter } = geo;
+  useEffect(() => {
+    const host = scrollRef.current;
+    if (!host || !fretKey) return;
+    host.scrollLeft = scrollTargetFor(
+      fretKey.split(",").map(Number),
+      { width: boardWidth, unit: fretUnit, nameGutter: gutter },
+      host.clientWidth,
+    );
+  }, [fretKey, boardWidth, fretUnit, gutter]);
+
   return (
     <figure className={`fretboard-figure ${mini ? "mini" : ""}`}>
       {(caption || !mini) && (
@@ -202,6 +226,7 @@ export function Fretboard({
         </figcaption>
       )}
       <div
+        ref={scrollRef}
         className={`fretboard ${mini ? "mini" : ""}`}
         // A 13-fret board squeezed into a phone width leaves each fret ~25px,
         // too narrow for a legible label. Below the board's comfortable width

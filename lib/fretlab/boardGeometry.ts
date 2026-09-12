@@ -116,3 +116,40 @@ export function smallestTypeOnScreen(
     scale
   );
 }
+
+/**
+ * Where to scroll a board that does not fit, so the notes are on screen.
+ *
+ * A full 0–12 neck is 860 units and a phone column is 354, so after FD-01 it
+ * is legible and overflows. Left alone it opens at the nut — and a drill whose
+ * shape sits at frets 7–10 then opens on an empty stretch of board, with the
+ * thing being taught off the right-hand edge. The learner has to discover the
+ * scroll to find out the board is not empty.
+ *
+ * Returns the pixel offset that centres the notes in view, clamped to the ends
+ * so the board never scrolls past its own edges. Returns 0 when it all fits,
+ * which is the common case and needs no scrolling at all.
+ */
+export function scrollTargetFor(
+  frets: readonly number[],
+  /** Only the three measurements this needs, so a caller can pass primitives
+      and keep them out of a React dependency array. */
+  geometry: Pick<BoardGeometry, "width" | "unit" | "nameGutter">,
+  containerWidth: number,
+): number {
+  const overflow = geometry.width - containerWidth;
+  if (overflow <= 0 || frets.length === 0) return 0;
+
+  // Where the notes sit in viewBox units. `nameGutter` is the string-name
+  // column before fret one.
+  const lowest = Math.min(...frets);
+  const highest = Math.max(...frets);
+  const unitsPerFret = geometry.unit;
+  const left = geometry.nameGutter + lowest * unitsPerFret;
+  const right = geometry.nameGutter + (highest + 1) * unitsPerFret;
+  const centre = (left + right) / 2;
+
+  // The board renders at its natural width when it overflows, so viewBox units
+  // and pixels are one to one — that is what FD-01's minimum width buys.
+  return Math.max(0, Math.min(overflow, Math.round(centre - containerWidth / 2)));
+}

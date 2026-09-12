@@ -14,7 +14,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const { boardGeometry, renderedScale, smallestTypeOnScreen, TYPE_FLOOR } =
+const { boardGeometry, renderedScale, smallestTypeOnScreen, scrollTargetFor, TYPE_FLOOR } =
   await import("../lib/fretlab/boardGeometry.ts");
 
 /**
@@ -115,4 +115,56 @@ test("the CSS honours the geometry it is given", async () => {
     !css.includes("--board-natural"),
     "the old width cap should be gone, not left dangling",
   );
+});
+
+// ------------------------------------------------------ FD-05: where it opens
+
+/**
+ * FD-01 traded illegibility for a scrollbar: the full neck is 860 units and a
+ * phone column is 354. Left alone such a board opens at the nut, so a drill
+ * whose shape sits at frets 7-10 opens on an empty stretch with the lesson off
+ * the right-hand edge — and the reader has to discover the scroll to learn the
+ * board is not blank.
+ */
+test("an overflowing board opens on its notes", () => {
+  const neck = boardGeometry({ low: 0, high: 12 });
+  const phone = 354;
+  assert.ok(neck.width > phone, "this test is meaningless if the neck fits");
+
+  const atNut = scrollTargetFor([0, 1, 2, 3], neck, phone);
+  const upTheNeck = scrollTargetFor([7, 8, 9, 10], neck, phone);
+  assert.equal(atNut, 0, "notes at the nut need no scrolling");
+  assert.ok(upTheNeck > 0, "a shape at fret 7 should not open off-screen");
+
+  // The notes must actually land inside the visible column.
+  const left = neck.nameGutter + 7 * neck.unit;
+  const right = neck.nameGutter + 11 * neck.unit;
+  assert.ok(left >= upTheNeck, "the shape starts left of the viewport");
+  assert.ok(right <= upTheNeck + phone, "the shape runs past the viewport");
+});
+
+test("a board never scrolls past its own edges", () => {
+  const neck = boardGeometry({ low: 0, high: 12 });
+  const phone = 354;
+  const overflow = neck.width - phone;
+  for (const frets of [[0], [6], [12], [0, 12], [11, 12]]) {
+    const target = scrollTargetFor(frets, neck, phone);
+    assert.ok(target >= 0, `frets ${frets}: scrolled to ${target}`);
+    assert.ok(target <= overflow, `frets ${frets}: scrolled ${target} past ${overflow}`);
+  }
+});
+
+test("a board that fits is never scrolled at all", () => {
+  for (const input of [{ low: 1, high: 4 }, { low: 0, high: 4 }, { low: 1, high: 4, mini: true }]) {
+    const geometry = boardGeometry(input);
+    assert.equal(
+      scrollTargetFor([1, 2, 3], geometry, 1100),
+      0,
+      "a board with room to spare should sit where it is",
+    );
+  }
+});
+
+test("an empty board asks for no scrolling", () => {
+  assert.equal(scrollTargetFor([], boardGeometry({ low: 0, high: 12 }), 354), 0);
 });

@@ -9,7 +9,7 @@
 | FD-02 | Contribution graph | `DONE` |
 | FD-03 | Delete `Guided` | `DONE` |
 | FD-04 | Board density | `CLOSED` — premise was wrong, nothing to do |
-| **FD-05** | **A full neck that fits a phone** | **`TODO`** |
+| FD-05 | A full neck that fits a phone | `PARTIAL` — opens on the notes; still scrolls |
 
 Tracked alongside `docs/REMEDIATION-PLAN.md`; the same working loop in
 `docs/HANDOFF.md` applies to both.
@@ -279,7 +279,7 @@ Checked during this audit and deliberately left alone:
 
 ## FD-05 — A full neck that fits a phone
 
-**Status:** `TODO` · **Severity:** Major · **Was:** FD-01 step 2
+**Status:** `PARTIAL` · **Severity:** Major · **Was:** FD-01 step 2
 
 **Problem.** FD-01 fixed legibility by never scaling a board below its own
 width. The full 0–12 board is 860 units and a phone column is 354, so it is now
@@ -318,6 +318,24 @@ is the honest statement of what is left.
 
 **Done when.** A beginner can see the whole neck on a phone without scrolling,
 at readable size.
+
+> **Option 3 taken, options 1 and 2 still open.** An overflowing board now
+> opens centred on its own notes rather than at the nut, so a drill at frets
+> 7–10 no longer opens on an empty stretch of board with the lesson off the
+> right-hand edge. Clamped to both ends, and a board that fits is never
+> scrolled at all.
+>
+> This is the cheapest of the three and it does not close the task: the neck
+> still needs scrolling to see whole. It was chosen over stacking the neck
+> across two rows because that means teaching the SVG geometry to wrap —
+> every y-coordinate, the nut, the inlays, the string lines and the keyboard
+> navigation — in a 600-line component with tests pinned to its current
+> layout. That is a refactor with its own risk of regressions, and it should
+> be its own task rather than a rider on a fingering fix.
+>
+> The scroll target is a pure function, so it is tested: the notes land inside
+> the visible column, the board never scrolls past its own edges, and a board
+> with room to spare stays where it is.
 
 ---
 
