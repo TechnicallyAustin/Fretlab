@@ -8,7 +8,9 @@
 import type { View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
 import { CHORDS, SONGS } from "@/lib/fretlab/library";
+import { Fretboard } from "@/components/fretlab/Fretboard";
 import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
+import { shapeWindow } from "@/lib/fretlab/geometry";
 import { cssVars } from "@/lib/fretlab/palette";
 import { useState } from "react";
 
@@ -88,8 +90,12 @@ export function SongDetail({
             <h2>Chord set</h2>
             <span>Click to study</span>
           </div>
+          {/* The chord set listed its names and left the shapes on another
+              screen, so a song could not be played from the page that taught
+              it. Each one shows its own grip now. */}
           {song.progression.map((symbol) => {
             const chord = CHORDS.find((item) => item.symbol === symbol);
+            const window = chord ? shapeWindow(chord.fingering) : null;
             return (
               <button onClick={() => chord && onChord(chord.id)} key={symbol}>
                 <span className="relation-key">{symbol}</span>
@@ -97,17 +103,21 @@ export function SongDetail({
                   <strong>{chord?.name ?? symbol}</strong>
                   <small>{chord?.notes ?? "Song chord"}</small>
                 </span>
+                {chord && window && (
+                  <Fretboard
+                    notes={chord.fingering}
+                    muted={chord.muted}
+                    low={window.low}
+                    high={window.high}
+                    mini
+                    labelMode="finger"
+                    rootKey={chord.root}
+                  />
+                )}
                 <b>→</b>
               </button>
             );
           })}
-          <div className="song-practice-goal">
-            <span>Practice goal</span>
-            <strong>3 clean loops</strong>
-            <i>
-              <b style={{ width: "34%" }} />
-            </i>
-          </div>
         </aside>
       </div>
     </div>

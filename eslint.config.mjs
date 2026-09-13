@@ -116,6 +116,9 @@ const eslintConfig = defineConfig([
   },
 
   globalIgnores([
+    // Reference copy of the design kit as delivered. The vendored, working
+    // version lives in components/ui and is linted.
+    "fretlab-UI/**",
     ".next/**",
     "out/**",
     "build/**",

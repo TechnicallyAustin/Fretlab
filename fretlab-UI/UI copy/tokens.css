@@ -1,0 +1,124 @@
+/* FretLab UI — tokens
+   Values read off the shipped screens. Change them here, not in components. */
+
+:root {
+  /* Paper ground */
+  --fl-canvas: #f7f4ed;
+  --fl-canvas-wash: #ece8f9; /* the soft lavender bloom in the top right */
+  --fl-surface: #fffdf9;
+  --fl-surface-sunk: #f3efe6;
+  --fl-line: #e7e1d5;
+  --fl-line-soft: #f0ebe1;
+
+  /* Ink */
+  --fl-ink: #1b1a1f;
+  --fl-ink-2: #4a4753;
+  --fl-ink-3: #79747f;
+  --fl-ink-4: #a19caa;
+
+  /* Accent — the practice lavender */
+  --fl-accent: #6152d9;
+  --fl-accent-ink: #3d33a3;
+  --fl-accent-soft: #ded8fb;
+  --fl-accent-softer: #efecfd;
+  --fl-accent-line: #cdc4f6;
+
+  /* Dark panels: heroes, tiles, the neck */
+  --fl-dark: #17161b;
+  --fl-dark-2: #232228;
+  --fl-dark-ink: #ffffff;
+  --fl-dark-ink-2: rgba(255, 255, 255, 0.72);
+  --fl-dark-ink-3: rgba(255, 255, 255, 0.48);
+
+  /* Fretboard */
+  --fl-neck: #26252c;
+  --fl-neck-edge: #131217;
+  --fl-fretwire: rgba(255, 255, 255, 0.16);
+  --fl-string: rgba(255, 255, 255, 0.3);
+  --fl-inlay: rgba(255, 255, 255, 0.22);
+  --fl-root: #b7abf7;
+  --fl-third: #8b7cec;
+  --fl-fifth: #ffffff;
+  --fl-scale: #2f2e36;
+  --fl-ghost: rgba(255, 255, 255, 0.14);
+
+  /* Semantic status */
+  --fl-live: #3fa87a;
+  --fl-warn: #c98a2b;
+
+  /* Level badges */
+  --fl-beginner: #6152d9;
+  --fl-beginner-bg: #ece9fd;
+  --fl-intermediate: #b4632b;
+  --fl-intermediate-bg: #fbeee1;
+  --fl-advanced: #a33b57;
+  --fl-advanced-bg: #fbe6ec;
+
+  /* Type */
+  --fl-font: "Lexend", "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --fl-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --fl-t-display: 2.55rem;
+  --fl-t-title: 1.9rem;
+  --fl-t-section: 1.35rem;
+  --fl-t-body: 0.95rem;
+  --fl-t-small: 0.82rem;
+  --fl-t-label: 0.7rem;
+
+  /* Space + shape */
+  --fl-r-sm: 8px;
+  --fl-r-md: 12px;
+  --fl-r-lg: 16px;
+  --fl-r-xl: 22px;
+  --fl-r-pill: 999px;
+
+  --fl-shadow-card: 0 1px 2px rgba(30, 25, 15, 0.04);
+  --fl-shadow-raised: 0 8px 24px rgba(30, 25, 15, 0.08);
+
+  /* Interaction system. Controls share one geometry, one focus treatment,
+     and one motion curve so they feel related even when their jobs differ. */
+  --fl-control-sm: 32px;
+  --fl-control-md: 40px;
+  --fl-control-lg: 48px;
+  --fl-focus: rgba(97, 82, 217, 0.34);
+  --fl-success: #27845f;
+  --fl-success-soft: #e2f4ec;
+  --fl-danger: #b64d65;
+  --fl-danger-soft: #f9e8ec;
+  --fl-ease-out: cubic-bezier(.2, .8, .2, 1);
+  --fl-ease-spring: cubic-bezier(.2, 1.4, .4, 1);
+  --fl-motion-fast: 140ms;
+  --fl-motion-base: 240ms;
+  --fl-shadow-control: 0 1px 2px rgba(30, 25, 15, .07), 0 0 0 1px rgba(255,255,255,.55) inset;
+  --fl-shadow-float: 0 16px 44px rgba(32, 26, 55, .12), 0 2px 8px rgba(32, 26, 55, .06);
+  --fl-shadow-popover: 0 22px 64px rgba(28, 22, 52, .18), 0 4px 14px rgba(28, 22, 52, .08);
+  --fl-control-ring: 0 0 0 3px var(--fl-focus), 0 0 0 1px var(--fl-accent);
+  --fl-z-sticky: 20;
+  --fl-z-toast: 80;
+
+  /* Key colour. Serve --fl-key-h from the API (289 + fifths * 30) and every
+     key-tinted surface follows it. */
+  --fl-key-h: 289;
+  --fl-key: oklch(0.55 0.16 var(--fl-key-h));
+  --fl-key-ink: oklch(0.38 0.13 var(--fl-key-h));
+  --fl-key-soft: oklch(0.93 0.045 var(--fl-key-h));
+  --fl-key-line: oklch(0.86 0.07 var(--fl-key-h));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-fl-theme="auto"] {
+    --fl-canvas: #131217;
+    --fl-canvas-wash: #1d1b26;
+    --fl-surface: #1c1b21;
+    --fl-surface-sunk: #17161b;
+    --fl-line: #2c2a33;
+    --fl-line-soft: #232128;
+    --fl-ink: #f4f1ea;
+    --fl-ink-2: #c3bfca;
+    --fl-ink-3: #8e8996;
+    --fl-ink-4: #6a6572;
+    --fl-accent-soft: #322b6b;
+    --fl-accent-softer: #23204a;
+    --fl-accent-line: #453c8f;
+  }
+}

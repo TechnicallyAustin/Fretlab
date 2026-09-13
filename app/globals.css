@@ -1,4 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+@import "../components/ui/tokens.css";
+@import "../components/ui/fretlab-ui.css";
 
 :root {
   --paper: #f4f0e7;
