@@ -117,14 +117,16 @@ export function primaryViewFor(view: View): View {
   if (view === "today") return "today";
   if (view === "theory") return "theory";
   if (view === "library" || view === "keys" || view.includes("key") || view.includes("scale") || view.includes("chord") || view.includes("song")) return "library";
-  // The tuner belongs with practice: it is what you do before a session, not
-  // something you browse.
+  // The tuner used to sit under practice, on the grounds that it is what you
+  // do before a session rather than something you browse. That was right while
+  // it was reached from Today; it is a nav destination of its own now, and a
+  // tab that never lights up when you are on its own screen is a broken tab.
+  if (view === "tuner") return "tuner";
   if (
     view === "train" ||
     view === "drills" ||
     view === "routines" ||
     view === "runner" ||
-    view === "tuner" ||
     view === "ear"
   ) {
     return "train";

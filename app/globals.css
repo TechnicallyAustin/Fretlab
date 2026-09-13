@@ -16,6 +16,77 @@
    here rather than in tokens.css because how the kit's theme maps onto this
    app's is the app's knowledge, not the kit's.
    --------------------------------------------------------------------------- */
+/* The same paper diagram, inverted for the dark theme: still a grid of thin
+   lines with the notes as the only saturated things, just not a white slab
+   burning a hole in a near-black page. */
+.theme-dark,
+.theme-dark .fretboard {
+  --board: #0d1219;
+  --board-raised: #161b22;
+  --board-wire: #2c3540;
+  --board-string: #5b6673;
+  --board-label: #99a1aa;
+  --board-top: #0d1219;
+  --board-middle: #0d1219;
+  --board-bottom: #0d1219;
+  --board-border: #2c3540;
+  --board-fret: #414b57;
+  --board-nut: #e6edf3;
+  --board-inlay: #232b34;
+  --board-muted-mark: #f0907f;
+  --board-open-mark: #99a1aa;
+  --board-string-shadow: transparent;
+  --board-wound-string: #5b6673;
+  --board-plain-string: #6e7985;
+  --board-label-text: #99a1aa;
+  --board-path: #a78bfa;
+  --board-empty-note: #161b22;
+  --board-note-backdrop: #0d1219;
+  --board-note-outline: #e6edf3;
+  --board-note-soft-outline: rgba(230,237,243,.45);
+  --board-note-inner: rgba(13,18,25,.6);
+  --board-note-ink-dark: #0d1219;
+  --board-note-ink-light: #e6edf3;
+  --board-number-emphasis: #e6edf3;
+  --board-number: #99a1aa;
+  --board-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .theme-system,
+  .theme-system .fretboard {
+    --board: #0d1219;
+    --board-raised: #161b22;
+    --board-wire: #2c3540;
+    --board-string: #5b6673;
+    --board-label: #99a1aa;
+    --board-top: #0d1219;
+    --board-middle: #0d1219;
+    --board-bottom: #0d1219;
+    --board-border: #2c3540;
+    --board-fret: #414b57;
+    --board-nut: #e6edf3;
+    --board-inlay: #232b34;
+    --board-muted-mark: #f0907f;
+    --board-open-mark: #99a1aa;
+    --board-string-shadow: transparent;
+    --board-wound-string: #5b6673;
+    --board-plain-string: #6e7985;
+    --board-label-text: #99a1aa;
+    --board-path: #a78bfa;
+    --board-empty-note: #161b22;
+    --board-note-backdrop: #0d1219;
+    --board-note-outline: #e6edf3;
+    --board-note-soft-outline: rgba(230,237,243,.45);
+    --board-note-inner: rgba(13,18,25,.6);
+    --board-note-ink-dark: #0d1219;
+    --board-note-ink-light: #e6edf3;
+    --board-number-emphasis: #e6edf3;
+    --board-number: #99a1aa;
+    --board-shadow: none;
+  }
+}
+
 .theme-dark,
 .theme-dark .fl-root {
   --fl-canvas: #131217;
@@ -68,36 +139,50 @@
   --quiet: #6a6559;
   --secondary-ink: #3f3c34;
   --bezel: #23242f;
-  --board: #232532;
-  --board-raised: #292b31;
-  --board-wire: #3f424d;
-  --board-string: #595d6c;
-  --board-label: #9397ab;
-  --board-top: #303340;
-  --board-middle: #20222d;
-  --board-bottom: #171923;
-  --board-border: #3c3f4b;
-  --board-fret: #777b86;
-  --board-nut: #e8e3d8;
-  --board-inlay: #c9c4b9;
-  --board-muted-mark: #c98b84;
-  --board-open-mark: #cfd3df;
-  --board-string-shadow: #090a0f;
-  --board-wound-string: #b7afa0;
-  --board-plain-string: #d9d3c8;
-  --board-label-text: #b9bdcc;
-  --board-path: #f3f0ea;
-  --board-empty-note: #232532;
-  --board-note-backdrop: #1b1d27;
-  --board-note-outline: #fffdf8;
-  --board-note-soft-outline: rgba(255,255,255,.55);
-  --board-note-inner: rgba(20,20,25,.55);
-  --board-note-ink-dark: #14151c;
-  --board-note-ink-light: #f3f0ea;
-  --board-number-emphasis: #f2efe6;
-  --board-number: #aeb3c4;
-  --card-shadow: 0 4px 10px rgba(60, 50, 30, .16);
-  --board-shadow: 0 8px 20px rgba(60, 50, 30, .18);
+  /* ---------------------------------------------------------------------
+     The board is a paper diagram, not a photograph of a neck.
+
+     It used to be a dark wood gradient with lit strings — handsome, and the
+     wrong thing. What a learner reads on paper, in a chord book, and in every
+     teaching video is a light grid: thin lines, faint inlays, and the notes
+     as the only saturated things on it. Making the neck itself the loudest
+     object on the screen leaves the notes competing with it.
+
+     Same tokens, so the renderer did not change: it was already painting
+     entirely from these.
+     --------------------------------------------------------------------- */
+  --board: #fffdf9;
+  --board-raised: #fbf8f2;
+  --board-wire: #ded7c7;
+  --board-string: #a49c8c;
+  --board-label: #6a6559;
+  /* Flat, not a gradient. Paper has no sheen. */
+  --board-top: #fffdf9;
+  --board-middle: #fffdf9;
+  --board-bottom: #fffdf9;
+  --board-border: #c9c1b0;
+  --board-fret: #c2baa9;
+  /* The one heavy line on the board: where the neck actually begins. */
+  --board-nut: #2b2924;
+  --board-inlay: #e4ded0;
+  --board-muted-mark: #9c2f26;
+  --board-open-mark: #59554a;
+  /* Paper casts no shadow under its own strings. */
+  --board-string-shadow: transparent;
+  --board-wound-string: #a49c8c;
+  --board-plain-string: #b8b1a1;
+  --board-label-text: #59554a;
+  --board-path: #6650a4;
+  --board-empty-note: #f0ebe1;
+  --board-note-backdrop: #fffdf9;
+  --board-note-outline: #2b2924;
+  --board-note-soft-outline: rgba(43,41,36,.42);
+  --board-note-inner: rgba(255,253,249,.6);
+  --board-note-ink-dark: #2b2924;
+  --board-note-ink-light: #fffdf9;
+  --board-number-emphasis: #2b2924;
+  --board-number: #59554a;
+  --board-shadow: none;
 }
 
 * {
@@ -1088,7 +1173,8 @@ p {
   overflow: visible;
   border-radius: 12px;
   background: transparent;
-  filter: drop-shadow(0 8px 15px rgba(23, 24, 32, .19));
+  /* No drop shadow. It lifted the board off the page as a physical object,
+     which is right for a photograph of a neck and wrong for a diagram. */
 }
 
 .fretboard {

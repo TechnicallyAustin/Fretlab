@@ -503,7 +503,13 @@ export function Fretboard({
                     ? String(entry.finger)
                     : ""
                 : labelMode === "degree"
-                  ? degreeName[degree]
+                  ? // "R", not "1". A beginner reading a board covered in
+                    // numbers has to work out whether a 1 is a degree, a fret
+                    // or a finger; R is only ever the root. Degrees keep their
+                    // numbers, so the scale still reads R 2 3 4 5 6 7.
+                    degree === 0
+                    ? "R"
+                    : degreeName[degree]
                   : spellPitchClass(pc, rootKey);
 
               // A secondary layer reads as context behind the primary one.

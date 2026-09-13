@@ -45,12 +45,21 @@ function token(css, block, name) {
 
 const AA = 4.5;
 
+/**
+ * The app's own dark palette block.
+ *
+ * Three blocks now open with `.theme-dark,` — this one, the design kit's
+ * tokens, and the board's — so anything that finds the first one finds the
+ * wrong one. Only the app's palette pairs the two theme classes like this.
+ */
+const APP_DARK = ".theme-dark,\n.theme-system {";
+
 test("secondary text meets WCAG AA on every surface it sits on", async () => {
   const css = await readProjectFile("app/globals.css");
 
   const themes = [
     { name: "light", block: ":root {" },
-    { name: "dark", block: ".theme-dark," },
+    { name: "dark", block: APP_DARK },
   ];
 
   for (const theme of themes) {
@@ -75,7 +84,7 @@ test("the two secondary tiers stay visibly different", async () => {
   // Raising both to clear AA is easy; doing it without collapsing them into one
   // grey is the part worth guarding. `muted` is the more prominent tier.
   const css = await readProjectFile("app/globals.css");
-  for (const block of [":root {", ".theme-dark,"]) {
+  for (const block of [":root {", APP_DARK]) {
     const muted = rgb(token(css, block, "muted"));
     const quiet = rgb(token(css, block, "quiet"));
     const ratio = contrast(muted, quiet);
@@ -217,10 +226,13 @@ test("a converted screen is readable in the app's dark theme", async () => {
 
   // The kit's own gate is an attribute this app never sets, so the app has to
   // re-declare the dark tokens under the classes it does set.
-  const block = globals.match(/\.theme-dark[^{]*\{([^}]*)\}/);
-  assert.ok(block, "the kit's dark tokens are not wired to .theme-dark");
-  const darkInk = block[1].match(/--fl-ink:\s*(#[0-9a-fA-F]{3,8})/);
-  assert.ok(darkInk, ".theme-dark does not redefine --fl-ink");
+  // Several .theme-dark blocks exist — the kit's tokens, the board's, the
+  // app's palette. Take the one that defines the token being checked rather
+  // than whichever appears first; ordering is not what this is asserting.
+  const darkInk = [...globals.matchAll(/\.theme-dark[^{]*\{([^}]*)\}/g)]
+    .map((block) => block[1].match(/--fl-ink:\s*(#[0-9a-fA-F]{3,8})/))
+    .find(Boolean);
+  assert.ok(darkInk, "no .theme-dark block redefines --fl-ink for the kit");
 
   // Against the app's dark page, which is the ground a converted screen sits
   // on. Two blocks now start `.theme-dark,` — the app's own palette and the

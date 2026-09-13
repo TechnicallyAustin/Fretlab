@@ -14,6 +14,7 @@ export function BottomNav({ active, go }: { active: View; go: (view: View) => vo
     { label: "Today", view: "today" },
     { label: "Practice", view: "drills" },
     { label: "Library", view: "library" },
+    { label: "Tuner", view: "tuner" },
     { label: "Progress", view: "progress" },
   ];
   return (
