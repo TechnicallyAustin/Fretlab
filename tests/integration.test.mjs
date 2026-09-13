@@ -12,23 +12,71 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-const BASE = process.env.FRETLAB_URL ?? "http://localhost:3000";
+/**
+ * Where FretLab is. Vite takes the next free port when 3000 is occupied, which
+ * on a developer machine it often is, so the default is a guess rather than a
+ * fact — hence the identity check below and the FRETLAB_URL override.
+ */
+const BASE = (process.env.FRETLAB_URL ?? "http://localhost:3000").replace(/\/$/, "");
 const PASSWORD = "practice-every-day";
 
-async function serverUp() {
+/**
+ * Why the suite is not running, in the words a reader can act on.
+ *
+ * This used to answer a boolean, which hid two very different situations
+ * behind one "no server" message. Port 3000 on a developer machine is popular:
+ * for a while another application answered it, this check asked it for
+ * /api/v1/health, got HTML, threw on `.json()` and concluded FretLab was not
+ * running. The suite skipped thirteen tests and reported green, against a
+ * server that was up the whole time on another port.
+ */
+async function serverState() {
+  let response;
   try {
-    const response = await fetch(`${BASE}/api/v1/health`, { signal: AbortSignal.timeout(2000) });
-    const body = await response.json();
-    return body.database === "ok";
+    response = await fetch(`${BASE}/api/v1/health`, { signal: AbortSignal.timeout(2000) });
   } catch {
-    return false;
+    return { ok: false, why: `nothing is listening at ${BASE}` };
   }
+
+  const body = await response.text();
+  let health;
+  try {
+    health = JSON.parse(body);
+  } catch {
+    // Something answered, but it is not this app.
+    const title = body.match(/<title>([^<]*)<\/title>/i)?.[1]?.trim();
+    return {
+      ok: false,
+      why:
+        `${BASE} answered with ${title ? `a page titled "${title}"` : "something that is not JSON"}` +
+        ", so that is a different application. Set FRETLAB_URL to the port FretLab is on.",
+    };
+  }
+
+  if (health.auth_mode === undefined && health.database === undefined) {
+    return { ok: false, why: `${BASE} returned JSON, but not FretLab's health shape` };
+  }
+  if (health.database !== "ok") {
+    return { ok: false, why: `FretLab is at ${BASE} but its database is "${health.database}" — run npm run setup` };
+  }
+  return { ok: true, why: "" };
 }
 
-const up = await serverUp();
-const options = up
-  ? {}
-  : { skip: `no server with a live database at ${BASE}; run npm run setup && npm run dev` };
+const state = await serverState();
+
+/**
+ * A skipped suite is not a passing one, and thirteen tests quietly not running
+ * is the kind of thing that trains people to trust a green summary. Say it
+ * loudly enough to be seen in a scrollback, every time.
+ */
+if (!state.ok) {
+  const line = "─".repeat(64);
+  console.warn(
+    `\n${line}\nSKIPPING ${13} INTEGRATION TESTS\n  ${state.why}\n  Start one with: npm run setup && npm run dev\n${line}\n`,
+  );
+}
+
+const options = state.ok ? {} : { skip: state.why };
 
 /** Keeps one session's cookies across requests. */
 function client() {

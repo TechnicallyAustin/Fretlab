@@ -54,7 +54,7 @@ into a task's commit.
 | `npm test` | Builds, then every test | Slow. The build is what makes the server-render tests real. Run before committing. |
 | `npm run typecheck` | `tsc --noEmit` | |
 | `npm run lint` | eslint, including the boundary rules | |
-| `npm run test:integration` | Against a live server | Needs `npm run setup && npm run dev` in another terminal. Skips cleanly with no server, so a green `npm test` does **not** mean these ran. |
+| `npm run test:integration` | Against a live server | Needs `npm run setup && npm run dev` in another terminal. It prints a loud banner naming the reason when it skips, including when something *else* is answering the port — set `FRETLAB_URL=http://localhost:3001` (or wherever vinext landed) to point it at the right one. |
 
 **Known flake:** `npm test` runs the integration suite in parallel with
 everything else, and with a dev server up they contend on the shared local D1. A
