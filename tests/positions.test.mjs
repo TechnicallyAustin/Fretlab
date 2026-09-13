@@ -29,6 +29,10 @@ const SCALED = [
   "lydian",
   "mixolydian",
   "natural-minor",
+  // Derived by altering a degree of a table above rather than by being a mode.
+  "blues",
+  "harmonic-minor",
+  "melodic-minor",
 ];
 const soundedPc = (note) => (OPEN_PC[note.s] + note.f) % 12;
 
@@ -47,11 +51,88 @@ test("the scales with positions are the ones that claim them", () => {
   // the major scale, so it has the major shapes now — the ones left are the
   // three that are not modes of anything already tabled, and they still say so
   // rather than returning something plausible.
-  for (const id of ["blues", "harmonic-minor", "melodic-minor"]) {
-    assert.deepEqual(positionsFor(id), [], `${id} should have no table yet`);
-    assert.equal(hasPositions(id), false);
+  // Every scale in the library has real shapes now, so the only thing left to
+  // check is that an id which is not a scale still says so rather than
+  // returning something plausible.
+  assert.deepEqual(positionsFor("nonsense-scale"), []);
+  assert.equal(hasPositions("nonsense-scale"), false);
+
+  for (const scale of SCALES) {
+    assert.ok(hasPositions(scale.id), `${scale.name} still has no positions`);
   }
-  assert.equal(positionsFor("nonsense-scale").length, 0);
+});
+
+/**
+ * The last three scales are not modes of anything already tabled, so each is
+ * derived by altering one degree of a table that is. These check the alteration
+ * did what the sentence describing it says.
+ */
+test("the blues scale is the minor pentatonic plus the blue note", () => {
+  const pentatonic = positionsFor("minor-pentatonic");
+  const blues = positionsFor("blues");
+  assert.equal(blues.length, pentatonic.length);
+
+  for (let index = 0; index < blues.length; index += 1) {
+    for (const key of FIFTHS) {
+      const pentatonicNotes = new Set(
+        positionNotes(pentatonic[index], key).map((n) => `${n.s}:${n.f}`),
+      );
+      const bluesNotes = positionNotes(blues[index], key);
+      const bluesIds = new Set(bluesNotes.map((n) => `${n.s}:${n.f}`));
+
+      // Nothing is lost.
+      for (const id of pentatonicNotes) {
+        assert.ok(bluesIds.has(id), `blues box ${index + 1} in ${key} dropped ${id}`);
+      }
+      // And everything gained is the flat fifth, nothing else.
+      const flatFive = (keyPc(key) + 6) % 12;
+      for (const note of bluesNotes) {
+        if (pentatonicNotes.has(`${note.s}:${note.f}`)) continue;
+        assert.equal(
+          soundedPc(note),
+          flatFive,
+          `blues box ${index + 1} in ${key} added something that is not the flat fifth`,
+        );
+      }
+      assert.ok(
+        bluesNotes.length > pentatonicNotes.size,
+        `blues box ${index + 1} in ${key} added no blue note at all`,
+      );
+    }
+  }
+});
+
+test("harmonic minor is natural minor with the seventh raised", () => {
+  for (const key of FIFTHS) {
+    const natural = new Set(
+      positionsFor("natural-minor").flatMap((p) =>
+        positionNotes(p, key).map((n) => soundedPc(n)),
+      ),
+    );
+    const harmonic = new Set(
+      positionsFor("harmonic-minor").flatMap((p) =>
+        positionNotes(p, key).map((n) => soundedPc(n)),
+      ),
+    );
+    const flatSeven = (keyPc(key) + 10) % 12;
+    const naturalSeven = (keyPc(key) + 11) % 12;
+    assert.ok(natural.has(flatSeven), `${key}: natural minor lost its flat seventh`);
+    assert.ok(harmonic.has(naturalSeven), `${key}: harmonic minor has no leading tone`);
+    assert.ok(!harmonic.has(flatSeven), `${key}: harmonic minor kept the flat seventh`);
+  }
+});
+
+test("melodic minor is major with the third lowered", () => {
+  for (const key of FIFTHS) {
+    const melodic = new Set(
+      positionsFor("melodic-minor").flatMap((p) =>
+        positionNotes(p, key).map((n) => soundedPc(n)),
+      ),
+    );
+    assert.ok(melodic.has((keyPc(key) + 3) % 12), `${key}: no minor third`);
+    assert.ok(!melodic.has((keyPc(key) + 4) % 12), `${key}: kept the major third`);
+    assert.ok(melodic.has((keyPc(key) + 11) % 12), `${key}: lost the major seventh`);
+  }
 });
 
 /**
@@ -162,7 +243,24 @@ test("a position sits on the neck, not off the end of it", () => {
         // twelve frets the app draws rather than at fret 20.
         assert.ok(window.low >= 0, `${id} ${position.id} in ${key} starts at ${window.low}`);
         assert.ok(window.low <= 11, `${id} ${position.id} in ${key} starts at ${window.low}`);
-        assert.ok(window.high <= 15, `${id} ${position.id} in ${key} ends at ${window.high}`);
+        // Derived from the shape rather than hardcoded. This was pinned at 15,
+        // which was low + span when the widest shape spanned five frets —
+        // lowering the third for melodic minor widens one to six, and the
+        // bound that matters is the neck, not yesterday's widest shape.
+        assert.equal(
+          window.high,
+          window.low + position.span,
+          `${id} ${position.id} in ${key}: window disagrees with its span`,
+        );
+        assert.ok(
+          window.high <= 21,
+          `${id} ${position.id} in ${key} ends at ${window.high}, past the neck`,
+        );
+        // Six frets is a stretch a hand can make. Seven is a shift.
+        assert.ok(
+          position.span <= 5,
+          `${id} ${position.id} spans ${position.span + 1} frets`,
+        );
         for (const note of positionNotes(position, key)) {
           assert.ok(
             note.f >= window.low && note.f <= window.high,

@@ -221,6 +221,81 @@ function modeOf(semitones: number): ScalePosition[] {
   }));
 }
 
+/**
+ * The scale degree a note in a position sounds, without needing a key.
+ *
+ * A position's offset is measured from the root's fret on string six, and the
+ * root's fret is whatever puts the key there — so the key cancels out of the
+ * arithmetic entirely. That is what makes the derivations below possible: a
+ * shape can be altered degree by degree once, rather than in twelve keys.
+ */
+function degreeAt(stringIndex: number, offset: number, fret: number): number {
+  const string = 6 - stringIndex;
+  const openDelta = openPc(STANDARD_TUNING, string) - openPc(STANDARD_TUNING, 6);
+  return (((openDelta + offset + fret) % 12) + 12) % 12;
+}
+
+/** Put a shape's frets back on zero after an alteration moved them. */
+function renormalise(position: ScalePosition, frets: number[][]): ScalePosition {
+  const flat = frets.flat();
+  const lowest = Math.min(...flat);
+  return {
+    ...position,
+    offset: position.offset + lowest,
+    span: Math.max(...flat) - lowest,
+    frets: frets.map((row) => row.map((fret) => fret - lowest).sort((a, b) => a - b)),
+  };
+}
+
+/**
+ * A scale that is another scale with a degree moved.
+ *
+ * Harmonic minor is natural minor with the seventh raised; melodic minor is
+ * major with the third lowered. Neither is a mode of anything already tabled,
+ * so the alternative was fifteen more hand-written tables — fifteen more
+ * chances to be wrong about something one sentence of theory settles.
+ *
+ * The note moves by the semitones between the two degrees, which on a string
+ * is exactly that many frets.
+ */
+function alteredFrom(
+  parent: ScalePosition[],
+  changes: readonly { from: number; to: number }[],
+): ScalePosition[] {
+  return parent.map((position) => {
+    const frets = position.frets.map((row, stringIndex) =>
+      row.map((fret) => {
+        const degree = degreeAt(stringIndex, position.offset, fret);
+        const change = changes.find((each) => each.from === degree);
+        return change ? fret + (change.to - change.from) : fret;
+      }),
+    );
+    return renormalise(position, frets);
+  });
+}
+
+/**
+ * A scale that is another scale with a degree added.
+ *
+ * The blues scale is the minor pentatonic plus the flat fifth — the blue note,
+ * which sits between the fourth and the fifth and is the whole character of
+ * the scale. Every place it falls inside the shape is added, which is what a
+ * blues box looks like on paper.
+ */
+function withDegree(parent: ScalePosition[], degree: number): ScalePosition[] {
+  return parent.map((position) => {
+    const frets = position.frets.map((row, stringIndex) => {
+      const added = [...row];
+      for (let fret = 0; fret <= position.span; fret += 1) {
+        if (row.includes(fret)) continue;
+        if (degreeAt(stringIndex, position.offset, fret) === degree) added.push(fret);
+      }
+      return added.sort((a, b) => a - b);
+    });
+    return renormalise(position, frets);
+  });
+}
+
 const TABLES: Record<string, ScalePosition[]> = {
   major: MAJOR,
   "major-pentatonic": MAJOR_PENTATONIC,
@@ -228,6 +303,12 @@ const TABLES: Record<string, ScalePosition[]> = {
   ...Object.fromEntries(
     Object.entries(MODES_OF_MAJOR).map(([id, semitones]) => [id, modeOf(semitones)]),
   ),
+  // The last three, each one note away from a table that already exists.
+  blues: withDegree(MINOR_PENTATONIC, 6),
+  "harmonic-minor": alteredFrom(modeOf(MODES_OF_MAJOR["natural-minor"]), [
+    { from: 10, to: 11 },
+  ]),
+  "melodic-minor": alteredFrom(MAJOR, [{ from: 4, to: 3 }]),
 };
 
 /** The named positions for a scale, or none where they are not written yet. */
