@@ -23,9 +23,11 @@
  * numbers them 1 for the high e through 6 for the low E, the way a guitarist
  * does. One is the other plus one.
  */
-import type { Note } from "@/lib/fretlab/types";
+import type { KeyName, Note, Tuning } from "@/lib/fretlab/types";
 import type { NoteGroup } from "@/lib/fretlab/noteRoles";
 import { Fretboard } from "@/components/fretlab/Fretboard";
+import { roleForDegree } from "@/lib/fretlab/noteRoles";
+import { STANDARD_TUNING, keyPc, openPc } from "@/lib/fretlab/theory";
 
 export type MarkerTone = "root" | "third" | "fifth" | "scale" | "ghost";
 
@@ -114,4 +116,36 @@ export function FretboardMini({
       rootKey={rootKey}
     />
   );
+}
+
+/**
+ * App notes as kit markers.
+ *
+ * The card components in the kit take `Marker[]`; the app stores `Note[]`.
+ * This is the one place that converts, including the string-index flip and
+ * the tone, which comes from the note's degree against the key — the same
+ * `NoteRole` the board itself paints with, so a card thumbnail and the full
+ * board colour the same note the same way.
+ */
+export function markersFrom(
+  notes: readonly Note[],
+  rootKey: KeyName,
+  tuning: Tuning = STANDARD_TUNING,
+): Marker[] {
+  return notes.map((note) => {
+    const degree = (openPc(tuning, note.s) + note.f - keyPc(rootKey) + 120) % 12;
+    // The kit paints four roles; the app names five. A seventh is a scale
+    // tone that is not the root, third or fifth, so that is what it becomes
+    // here — narrowing, not renaming, and only in the card thumbnails. The
+    // full board still draws it as a seventh.
+    const role = roleForDegree(degree);
+    const tone: MarkerTone =
+      role === "outside" ? "ghost" : role === "seventh" ? "scale" : role;
+    return {
+      id: `s${note.s}f${note.f}`,
+      stringIndex: note.s - 1,
+      fret: note.f,
+      tone,
+    };
+  });
 }

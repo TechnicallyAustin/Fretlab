@@ -8,10 +8,16 @@
 import type { View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
 import { CHORDS } from "@/lib/fretlab/library";
-import { Fretboard } from "@/components/fretlab/Fretboard";
-import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
+import {
+  ChordCard,
+  Hero,
+  PillGroup,
+  SegmentedControl,
+  levelOf,
+  markersFrom,
+} from "@/components/ui";
 import { chordIntervals } from "@/lib/fretlab/theory";
-import { cssVars } from "@/lib/fretlab/palette";
+import { keyHue } from "@/lib/fretlab/palette";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
 import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
@@ -34,93 +40,63 @@ export function ChordLibrary({
       (level === "All levels" || chord.level === level),
   );
   return (
-    <div className="screen-content library-screen chord-library-screen">
+    <div className="fl-root screen-content library-screen chord-library-screen">
       <AppHeader
         title="Chord library"
         meta={`${visible.length} shapes`}
         onBack={() => go("library")}
       />
-      <section className="library-photo-hero chord-photo">
-        <div>
-          <p className="kicker">Shape meets harmony</p>
-          <h2>Every chord is a small map of the key.</h2>
-          <p>
-            Choose a shape to see its exact notes, intervals, fingering, movable
-            positions and practice path.
-          </p>
-        </div>
-        <span>{CHORDS.length} essential shapes</span>
-      </section>
+      <Hero
+        eyebrow="Shape meets harmony"
+        title="Every chord is a small map of the key."
+        sub="Choose a shape to see its exact notes, intervals, fingering, movable positions and practice path."
+        meta={`${CHORDS.length} essential shapes`}
+      />
       <div className="library-controls">
-        <SegmentTabs
-          labels={["All", "Major", "Minor", "Seventh", "Suspended"]}
-          active={quality}
+        <SegmentedControl
+          label="Quality"
+          options={["All", "Major", "Minor", "Seventh", "Suspended"]}
+          value={quality}
           onChange={setQuality}
         />
-        <div className="chip-scroll">
-          {["All levels", "Beginner", "Intermediate", "Advanced"].map(
-            (item) => (
-              <button
-                className={level === item ? "active" : ""}
-                onClick={() => setLevel(item)}
-                key={item}
-              >
-                {item}
-              </button>
-            ),
-          )}
-        </div>
-        <div className="chip-scroll">
-          {["All", "G", "C", "D", "A", "E", "F", "B"].map((key) => (
-            <button
-              className={root === key ? "active" : ""}
-              onClick={() => setRoot(key)}
-              key={key}
-            >
-              {key}
-            </button>
-          ))}
-        </div>
+        <PillGroup
+          label="Level"
+          options={["All levels", "Beginner", "Intermediate", "Advanced"]}
+          value={level}
+          onChange={setLevel}
+        />
+        <PillGroup
+          label="Root"
+          circle
+          options={["All", "G", "C", "D", "A", "E", "F", "B"]}
+          value={root}
+          onChange={setRoot}
+        />
       </div>
-      <div className="chord-library-grid">
-        {visible.map((chord) => (
-          <article
-            className="chord-library-card"
-            key={chord.id}
-            style={cssVars(chord.root)}
-          >
-            <button
-              className="library-card-open"
-              onClick={() => onOpen(chord.id)}
-            >
-              <div>
-                <span className="chord-symbol">{chord.symbol}</span>
-                <span>
-                  <strong>{chord.name}</strong>
-                  <small>{chord.notes}</small>
-                </span>
-                <b>→</b>
-              </div>
-              <Fretboard
-                notes={tuning.id === "drop-d" ? chord.fingering.filter((note) => note.s !== 6) : chord.fingering}
-                low={0}
-                high={4}
-                mini
-                rootKey={chord.root}
-              />
-            </button>
-            <footer>
-              <span className="experience-badge">{chord.level}</span>
-              <span>{chord.formula}</span>
-              <button
-                className="sample-play"
-                onClick={() => playTones(chord.root, chordIntervals(chord))}
-              >
-                ▶ Hear
-              </button>
-            </footer>
-          </article>
-        ))}
+      <div className="fl-grid fl-grid--3">
+        {visible.map((chord) => {
+          // Drop D retunes the sixth string, so a shape that uses it is no
+          // longer that shape. The board drops the string rather than drawing
+          // a note that would not sound.
+          const shape =
+            tuning.id === "drop-d"
+              ? chord.fingering.filter((note) => note.s !== 6)
+              : chord.fingering;
+          return (
+            <ChordCard
+              key={chord.id}
+              name={chord.name}
+              root={chord.root}
+              notes={chord.notes.split(" · ")}
+              intervals={chord.formula}
+              level={levelOf(chord.level)}
+              markers={markersFrom(shape, chord.root, tuning)}
+              hue={keyHue(chord.root)}
+              onHear={() => playTones(chord.root, chordIntervals(chord))}
+              onOpen={() => onOpen(chord.id)}
+            />
+          );
+        })}
       </div>
     </div>
   );

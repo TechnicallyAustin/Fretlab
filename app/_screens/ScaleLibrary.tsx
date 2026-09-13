@@ -7,11 +7,16 @@
  */
 import type { KeyName, View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
-import { FIFTHS, intervalShape } from "@/lib/fretlab/theory";
-import { Fretboard } from "@/components/fretlab/Fretboard";
+import { intervalShape } from "@/lib/fretlab/theory";
 import { SCALES } from "@/lib/fretlab/library";
-import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
-import { cssVars } from "@/lib/fretlab/palette";
+import {
+  Hero,
+  PillGroup,
+  ScaleCard,
+  SegmentedControl,
+  levelOf,
+  markersFrom,
+} from "@/components/ui";
 import { playTones } from "@/lib/fretlab/audio";
 import { useState } from "react";
 import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
@@ -34,82 +39,49 @@ export function ScaleLibrary({
       (level === "All levels" || scale.level === level),
   );
   return (
-    <div className="screen-content library-screen scale-library-screen">
+    <div className="fl-root screen-content library-screen scale-library-screen">
       <AppHeader
         title="Scale library"
         meta={`Key of ${selectedKey}`}
         onBack={() => go("library")}
       />
-      <section className="library-photo-hero scale-photo">
-        <div>
-          <p className="kicker">One neck, many sounds</p>
-          <h2>Compare scale families without losing your place.</h2>
-          <p>
-            Every pattern is generated from the selected key and opens into
-            connected fretboard positions.
-          </p>
-        </div>
-        <span>
-          {SCALES.length} scales · {selectedKey} active
-        </span>
-      </section>
+      <Hero
+        eyebrow="One neck, many sounds"
+        title="Compare scale families without losing your place."
+        sub="Every pattern is generated from the selected key and opens into connected fretboard positions."
+        meta={`${SCALES.length} scales \u00b7 ${selectedKey} active`}
+      />
       <div className="library-controls">
-        <SegmentTabs
-          labels={["All", "Major", "Minor", "Pentatonic", "Modes"]}
-          active={family}
+        <SegmentedControl
+          label="Scale family"
+          options={["All", "Major", "Minor", "Pentatonic", "Modes"]}
+          value={family}
           onChange={setFamily}
         />
-        <div className="chip-scroll">
-          {["All levels", "Beginner", "Intermediate", "Advanced"].map(
-            (item) => (
-              <button
-                className={level === item ? "active" : ""}
-                onClick={() => setLevel(item)}
-                key={item}
-              >
-                {item}
-              </button>
-            ),
-          )}
-        </div>
+        <PillGroup
+          label="Level"
+          options={["All levels", "Beginner", "Intermediate", "Advanced"]}
+          value={level}
+          onChange={setLevel}
+        />
       </div>
-      <div className="scale-library-grid">
+      <div className="fl-grid fl-grid--3">
         {visible.map((scale, index) => (
-          <article
-            className="scale-library-card"
+          <ScaleCard
             key={scale.id}
-            style={cssVars(FIFTHS[(FIFTHS.indexOf(selectedKey) + index) % 12])}
-          >
-            <button
-              className="library-card-open"
-              onClick={() => onOpen(scale.id)}
-            >
-              <div>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <strong>
-                  {selectedKey} {scale.name}
-                </strong>
-                <small>{scale.mood}</small>
-              </div>
-              <Fretboard
-                notes={intervalShape(selectedKey, scale.intervals, 1, 7, tuning)}
-                low={1}
-                high={7}
-                mini
-                rootKey={selectedKey}
-              />
-            </button>
-            <footer>
-              <span className="experience-badge">{scale.level}</span>
-              <b>{scale.formula}</b>
-              <button
-                className="sample-play"
-                onClick={() => playTones(selectedKey, scale.intervals, true)}
-              >
-                ▶ Hear
-              </button>
-            </footer>
-          </article>
+            index={String(index + 1).padStart(2, "0")}
+            name={`${selectedKey} ${scale.name}`}
+            mood={scale.mood}
+            level={levelOf(scale.level)}
+            formula={scale.formula}
+            markers={markersFrom(
+              intervalShape(selectedKey, scale.intervals, 1, 7, tuning),
+              selectedKey,
+              tuning,
+            )}
+            onHear={() => playTones(selectedKey, scale.intervals, true)}
+            onOpen={() => onOpen(scale.id)}
+          />
         ))}
       </div>
     </div>

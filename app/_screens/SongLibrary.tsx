@@ -8,8 +8,8 @@
 import type { View } from "@/lib/fretlab/types";
 import { AppHeader } from "@/components/fretlab/AppHeader";
 import { SONGS } from "@/lib/fretlab/library";
-import { SegmentTabs } from "@/components/fretlab/SegmentTabs";
-import { cssVars } from "@/lib/fretlab/palette";
+import { Hero, HeroSearch, SegmentedControl, SongCard, levelOf } from "@/components/ui";
+import { keyHue } from "@/lib/fretlab/palette";
 import { useState } from "react";
 
 export function SongLibrary({
@@ -29,61 +29,41 @@ export function SongLibrary({
         .includes(query.toLowerCase()),
   );
   return (
-    <div className="screen-content library-screen song-library-screen">
+    /* fl-root scopes the design kit's type and colour to the screens that have
+       been converted, so the rest of the app keeps its own look until it is
+       converted too. */
+    <div className="fl-root screen-content library-screen song-library-screen">
       <AppHeader
         title="Songs"
         meta={`${visible.length} arrangements`}
         onBack={() => go("library")}
       />
-      <section className="songs-hero">
-        <div>
-          <p className="kicker">Play music sooner</p>
-          <h2>Turn the shapes you know into complete songs.</h2>
-          <p>
-            Each arrangement connects chord changes, rhythm, tempo and the key
-            map.
-          </p>
-        </div>
-        <div className="song-search">
-          <label htmlFor="song-search">Find a song</label>
-          <input
-            id="song-search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Title or artist…"
-          />
-        </div>
-      </section>
-      <SegmentTabs
-        labels={["All", "Beginner", "Intermediate"]}
-        active={level}
+      <Hero
+        eyebrow="Play music sooner"
+        title="Turn the shapes you know into complete songs."
+        sub="Each arrangement connects chord changes, rhythm, tempo and the key map."
+        aside={<HeroSearch value={query} onChange={setQuery} />}
+      />
+      <SegmentedControl
+        label="Difficulty"
+        options={["All", "Beginner", "Intermediate"]}
+        value={level}
         onChange={setLevel}
       />
-      <div className="song-library-grid">
+      <div className="fl-grid fl-grid--3">
         {visible.map((song) => (
-          <button
-            className="song-card"
-            onClick={() => onOpen(song.id)}
+          <SongCard
             key={song.id}
-            style={{
-              ...cssVars(song.key),
-              backgroundImage: `linear-gradient(180deg,rgba(25,25,30,.04),rgba(25,25,30,.88)),url(${song.image})`,
-            }}
-          >
-            <span className="key-chip">Key {song.key}</span>
-            <div>
-              <small>
-                {song.level} · {song.tempo} bpm
-              </small>
-              <strong>{song.title}</strong>
-              <p>{song.artist}</p>
-              <footer>
-                {song.progression.map((chord) => (
-                  <span key={chord}>{chord}</span>
-                ))}
-              </footer>
-            </div>
-          </button>
+            title={song.title}
+            artist={song.artist}
+            songKey={song.key}
+            level={levelOf(song.level)}
+            bpm={song.tempo}
+            chords={song.progression}
+            image={song.image}
+            hue={keyHue(song.key)}
+            onOpen={() => onOpen(song.id)}
+          />
         ))}
       </div>
     </div>

@@ -8,6 +8,7 @@
 import type { View } from "@/lib/fretlab/types";
 import { CHORDS, SCALES, SONGS } from "@/lib/fretlab/library";
 import { FIFTHS } from "@/lib/fretlab/theory";
+import { LibraryTile, SectionHeading } from "@/components/ui";
 
 export function LibraryLaunchpad({ go }: { go: (view: View) => void }) {
   const cards: {
@@ -47,25 +48,21 @@ export function LibraryLaunchpad({ go }: { go: (view: View) => void }) {
     },
   ];
   return (
-    <section className="library-launchpad">
-      <div className="section-head">
-        <h2>Explore the full library</h2>
-        <span>Choose a way into the neck</span>
-      </div>
-      <div>
+    <section className="fl-root library-launchpad">
+      <SectionHeading
+        title="Explore the full library"
+        action={<span className="fl-eyebrow">Choose a way into the neck</span>}
+      />
+      <div className="fl-grid fl-grid--4">
         {cards.map((card) => (
-          <button
-            onClick={() => go(card.view)}
+          <LibraryTile
             key={card.label}
-            style={{
-              backgroundImage: `linear-gradient(110deg,rgba(35,36,47,.86),rgba(35,36,47,.2)),url(${card.image})`,
-            }}
-          >
-            <span>{card.count}</span>
-            <strong>{card.label}</strong>
-            <small>{card.copy}</small>
-            <b>Open →</b>
-          </button>
+            count={card.count}
+            title={card.label}
+            description={card.copy}
+            image={card.image}
+            onOpen={() => go(card.view)}
+          />
         ))}
       </div>
     </section>

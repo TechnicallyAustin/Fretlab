@@ -18,7 +18,9 @@
  * at a time.
  */
 export * from "./primitives";
+export * from "./adapt";
 export * from "./shell";
+export * from "./hero";
 export * from "./cards";
 export * from "./practice";
 export * from "./progress";
