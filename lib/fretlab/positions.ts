@@ -184,10 +184,50 @@ const MAJOR: ScalePosition[] = [
   },
 ];
 
+/**
+ * How far each mode's root sits above its parent major scale's root.
+ *
+ * A mode of the major scale is the same seven notes read from a different
+ * degree — D Dorian is C major starting on D — so it is played with the same
+ * five shapes, in the same places on the neck. Only the anchor moves.
+ *
+ * These are derived rather than hand-written for exactly that reason. Typing
+ * out twenty-five more tables would be twenty-five more chances to be wrong
+ * about something the theory already fixes, and the derivation is checkable:
+ * `tests/positions.test.mjs` asserts each mode's notes are its own scale's.
+ */
+const MODES_OF_MAJOR: Record<string, number> = {
+  dorian: 2,
+  phrygian: 4,
+  lydian: 5,
+  mixolydian: 7,
+  "natural-minor": 9,
+};
+
+/**
+ * The major shapes, re-anchored on the mode's own root.
+ *
+ * A position's offset is measured from the root's fret on string six. The
+ * mode's root is `semitones` above its parent's, so every offset moves down by
+ * that much and the shape itself is untouched.
+ */
+function modeOf(semitones: number): ScalePosition[] {
+  return MAJOR.map((position) => ({
+    ...position,
+    offset: position.offset - semitones,
+    // Naming it for the parent's chord shape would be a lie in the mode's own
+    // key, and the number is what a learner needs here anyway.
+    shape: undefined,
+  }));
+}
+
 const TABLES: Record<string, ScalePosition[]> = {
   major: MAJOR,
   "major-pentatonic": MAJOR_PENTATONIC,
   "minor-pentatonic": MINOR_PENTATONIC,
+  ...Object.fromEntries(
+    Object.entries(MODES_OF_MAJOR).map(([id, semitones]) => [id, modeOf(semitones)]),
+  ),
 };
 
 /** The named positions for a scale, or none where they are not written yet. */

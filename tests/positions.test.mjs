@@ -19,7 +19,17 @@ const { SCALES } = await import("../lib/fretlab/library.ts");
 const { positionsFor, positionNotes, positionWindow, hasPositions } =
   await import("../lib/fretlab/positions.ts");
 
-const SCALED = ["major", "major-pentatonic", "minor-pentatonic"];
+const SCALED = [
+  "major",
+  "major-pentatonic",
+  "minor-pentatonic",
+  // Modes of the major scale, whose positions are derived from it.
+  "dorian",
+  "phrygian",
+  "lydian",
+  "mixolydian",
+  "natural-minor",
+];
 const soundedPc = (note) => (OPEN_PC[note.s] + note.f) % 12;
 
 /** The shape with its lowest fret subtracted, so two tables can be compared. */
@@ -33,9 +43,46 @@ test("the scales with positions are the ones that claim them", () => {
     assert.ok(hasPositions(id), `${id} has no positions`);
     assert.equal(positionsFor(id).length, 5, `${id} should have five`);
   }
-  // A scale with no table says so rather than returning something plausible.
-  assert.deepEqual(positionsFor("lydian"), []);
-  assert.equal(hasPositions("lydian"), false);
+  // Lydian used to be the example of a scale with no table. It is a mode of
+  // the major scale, so it has the major shapes now — the ones left are the
+  // three that are not modes of anything already tabled, and they still say so
+  // rather than returning something plausible.
+  for (const id of ["blues", "harmonic-minor", "melodic-minor"]) {
+    assert.deepEqual(positionsFor(id), [], `${id} should have no table yet`);
+    assert.equal(hasPositions(id), false);
+  }
+  assert.equal(positionsFor("nonsense-scale").length, 0);
+});
+
+/**
+ * A mode of the major scale is the same seven notes read from a different
+ * degree, so it is played with the same five shapes in the same places. The
+ * mode tables are derived from the major one rather than typed out again —
+ * this is the check that the derivation lands where it should.
+ */
+test("a mode's shapes sit where its parent major scale's shapes sit", () => {
+  // D Dorian is C major. Both should put their positions on the same frets.
+  for (const [mode, modeKey, parentKey] of [
+    ["dorian", "D", "C"],
+    ["mixolydian", "G", "C"],
+    ["lydian", "F", "C"],
+    ["phrygian", "E", "C"],
+    ["natural-minor", "A", "C"],
+  ]) {
+    for (let index = 0; index < 5; index += 1) {
+      const fromMode = positionNotes(positionsFor(mode)[index], modeKey)
+        .map((note) => `${note.s}:${note.f}`)
+        .sort();
+      const fromParent = positionNotes(positionsFor("major")[index], parentKey)
+        .map((note) => `${note.s}:${note.f}`)
+        .sort();
+      assert.deepEqual(
+        fromMode,
+        fromParent,
+        `${modeKey} ${mode} position ${index + 1} is not ${parentKey} major's`,
+      );
+    }
+  }
 });
 
 test("every note of every position belongs to the scale", () => {
