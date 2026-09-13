@@ -1275,17 +1275,24 @@ p {
   gap: 9px;
 }
 
-.train-module-picker>div:last-child {
+/* The picker was four items in a fixed order. It is the whole drill library
+   now — 25 items — so it scrolls in its own box rather than pushing the drill
+   itself off the screen. */
+.train-module-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
+  max-height: 232px;
+  overflow-y: auto;
+  padding-right: 4px;
+  overscroll-behavior-y: contain;
 }
 
 .train-module-picker button {
   min-width: 0;
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 2px 8px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 11px;
@@ -1297,12 +1304,6 @@ p {
 .train-module-picker button.active {
   border-color: var(--key-edge);
   background: linear-gradient(135deg, var(--key-fill), var(--card));
-}
-
-.train-module-picker button>span {
-  grid-row: 1 / 3;
-  color: var(--key-ink);
-  font-size: 0.8125rem;
 }
 
 .train-module-picker button strong {

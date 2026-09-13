@@ -1082,3 +1082,83 @@ export function runPlanFor(id: string, selectedKey: KeyName): RunPlan | null {
     steps: [{ drillId: drill.id, drill, mins: drill.minutes }],
   };
 }
+
+/**
+ * Anything the Train screen can score.
+ *
+ * `Train` is the only screen that records an accuracy — it shows targets, you
+ * tap them, and first-attempt hits are the score. It could only run the four
+ * `TRAINING_MODULES`, so the other 21 drills were timed and recorded
+ * `accuracy: null`. Everything downstream inherited that ceiling: Progress's
+ * accuracy, the daily chart, and FL-23's review queue all described a quarter
+ * of the content, and a learner who worked through routines — the app's own
+ * primary path — generated no accuracy data at all.
+ *
+ * Nothing about the scoring was specific to those four. It needs a set of
+ * target notes and a sentence saying what to look for, and every drill has
+ * both. This presents either kind in the one shape `Train` consumes.
+ */
+export type Trainable = {
+  id: string;
+  name: string;
+  level: string;
+  minutes: number;
+  intervals: readonly number[];
+  /** What the player is hunting for: "root note", "1 · 3 · 5". */
+  target: string;
+  instruction: string;
+  /** Frets to search. A drill brings its own window; a module uses 1-7. */
+  low: number;
+  high: number;
+  /** Restrict to these strings, where the drill does. */
+  strings?: readonly number[];
+};
+
+/**
+ * Degrees named the way the rest of the app names them, so a drill's target
+ * reads like its own lesson rather than like a list of semitones.
+ */
+const DEGREE_NAMES: Record<number, string> = {
+  0: "1", 1: "♭2", 2: "2", 3: "♭3", 4: "3", 5: "4",
+  6: "♭5", 7: "5", 8: "♭6", 9: "6", 10: "♭7", 11: "7",
+};
+
+function describeDegrees(intervals: readonly number[]): string {
+  if (intervals.length === 1 && intervals[0] === 0) return "root note";
+  return intervals.map((i) => DEGREE_NAMES[((i % 12) + 12) % 12]).join(" · ");
+}
+
+/** Every drill and module the Train screen can put a score against. */
+export function trainables(): Trainable[] {
+  const modules: Trainable[] = TRAINING_MODULES.map((module) => ({
+    id: module.id,
+    name: module.name,
+    level: module.level,
+    minutes: module.minutes,
+    intervals: module.intervals,
+    target: module.target,
+    instruction: module.instruction,
+    low: 1,
+    high: 7,
+  }));
+
+  const drills: Trainable[] = DRILLS.map((drill) => ({
+    id: drill.id,
+    name: drill.name,
+    level: drill.level,
+    minutes: drill.minutes,
+    intervals: drill.intervals,
+    target: describeDegrees(drill.intervals),
+    // The drill's own cue, which already says how to play it.
+    instruction: drill.cue,
+    low: drill.low,
+    high: drill.high,
+    strings: "strings" in drill ? drill.strings : undefined,
+  }));
+
+  return [...modules, ...drills];
+}
+
+export function trainableById(id: string): Trainable | undefined {
+  return trainables().find((item) => item.id === id);
+}

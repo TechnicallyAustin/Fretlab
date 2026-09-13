@@ -16,7 +16,7 @@ import {
 } from "@/lib/fretlab/theory";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { StatusBar } from "@/components/fretlab/StatusBar";
-import { TRAINING_MODULES } from "@/lib/fretlab/library";
+import { trainableById, trainables } from "@/lib/fretlab/library";
 import { playTones } from "@/lib/fretlab/audio";
 import { useElapsed } from "@/lib/fretlab/useElapsed";
 import { useMemo, useState } from "react";
@@ -37,15 +37,25 @@ export function Train({
   setTuning?: (tuning: Tuning) => void;
   setLeftHanded?: (leftHanded: boolean) => void;
 }) {
-  const [moduleId, setModuleId] =
-    useState<(typeof TRAINING_MODULES)[number]["id"]>("locator");
-  const moduleIndex = TRAINING_MODULES.findIndex(
-    (item) => item.id === moduleId,
-  );
-  const trainingModule = TRAINING_MODULES[moduleIndex];
+  // Every drill is scorable now, not only the four training modules. The
+  // scoring was never specific to them: it needs target notes and a sentence
+  // saying what to find, and every drill has both.
+  const items = useMemo(() => trainables(), []);
+  const [moduleId, setModuleId] = useState<string>("locator");
+  const trainingModule = trainableById(moduleId) ?? items[0];
+  const moduleIndex = items.findIndex((item) => item.id === trainingModule.id);
   const notes = useMemo(
     () =>
-      intervalShape(selectedKey, [...trainingModule.intervals], 1, 7, tuning),
+      intervalShape(
+        selectedKey,
+        [...trainingModule.intervals],
+        trainingModule.low,
+        trainingModule.high,
+        tuning,
+      ).filter(
+        (note) =>
+          !trainingModule.strings || trainingModule.strings.includes(note.s),
+      ),
     [selectedKey, trainingModule, tuning],
   );
   const signature = notes.map((note) => `${note.s}:${note.f}`).join(",");
@@ -128,11 +138,12 @@ export function Train({
 
   const next = () => {
     void record(found.size === notes.length);
-    if (moduleIndex === TRAINING_MODULES.length - 1)
+    // Round the whole library and the key advances, so the same drill comes
+    // back in a key you have not done it in — which is the distinction the
+    // review scheduler also makes.
+    if (moduleIndex === items.length - 1)
       setSelectedKey(FIFTHS[(FIFTHS.indexOf(selectedKey) + 1) % FIFTHS.length]);
-    setModuleId(
-      TRAINING_MODULES[(moduleIndex + 1) % TRAINING_MODULES.length].id,
-    );
+    setModuleId(items[(moduleIndex + 1) % items.length].id);
     setMisses(0);
   };
 
@@ -141,27 +152,32 @@ export function Train({
       <StatusBar end="Training modules" />
       <section className="train-module-picker">
         <div className="section-head">
-          <h2>Your module path</h2>
+          {/* "Your module path" described four items in a fixed order. It is
+              the whole drill library now, so it is a list to choose from
+              rather than a path to walk. */}
+          <h2>What to practise</h2>
           <span>
-            {moduleIndex + 1} of {TRAINING_MODULES.length}
+            {moduleIndex + 1} of {items.length}
           </span>
         </div>
-        <div>
-          {TRAINING_MODULES.map((item, index) => (
+        <div className="train-module-list">
+          {items.map((item) => (
             <button
               className={item.id === moduleId ? "active" : ""}
               onClick={() => setModuleId(item.id)}
               key={item.id}
             >
-              <span>0{index + 1}</span>
               <strong>{item.name}</strong>
               <small>
                 {item.level} · {item.minutes} min
               </small>
               <i>
+                {/* Only the drill in hand shows progress. The bar used to fill
+                    for every item before this one in the list, which read as
+                    "completed" for drills nobody had opened. */}
                 <b
                   style={{
-                    width: `${item.id === moduleId ? Math.round((found.size / Math.max(1, notes.length)) * 100) : index < moduleIndex ? 100 : 0}%`,
+                    width: `${item.id === moduleId ? Math.round((found.size / Math.max(1, notes.length)) * 100) : 0}%`,
                   }}
                 />
               </i>
