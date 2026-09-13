@@ -489,6 +489,61 @@ p {
 
 .today-side-actions>button { flex: 1 1 10rem; }
 
+/* Play along: a drone or a loop to practise over. Sits under the board it
+   belongs to rather than on a screen of its own, because it is an accompaniment
+   to a drill and not a thing you go and do. */
+.play-along {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.play-along-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+  gap: 7px;
+}
+
+.play-along-picker button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 62px;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.play-along-picker button strong {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.play-along-picker button small {
+  color: var(--quiet);
+  font-size: 0.8125rem;
+}
+
+.play-along-picker button.active {
+  border-color: var(--key-bright);
+  background: var(--key-fill);
+  color: var(--key-ink);
+}
+
+.play-along-picker button.active small { color: var(--key-ink); }
+
+.play-along .section-head span {
+  font-variant-numeric: tabular-nums;
+}
+
 .ear-stage {
   display: flex;
   flex-direction: column;

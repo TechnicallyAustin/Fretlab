@@ -19,6 +19,8 @@ import { drillShape, withPlayOrder, fingersUsed } from "@/lib/fretlab/fingering"
 import { playTones } from "@/lib/fretlab/audio";
 import { usePracticeSessions } from "@/lib/api/hooks";
 import { useClock } from "@/lib/fretlab/useClock";
+import { PROGRESSIONS } from "@/lib/fretlab/backing";
+import { useBacking } from "@/lib/fretlab/useBacking";
 import {
   compareLayers,
   patternCells,
@@ -28,6 +30,11 @@ import {
 import { dayLabel } from "@/lib/api/progress";
 import { useState } from "react";
 import { useGuitarSetup } from "@/lib/fretlab/GuitarSetup";
+
+/** How far the play-along tempo buttons move. The labels derive from it, so a
+    button cannot end up describing a step it does not take — the same guard
+    MetronomeBar needed after this test caught it there. */
+const TEMPO_STEP = 4;
 
 export function DrillDetail({
   go,
@@ -53,6 +60,7 @@ export function DrillDetail({
   // "Today" and "Tue" are answers about the viewer's calendar, so the labels
   // wait for a client clock rather than being drawn with the server's.
   const { now } = useClock();
+  const backing = useBacking(sessionKey, { bpm: drill.bpm || 84 });
   const entries =
     typeof now !== "number"
       ? []
@@ -236,6 +244,50 @@ export function DrillDetail({
             {ordered.some((note) => note.f === 0) ? " \u00b7 open strings ring" : ""}
           </p>
         )}
+
+        {/* FL-25. "Free play over a drone" has been a routine step since
+            FL-10 with nothing to play over. It rides the metronome's own
+            scheduler, so the chord changes land on a downbeat rather than
+            near one. */}
+        <section className="play-along">
+          <div className="section-head">
+            <h2>Play along</h2>
+            <span>{backing.label ?? "in " + sessionKey}</span>
+          </div>
+          <div className="play-along-picker">
+            {PROGRESSIONS.map((progression) => (
+              <button
+                className={backing.progressionId === progression.id ? "active" : ""}
+                onClick={() => backing.setProgression(progression.id)}
+                aria-pressed={backing.progressionId === progression.id}
+                key={progression.id}
+              >
+                <strong>{progression.name}</strong>
+                <small>{progression.about}</small>
+              </button>
+            ))}
+          </div>
+          <div className="transport">
+            <button
+              onClick={() => backing.setBpm(backing.bpm - TEMPO_STEP)}
+              aria-label={`Slower by ${TEMPO_STEP} bpm`}
+            >
+              −{TEMPO_STEP}
+              <small>bpm</small>
+            </button>
+            <button className="pause" onClick={backing.toggle}>
+              {backing.running ? "Stop" : "Play along"}
+              <small>{backing.bpm} bpm</small>
+            </button>
+            <button
+              onClick={() => backing.setBpm(backing.bpm + TEMPO_STEP)}
+              aria-label={`Faster by ${TEMPO_STEP} bpm`}
+            >
+              +{TEMPO_STEP}
+              <small>bpm</small>
+            </button>
+          </div>
+        </section>
 
         <div className="practice-controls">
           {/* This button named a drill and started an unrelated one. The

@@ -15,10 +15,10 @@ lint and tests rather than through review.
 | Stage 1 — Stop teaching wrong things | `COMPLETE` | 8 / 8 |
 | Stage 2 — Make the practice loop real | `COMPLETE` | 7 / 7 |
 | **Stage 3 — Make it shippable to real people** | **`COMPLETE`** | 6 / 6 |
-| Stage 4 — Retention and revenue | `IN PROGRESS` | 3 / 5 |
+| Stage 4 — Retention and revenue | `IN PROGRESS` | 4 / 5 |
 | Design pass — `docs/DESIGN-PASS.md` | `COMPLETE` | 8 / 8 |
 
-Next task: **FL-25 — Drones and backing tracks.**
+Next task: **FL-26 — Minor keys and a larger chord library.**
 
 The design pass is a separate document because it came from using the app
 rather than from the audit, but it is worked the same way and its tasks take
@@ -1294,7 +1294,7 @@ returning users.
 | FL-22 | Real guitar audio tied to the displayed shape | `DONE` |
 | FL-23 | Spaced repetition | `DONE` |
 | FL-24 | Ear training | `DONE` |
-| FL-25 | Drones and backing tracks | `TODO` |
+| FL-25 | Drones and backing tracks | `DONE` |
 | FL-26 | Minor keys and a larger chord library | `TODO` |
 
 ---
@@ -1422,12 +1422,36 @@ on FL-22 for credible audio.
 
 ---
 
-### - [ ] FL-25 — Drones and backing tracks
-**Status:** `TODO` · **Severity:** Major
+### - [x] FL-25 — Drones and backing tracks
+**Status:** `DONE` · **Severity:** Major
 
 **Required change.** A drone in all twelve keys (synthesised, no licensing) and simple
 I–IV–V / ii–V–I backing loops. The "Free play over a drone" routine step already
 assumes this exists.
+
+> **Done.** A drone plus I–IV–V, ii–V–I and a 12-bar blues, on the drill screen
+> under the board they accompany. Synthesised, so nothing is licensed and
+> nothing is fetched.
+>
+> **It rides the metronome's own scheduler.** The chord change happens on a
+> downbeat by construction rather than by a second timer agreeing with the
+> first — which is exactly the defect FL-09 removed when it found a silent
+> second metronome in the practice studio drifting against the real one.
+>
+> Progressions are stored as *degrees* of the key, so each is one definition
+> rather than twelve and transposes by construction. The 12-bar blues is
+> asserted to be twelve bars, in the order the form actually goes.
+>
+> The drone is a looping buffer rather than a chord struck each bar, and its
+> length is rounded to a whole number of cycles of every partial so the loop
+> point is not a click. Checking that needed care: the loop sits where all the
+> partials cross zero, which is also where consecutive samples differ most, so
+> a seamless wrap looks like a large step until you compare it against the
+> largest step rather than the average. It is 1.000× the largest.
+>
+> Twelve assertions, including that the drone does not decay — a decaying drone
+> is a note, and you cannot play over a note — and that its pitch is within a
+> cent, checked by the app's own detector.
 
 ---
 
