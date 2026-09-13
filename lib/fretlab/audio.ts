@@ -15,6 +15,9 @@
 import type { Accent } from "./metronome";
 import type { KeyName, Note, Tuning } from "./types";
 import { STANDARD_TUNING, keyPc } from "./theory";
+// The tuner's, not a second copy: a duplicated formula with 440 written into
+// it would silently desync the synthesiser from the thing that measures it.
+import { frequencyOf } from "./pitch";
 import { STRUM_DELAY, pluckBuffer } from "./pluck";
 
 type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
@@ -101,9 +104,29 @@ export function playTones(rootKey: KeyName, intervals: number[], sequence = fals
 
 
 
-/** Equal temperament, A4 = 440, so this agrees with the tuner. */
-function frequencyOf(midi: number): number {
-  return 440 * Math.pow(2, (midi - 69) / 12);
+/**
+ * What a shape sounds, string by string, low to high.
+ *
+ * This is FL-22's whole claim in one function: a note's pitch comes from the
+ * string's open note in the current tuning plus the fret, so an open C and a
+ * barre C at the eighth fret are different sounds and Drop D sounds like Drop
+ * D. Separated from playback because it is the part that can be wrong, and a
+ * test cannot ask an AudioContext what it played.
+ *
+ * Low string first, which is the direction a downstroke travels.
+ */
+export function shapePitches(
+  notes: readonly Note[],
+  tuning: Tuning = STANDARD_TUNING,
+): { note: Note; midi: number; frequency: number }[] {
+  return [...notes]
+    .sort((a, b) => b.s - a.s)
+    .flatMap((note) => {
+      const open = tuning.openMidi[note.s];
+      if (open === undefined) return [];
+      const midi = open + note.f;
+      return [{ note, midi, frequency: frequencyOf(midi) }];
+    });
 }
 
 /**
@@ -157,14 +180,9 @@ export function playShape(
   const context = unlock();
   if (!context || notes.length === 0) return;
 
-  // Low string first, which is the direction a downstroke travels.
-  const ordered = [...notes].sort((a, b) => b.s - a.s);
   const spacing = sequence ? 0.26 : strum;
 
-  ordered.forEach((note, index) => {
-    const open = tuning.openMidi[note.s];
-    if (open === undefined) return;
-    const frequency = frequencyOf(open + note.f);
+  shapePitches(notes, tuning).forEach(({ note, frequency }, index) => {
     const samples = pluckBuffer(frequency, context.sampleRate, {
       seconds: sequence ? 0.9 : 2.2,
       // A deterministic seed per string, so the same chord sounds the same

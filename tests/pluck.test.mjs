@@ -127,3 +127,89 @@ test("a fretted note takes its pitch from the string it is on", () => {
     "Drop D's low string is out of tune",
   );
 });
+
+// ------------------------------------------- what the shape on screen sounds
+
+const { shapePitches } = await import("../lib/fretlab/audio.ts");
+const { CHORDS } = await import("../lib/fretlab/library.ts");
+
+/**
+ * FL-22's claim, checked directly. It used to synthesise from an abstract
+ * interval over a fixed MIDI 48 base, so an open C and a barre C at the eighth
+ * fret sounded identical and neither was in a guitar's octave.
+ */
+test("two shapes of the same chord sound different", () => {
+  const open = CHORDS.find((chord) => chord.id === "c-major").fingering
+    .filter((note) => note.finger !== undefined);
+  const barre = [
+    { s: 5, f: 3 }, { s: 4, f: 5 }, { s: 3, f: 5 }, { s: 2, f: 5 }, { s: 1, f: 3 },
+  ];
+
+  const openPitches = shapePitches(open, BOARD_TUNING).map((p) => p.midi);
+  const barrePitches = shapePitches(barre, BOARD_TUNING).map((p) => p.midi);
+
+  assert.notDeepEqual(openPitches, barrePitches, "the two C shapes sound the same");
+
+  // They share their lowest note — both are rooted on the C at the third fret
+  // of the A string — so the difference is above it. Comparing the lowest note
+  // is what this assertion tried first, and it is the wrong end of the shape.
+  assert.equal(
+    Math.min(...openPitches),
+    Math.min(...barrePitches),
+    "both C shapes are rooted on the same C",
+  );
+  assert.ok(
+    Math.max(...barrePitches) > Math.max(...openPitches),
+    "the barre shape should reach higher than the open one",
+  );
+  // And both are C major: every note is a C, an E or a G.
+  for (const pitches of [openPitches, barrePitches]) {
+    for (const midi of pitches) {
+      assert.ok([0, 4, 7].includes(midi % 12), `MIDI ${midi} is not a C major tone`);
+    }
+  }
+});
+
+test("a shape sounds low string to high, the way a downstroke travels", () => {
+  const strings = shapePitches(
+    [{ s: 1, f: 3 }, { s: 6, f: 3 }, { s: 4, f: 0 }],
+    BOARD_TUNING,
+  ).map((p) => p.note.s);
+  assert.deepEqual(strings, [6, 4, 1], "strings should sound low to high");
+});
+
+test("a string's pitch comes from the tuning, so Drop D drops", () => {
+  const lowE = [{ s: 6, f: 0 }];
+  assert.equal(shapePitches(lowE, BOARD_TUNING)[0].midi, 40, "standard low E is E2");
+  assert.equal(shapePitches(lowE, DROP_D_TUNING)[0].midi, 38, "Drop D is a tone lower");
+
+  // Everything above the sixth string is untouched by Drop D.
+  for (const string of [1, 2, 3, 4, 5]) {
+    const note = [{ s: string, f: 0 }];
+    assert.equal(
+      shapePitches(note, BOARD_TUNING)[0].midi,
+      shapePitches(note, DROP_D_TUNING)[0].midi,
+      `Drop D moved string ${string}`,
+    );
+  }
+});
+
+test("the synthesiser and the tuner agree on every pitch", () => {
+  // They had two copies of the equal-temperament formula, one with 440
+  // written into it. A change to concert pitch in one would have desynced the
+  // thing that plays a note from the thing that measures it.
+  for (let midi = 40; midi <= 76; midi += 1) {
+    const fromShape = shapePitches([{ s: 6, f: midi - 40 }], BOARD_TUNING)[0];
+    assert.equal(fromShape.midi, midi);
+    assert.ok(
+      Math.abs(centsBetween(fromShape.frequency, frequencyOf(midi))) < 0.0001,
+      `MIDI ${midi}: the synth and the tuner disagree`,
+    );
+  }
+});
+
+test("a string the tuning does not have is not invented", () => {
+  const sevenString = shapePitches([{ s: 7, f: 0 }, { s: 6, f: 0 }], BOARD_TUNING);
+  assert.equal(sevenString.length, 1, "a seventh string should be dropped, not guessed");
+  assert.equal(sevenString[0].note.s, 6);
+});

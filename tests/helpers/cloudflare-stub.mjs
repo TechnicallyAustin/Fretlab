@@ -11,21 +11,32 @@
  *
  * Register with: node --import ./tests/helpers/register.mjs
  */
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import { dirname, resolve as resolvePath } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const EXTENSIONS = [".ts", ".tsx", ".mjs", ".js"];
 
+function isFile(path) {
+  try {
+    return statSync(path).isFile();
+  } catch {
+    return false;
+  }
+}
+
 function withExtension(basePath) {
-  if (existsSync(basePath) && !basePath.endsWith("/")) return basePath;
+  // `existsSync` is true for a directory, so `@/db` resolved to the db/ folder
+  // and importing it failed with EISDIR. Every module that imports @/db — the
+  // whole of lib/api — was unreachable from a test because of it.
+  if (isFile(basePath)) return basePath;
   for (const extension of EXTENSIONS) {
-    if (existsSync(basePath + extension)) return basePath + extension;
+    if (isFile(basePath + extension)) return basePath + extension;
   }
   for (const extension of EXTENSIONS) {
     const indexPath = resolvePath(basePath, `index${extension}`);
-    if (existsSync(indexPath)) return indexPath;
+    if (isFile(indexPath)) return indexPath;
   }
   return null;
 }
