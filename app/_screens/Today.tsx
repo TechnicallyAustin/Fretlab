@@ -16,10 +16,11 @@ import {
   lastAccuracyByDrill,
   summarise,
   weekMinutes,
-  workweekContributionLevels,
+  workweekContributionMinutes,
 } from "@/lib/api/progress";
 import { usePracticeSessions } from "@/lib/api/hooks";
 import { dueToday, reviewSchedule } from "@/lib/api/review";
+import { Button, Heatmap, HeatLegend, SessionCard } from "@/components/ui";
 import { useClock } from "@/lib/fretlab/useClock";
 
 export function Today({
@@ -58,8 +59,8 @@ export function Today({
   // The tallest bar in the week, so a light week still reads as a shape rather
   // than as five slivers. Never zero, or every bar divides by it.
   const peak = Math.max(1, ...(week ?? []).map((day) => day.minutes));
-  const contributionLevels =
-    typeof now !== "number" ? null : workweekContributionLevels(sessions, 5, now);
+  const contributionWeeks =
+    typeof now !== "number" ? null : workweekContributionMinutes(sessions, 5, now);
 
   // The session the Start button actually begins, read from the routine rather
   // than asserted. bpm is not shown: a routine has no tempo of its own.
@@ -70,7 +71,7 @@ export function Today({
   const resumable = DRILLS.filter((drill) => accuracyByDrill.has(drill.id)).slice(0, 2);
 
   return (
-    <div className="screen-content today-screen">
+    <div className="fl-root screen-content today-screen">
       <StatusBar
         end={
           stats === null
@@ -98,42 +99,38 @@ export function Today({
           <b>→</b>
         </button>
       )}
-      <article className="session-hero">
-        <div className="key-watermark">{sessionKey}</div>
-        <p className="kicker">Today&apos;s session</p>
-        <h2>The key of {sessionKey}</h2>
-        <p>
-          {routine.name}. Every drill in one key, so the shapes start rhyming.
-        </p>
-        <div className="session-stats">
-          <div>
-            <strong>{routineMinutes}</strong>
-            <span>minutes</span>
+      <SessionCard
+        title={`The key of ${sessionKey}`}
+        sub={`${routine.name}. Every drill in one key, so the shapes start rhyming.`}
+        stats={[
+          { value: routineMinutes, label: "minutes" },
+          { value: routine.drills.length, label: "drills" },
+        ]}
+        primary={
+          /* The runner needs to know which routine: it used to render the
+             same hardcoded drill whichever one you started. */
+          <Button
+            variant="primary"
+            block
+            trailing="\u2192"
+            onClick={() => go("runner", routine.id)}
+          >
+            Start session
+          </Button>
+        }
+        secondary={
+          /* The reasons a lot of people open a guitar app on a weekday, so
+             they sit on the first screen rather than behind the library. */
+          <div className="today-side-actions">
+            <Button variant="onDark" block onClick={() => go("tuner")}>
+              Tune up first
+            </Button>
+            <Button variant="onDark" block onClick={() => go("ear")}>
+              Train your ear
+            </Button>
           </div>
-          <div>
-            <strong>{routine.drills.length}</strong>
-            <span>drills</span>
-          </div>
-        </div>
-        {/* The runner needs to know which routine: it used to render the
-            same hardcoded drill whichever one you started. */}
-        <button
-          className="primary-action"
-          onClick={() => go("runner", routine.id)}
-        >
-          Start session <span>→</span>
-        </button>
-        {/* The reason a lot of people open a guitar app on a weekday, so it
-            sits on the first screen rather than behind the library. */}
-        <div className="today-side-actions">
-          <button className="secondary-action" onClick={() => go("tuner")}>
-            Tune up first
-          </button>
-          <button className="secondary-action" onClick={() => go("ear")}>
-            Train your ear
-          </button>
-        </div>
-      </article>
+        }
+      />
       {/* Seven day labels come from the clock alone, with or without any
           sessions, so this whole section waits for a client clock rather than
           rendering an empty chart the browser then disagrees with. */}
@@ -167,47 +164,22 @@ export function Today({
             </div>
           ))}
         </div>
-        {contributionLevels && (
+        {contributionWeeks && (
           <>
-          {/* Its own heading: the bars above are this week, this is five. One
-              section heading cannot be true of both. */}
-          <div className="section-head section-head-sub">
-            <h3>Last five weeks</h3>
-          </div>
-          <div className="contribution-wrap">
-            <div className="contribution-days" aria-hidden="true">
-              {[
-                ["M", "Monday"],
-                ["Tu", "Tuesday"],
-                ["W", "Wednesday"],
-                ["Th", "Thursday"],
-                ["F", "Friday"],
-              ].map(([short, full]) => <span title={full} key={full}>{short}</span>)}
-            </div>
-            <div
-              className="contribution-graph"
-              aria-label="Practice contributions for Monday through Friday over the last five weeks"
-            >
-              {contributionLevels.map((level, index) => (
-                <span
-                  className={`level-${level}`}
-                  key={index}
-                  title={level ? `${level} practice level` : "No practice"}
-                />
-              ))}
-            </div>
-            <div className="contribution-legend">
-              <span>Less</span><i className="level-0" /><i className="level-1" />
-              <i className="level-2" /><i className="level-3" /><i className="level-4" />
-              <span>More</span>
-            </div>
-            {/* Five rows is an editorial choice, not a missing weekend. Say so:
-                a beginner counting rows should not conclude the app lost two
-                days, or that practising on Sunday did not register. */}
-            <p className="contribution-note">
-              Weekdays only. Weekend practice still counts towards your streak.
-            </p>
-          </div>
+          {/* Five labels and the range, both explicit. The kit defaults to
+              seven weekdays and "Last 3 months"; this data is five weeks of
+              weekdays. The extra rows would draw as empty cells and read as
+              "never practises at weekends", which is the opposite of the note
+              below — and of the kit's own comment on the component. */}
+          <Heatmap
+            weeks={contributionWeeks}
+            rowLabels={["M", "Tu", "W", "Th", "F"]}
+            rangeLabel="Last five weeks"
+          />
+          <HeatLegend />
+          <p className="contribution-note">
+            Weekdays only. Weekend practice still counts towards your streak.
+          </p>
           </>
         )}
       </section>

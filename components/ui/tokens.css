@@ -63,7 +63,12 @@
   --fl-t-section: 1.35rem;
   --fl-t-body: 0.95rem;
   --fl-t-small: 0.82rem;
-  --fl-t-label: 0.7rem;
+  /* 0.7rem in the kit as delivered, which is 11.2px. This app set a 13px
+     caption floor in FL-17 and guards it, and this token drives every eyebrow,
+     key chip, card kicker and hero meta line — all of it real text. Raised to
+     the floor rather than letting the kit quietly undo the accessibility work.
+     tests/ui-kit.test.mjs keeps it there. */
+  --fl-t-label: 0.8125rem;
 
   /* Space + shape */
   --fl-r-sm: 8px;

@@ -8,7 +8,7 @@
  */
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readProjectFile } from "./helpers/sources.mjs";
+import { frontendSource, readProjectFile } from "./helpers/sources.mjs";
 import { readdir } from "node:fs/promises";
 
 test("every kit token is namespaced, so nothing overwrites the app's", async () => {
@@ -93,4 +93,79 @@ test("the kit's cards draw with the app's renderer, not the kit's", async () => 
       `${file} converts string indexes itself instead of leaving it to the adapter`,
     );
   }
+});
+
+/**
+ * The kit does not undo the readability floor.
+ *
+ * The app set a 13px caption floor in FL-17 and guards it in
+ * `text is readable`, which reads `app/globals.css` only. The kit arrived with
+ * 61 literal sizes below that floor — down to 7.68px — and a `--fl-t-label`
+ * token of 0.7rem, 11.2px, driving every eyebrow, key chip and card kicker.
+ * Adopting the kit would have quietly undone FD-07 and FL-17 together.
+ *
+ * This checks the type scale, and then only those kit classes the app
+ * actually renders: the kit ships components for screens FretLab does not
+ * have, and their type is not this app's problem until one is adopted. So the
+ * guard widens on its own as more screens convert.
+ */
+test("the kit's type scale clears the 13px floor", async () => {
+  const tokens = await readProjectFile("components/ui/tokens.css");
+  for (const [, name, rem] of tokens.matchAll(/(--fl-t-[a-z]+):\s*([0-9.]+)rem/g)) {
+    const px = Number(rem) * 16;
+    assert.ok(px >= 13, `${name} is ${px.toFixed(1)}px, under the 13px floor`);
+  }
+});
+
+test("no kit component the app renders sets type below 13px", async () => {
+  const css = await readProjectFile("components/ui/fretlab-ui.css");
+
+  // "In use" means the class reaches the page, not that it appears in the
+  // kit's own source — every kit class does that, which is how the first
+  // version of this test flagged components FretLab does not have. So the
+  // in-use set is read out of the rendered HTML.
+  const rendered = new Set();
+  for (const route of ["/", "/songs", "/scales", "/chords", "/library"]) {
+    const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+    workerUrl.searchParams.set("test", `kit-${process.pid}-${route}`);
+    const { default: worker } = await import(workerUrl.href);
+    const response = await worker.fetch(
+      new Request(`http://localhost${route}`, { headers: { accept: "text/html" } }),
+      { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
+      { waitUntil() {}, passThroughOnException() {} },
+    );
+    const html = await response.text();
+    for (const [, value] of html.matchAll(/class="([^"]*)"/g)) {
+      for (const name of value.split(/\s+/)) if (name.startsWith("fl-")) rendered.add(name);
+    }
+  }
+  assert.ok(rendered.size > 10, `only ${rendered.size} kit classes rendered; is the build stale?`);
+
+  const offenders = [];
+  const lines = css.split("\n");
+  lines.forEach((line, index) => {
+    for (const match of line.matchAll(/font-size:\s*(\.?[0-9.]+)rem/g)) {
+      const px = Number(match[1]) * 16;
+      if (px >= 13) continue;
+      let selector = line.split("{")[0].trim();
+      if (!selector) {
+        for (let back = index; back >= 0 && back > index - 14; back -= 1) {
+          if (/\{\s*$/.test(lines[back])) {
+            selector = lines[back].trim();
+            break;
+          }
+        }
+      }
+      const classes = [...selector.matchAll(/\.(fl-[a-z0-9_-]+)/g)].map((m) => m[1]);
+      if (classes.some((name) => rendered.has(name))) {
+        offenders.push(`${px.toFixed(2)}px  ${selector.slice(0, 60)}`);
+      }
+    }
+  });
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `kit type under the 13px floor, on components the app renders:\n  ${offenders.join("\n  ")}`,
+  );
 });

@@ -286,32 +286,36 @@ test("Today uses a contribution graph and fretboards keep stable viewports", asy
   const today = await readProjectFile("app/_screens/Today.tsx");
   const fretboard = await readProjectFile("components/fretlab/Fretboard.tsx");
   const css = await readProjectFile("app/globals.css");
-  assert.match(today, /workweekContributionLevels\(sessions, 5, now\)/);
-  assert.match(today, /contribution-graph/);
-  assert.match(today, /Monday through Friday/);
-  assert.match(today, /\["Tu", "Tuesday"\]/);
-  assert.match(today, /\["Th", "Thursday"\]/);
+  // The activity grid is the design kit's Heatmap now. These assertions were
+  // written against the hand-rolled markup it replaced — the class names, the
+  // literal day-label tuples, the grid CSS. None of that was the behaviour;
+  // it was one implementation of it. What FD-02 actually required is below,
+  // checked against the kit instead.
+  assert.match(today, /workweekContributionMinutes\(sessions, 5, now\)/);
+  assert.match(today, /<Heatmap\s+weeks=\{contributionWeeks\}/);
+  assert.match(today, /<HeatLegend \/>/);
 
-  // FD-02. The graph was a single row of five cells with a label under each:
-  // five data points, no second axis, and nothing a trend could show in. Days
-  // are rows now, named once down the left.
-  const dayLabels = [...today.matchAll(/\["(M|Tu|W|Th|F)", "\w+"\]/g)];
-  assert.equal(dayLabels.length, 5, "five weekdays, named once each");
-  assert.match(css, /\.contribution-days\s*\{[^}]*grid-template-rows/,
-    "day labels should be a column of rows, beside the grid");
-  assert.match(css, /\.contribution-graph\s*\{[^}]*grid-auto-flow: column/,
-    "weeks should run as columns");
+  // Five labels, passed explicitly. The kit's Heatmap defaults to seven, and
+  // this data is weekday-only — the extra rows would draw as empty cells and
+  // read as "never practises at weekends", contradicting the note under it.
+  assert.match(today, /rowLabels=\{\["M", "Tu", "W", "Th", "F"\]\}/);
+  assert.match(today, /rangeLabel="Last five weeks"/);
+  const heat = await readProjectFile("components/ui/progress.tsx");
+  // Weekdays named once each, down the left, and weeks running as columns.
+  assert.match(heat, /fl-heat__labels/);
+  const heatCss = await readProjectFile("components/ui/fretlab-ui.css");
+  assert.match(heatCss, /\.fl-heat\s*\{/);
+  assert.match(heatCss, /\.fl-heat__grid\s*\{/);
 
-  // Today shows two windows and each must be labelled with its own. The bars
-  // are this week at real minutes; the grid is five weeks at five levels. An
-  // earlier version of this test asserted "This week" was *absent*, which was
-  // only right while the bars were missing — the mismatch was never the words,
-  // it was one heading standing over two different spans of time.
-  assert.match(today, /<h2>This week<\/h2>/, "the week bars need their heading");
-  assert.match(today, /week-chart/, "the weekly bars are the Today view");
-  assert.match(today, /<h3>Last five weeks<\/h3>/, "the grid needs its own");
-  // Five rows is a choice, not a missing weekend, and a beginner counting rows
-  // should not have to guess which.
+  // The minutes reach the heatmap unbucketed: it does its own, and bucketing
+  // twice would flatten every cell before the kit ever saw it.
+  const progress = await readProjectFile("lib/api/progress.ts");
+  assert.match(progress, /export function workweekContributionMinutes/);
+  assert.doesNotMatch(
+    today,
+    /workweekContributionLevels/,
+    "levels are pre-bucketed; the heatmap wants minutes",
+  );
   assert.match(today, /Weekdays only/);
   assert.match(css, /\.contribution-graph/);
   assert.match(css, /grid-template-rows: repeat\(5, 16px\)/);

@@ -204,6 +204,38 @@ export function workweekContributionLevels(
   });
 }
 
+/**
+ * Minutes practised, as weeks of five weekdays, oldest week first.
+ *
+ * The sibling function buckets into five intensity levels. This returns the
+ * minutes themselves, because the design kit's heatmap does its own bucketing
+ * and handing it pre-bucketed levels would bucket them twice — each cell
+ * flattened once here and again there.
+ */
+export function workweekContributionMinutes(
+  sessions: readonly PracticeSessionWire[],
+  weeks: number,
+  now: number,
+): number[][] {
+  assertClock(now);
+  const today = startOfToday(now);
+  const monday = today - ((new Date(today).getDay() + 6) % 7) * DAY_MS;
+  const minutesByDay = new Map<string, number>();
+
+  for (const session of sessions) {
+    const key = dayKey(session.created_at);
+    minutesByDay.set(key, (minutesByDay.get(key) ?? 0) + (session.duration_seconds ?? 0) / 60);
+  }
+
+  return Array.from({ length: weeks }, (_, weekIndex) => {
+    const weekOffset = weeks - 1 - weekIndex;
+    return Array.from({ length: 5 }, (_, weekdayIndex) => {
+      const at = monday - weekOffset * 7 * DAY_MS + weekdayIndex * DAY_MS;
+      return Math.round(minutesByDay.get(dayKey(new Date(at).toISOString())) ?? 0);
+    });
+  });
+}
+
 /** Practice intensity for the current Monday-Friday week, oldest first. */
 export function weekdayContributionLevels(
   sessions: readonly PracticeSessionWire[],

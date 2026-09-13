@@ -43,7 +43,7 @@
   font-size: var(--fl-t-small); color: var(--fl-ink-2); cursor: pointer;
 }
 .fl-hear:hover { border-color: var(--fl-accent-line); color: var(--fl-accent-ink); }
-.fl-hear__glyph { font-size: .6rem; color: var(--fl-accent); }
+.fl-hear__glyph { font-size: .8125rem; color: var(--fl-accent); }
 
 .fl-arrowlink {
   display: inline-flex; align-items: center; gap: 6px;
