@@ -35,13 +35,27 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
-function getSnapshot(): string {
-  const now = new Date();
+/**
+ * The snapshot, as a string.
+ *
+ * `useSyncExternalStore` re-reads this on every render and compares by
+ * identity, so it has to be equal by value within the hour it describes — a
+ * fresh `Date` each time would re-render the tree forever.
+ *
+ * Exported, with the clock passed in, so a test can pin an hour. Reading the
+ * wall clock is the one thing this file exists to keep out of render.
+ */
+export function stampFrom(at: number): string {
+  const now = new Date(at);
   return [now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()].join("-");
 }
 
+function getSnapshot(): string {
+  return stampFrom(Date.now());
+}
+
 /** No clock on the server: the greeting appears once the client has one. */
-function getServerSnapshot(): string {
+export function serverStamp(): string {
   return "";
 }
 
@@ -63,16 +77,36 @@ export type Clock = {
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-export function useClock(): Clock {
-  const stamp = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+/**
+ * A clock from a snapshot, or the empty one.
+ *
+ * The empty clock is what the server gets, and `now: null` is what every
+ * caller guards on. It must never hand out a `now` that is neither null nor a
+ * finite number: `undefined` slipping through a guard is what produced
+ * `RangeError: Invalid time value` six frames inside a date helper.
+ */
+export function clockFromStamp(stamp: string): Clock {
   if (!stamp) return { date: null, dayName: "", greeting: "", now: null };
 
   const [year, month, day, hour] = stamp.split("-").map(Number);
+  if (![year, month, day, hour].every(Number.isFinite)) {
+    return { date: null, dayName: "", greeting: "", now: null };
+  }
   const date = new Date(year, month, day, hour);
+  const now = date.getTime();
+  if (!Number.isFinite(now)) {
+    return { date: null, dayName: "", greeting: "", now: null };
+  }
   return {
     date,
     dayName: DAYS[date.getDay()],
     greeting: hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening",
-    now: date.getTime(),
+    now,
   };
+}
+
+export function useClock(): Clock {
+  return clockFromStamp(
+    useSyncExternalStore(subscribe, getSnapshot, serverStamp),
+  );
 }

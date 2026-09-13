@@ -26,7 +26,15 @@ function subscribe(listener: () => void): () => void {
   };
 }
 
-function getSnapshot(): KeyName {
+/**
+ * The stored key, or the default.
+ *
+ * Exported so it can be tested. The hook around it is three lines of
+ * `useSyncExternalStore`; everything that can actually be wrong — an unknown
+ * key from an older build, storage that throws rather than returning null —
+ * is in here.
+ */
+export function readStoredKey(): KeyName {
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY) as KeyName | null;
     return stored && FIFTHS.includes(stored) ? stored : DEFAULT_KEY;
@@ -40,15 +48,21 @@ function getServerSnapshot(): KeyName {
   return DEFAULT_KEY;
 }
 
+/** Persist the key. Storage that refuses is not an error the player caused. */
+export function writeStoredKey(key: KeyName): void {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, key);
+  } catch {
+    // Private windows and blocked site data both land here. The key still
+    // applies for this session.
+  }
+}
+
 export function useStoredKey(): [KeyName, (key: KeyName) => void] {
-  const selectedKey = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const selectedKey = useSyncExternalStore(subscribe, readStoredKey, getServerSnapshot);
 
   const setSelectedKey = useCallback((next: KeyName) => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // Storage is unavailable; the key still applies for this session.
-    }
+    writeStoredKey(next);
     for (const listener of listeners) listener();
   }, []);
 

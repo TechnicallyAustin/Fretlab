@@ -16,6 +16,15 @@
  */
 import { useEffect, useRef, useState } from "react";
 
+/**
+ * Seconds as "4:05". Exported because it is the only part of this file that
+ * can be wrong in a way a reader would see, and a hook cannot be asked.
+ */
+export function clockLabel(seconds: number): string {
+  const whole = Math.max(0, Math.floor(seconds));
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
+}
+
 export function useElapsed(restartKey: string | number = "") {
   const startedAt = useRef(0);
   const [seconds, setSeconds] = useState(0);
@@ -39,7 +48,7 @@ export function useElapsed(restartKey: string | number = "") {
 
   return {
     seconds,
-    label: `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`,
+    label: clockLabel(seconds),
     /** The wall-clock start, for recording a session. Never read in render. */
     startedAt,
   };
