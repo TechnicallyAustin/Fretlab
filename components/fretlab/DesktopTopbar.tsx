@@ -45,6 +45,7 @@ export function DesktopTopbar({
     "song-detail": "Song practice",
     progress: "Your progress",
     tuner: "Tuner",
+    ear: "Ear training",
     routines: "Routines",
     runner: "Session runner",
     summary: "Session summary",

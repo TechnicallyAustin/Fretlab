@@ -15,10 +15,10 @@ lint and tests rather than through review.
 | Stage 1 — Stop teaching wrong things | `COMPLETE` | 8 / 8 |
 | Stage 2 — Make the practice loop real | `COMPLETE` | 7 / 7 |
 | **Stage 3 — Make it shippable to real people** | **`COMPLETE`** | 6 / 6 |
-| Stage 4 — Retention and revenue | `IN PROGRESS` | 2 / 5 |
+| Stage 4 — Retention and revenue | `IN PROGRESS` | 3 / 5 |
 | Design pass — `docs/DESIGN-PASS.md` | `COMPLETE` | 8 / 8 |
 
-Next task: **FL-24 — Ear training.**
+Next task: **FL-25 — Drones and backing tracks.**
 
 The design pass is a separate document because it came from using the app
 rather than from the audit, but it is worked the same way and its tasks take
@@ -1293,7 +1293,7 @@ returning users.
 |---|---|---|
 | FL-22 | Real guitar audio tied to the displayed shape | `DONE` |
 | FL-23 | Spaced repetition | `DONE` |
-| FL-24 | Ear training | `TODO` |
+| FL-24 | Ear training | `DONE` |
 | FL-25 | Drones and backing tracks | `TODO` |
 | FL-26 | Minor keys and a larger chord library | `TODO` |
 
@@ -1388,12 +1388,37 @@ Surface it as "Today's review: 12 items".
 
 ---
 
-### - [ ] FL-24 — Ear training
-**Status:** `TODO` · **Severity:** Major
+### - [x] FL-24 — Ear training
+**Status:** `DONE` · **Severity:** Major
 
 **Required change.** Interval and chord-quality recognition, reusing the note-role
 system so what you hear is labelled with the same vocabulary as what you see. Depends
 on FL-22 for credible audio.
+
+> **Done.** `/ear`, in two modes: name the distance, or name the chord. Twelve
+> intervals and seven qualities, played through FL-22's plucked voice so the
+> thing being identified sounds like a guitar.
+>
+> **The vocabulary is the board's.** Each interval carries the same `NoteRole`
+> the fretboard gives that degree, asserted in the tests — the third you have
+> been reading on the neck is the third you are being asked to hear, rather
+> than a second naming system for the same fact.
+>
+> Distractors are drawn from the *neighbours* of the answer. A major third
+> against a minor third is the distinction worth drilling; a major third
+> against an octave is a coin toss you always win, and a test asserts the
+> nearest wrong answer is never more than two semitones away.
+>
+> Grading matches `Train` — right first time, or not — so a round records the
+> same kind of accuracy a shape session does and lands in FL-23's review queue,
+> which a test checks end to end. Questions are seeded rather than random, so a
+> drill can be retried rather than re-rolled, and so the generator is testable
+> at all.
+>
+> Thirteen assertions, including that the right answer is always among the
+> options, that every interval and quality actually gets asked, and that the
+> answer is not rendered before the guess — which would make it a reading
+> exercise.
 
 ---
 

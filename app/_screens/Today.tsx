@@ -125,9 +125,14 @@ export function Today({
         </button>
         {/* The reason a lot of people open a guitar app on a weekday, so it
             sits on the first screen rather than behind the library. */}
-        <button className="secondary-action" onClick={() => go("tuner")}>
-          Tune up first
-        </button>
+        <div className="today-side-actions">
+          <button className="secondary-action" onClick={() => go("tuner")}>
+            Tune up first
+          </button>
+          <button className="secondary-action" onClick={() => go("ear")}>
+            Train your ear
+          </button>
+        </div>
       </article>
       {/* Seven day labels come from the clock alone, with or without any
           sessions, so this whole section waits for a client clock rather than

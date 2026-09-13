@@ -479,6 +479,113 @@ p {
    rather than a zero, because a zero reads as a failure. */
 /* The route-level error state. There was no boundary at all, so a throw during
    render left a blank page — which is what both reported crashes looked like. */
+/* Ear training. Nothing here may be readable before the answer: the whole
+   drill is that you cannot look it up. */
+.today-side-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.today-side-actions>button { flex: 1 1 10rem; }
+
+.ear-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ear-play {
+  min-height: 96px;
+  border: 1px solid var(--key-bright);
+  border-radius: 16px;
+  background: var(--key-fill);
+  color: var(--key-ink);
+  cursor: pointer;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.ear-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.ear-options button {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 64px;
+  padding: 11px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 13px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ear-options button strong {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.ear-options button small {
+  color: var(--quiet);
+  font-size: 0.8125rem;
+}
+
+.ear-options button.right {
+  border-color: var(--key-bright);
+  background: var(--key-fill);
+  color: var(--key-ink);
+}
+
+.ear-options button.right small { color: var(--key-ink); }
+
+.ear-options button.wrong {
+  border-color: var(--line-strong);
+  background: var(--sunken);
+}
+
+.ear-options button.faded { opacity: .5; }
+
+.ear-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+}
+
+.ear-answer p { margin: 0; color: var(--muted); font-size: 0.9375rem; }
+.ear-answer p.right { color: var(--key-ink); font-weight: 500; }
+.ear-answer p.wrong { color: var(--ink); font-weight: 500; }
+
+.ear-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 26px 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  text-align: center;
+}
+
+.ear-result>strong {
+  font-size: 3rem;
+  font-weight: 300;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.ear-result p { margin: 0; color: var(--muted); }
+
 .route-error {
   display: flex;
   align-items: center;

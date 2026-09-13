@@ -34,6 +34,7 @@ export type View =
   | "song-detail"
   | "progress"
   | "tuner"
+  | "ear"
   | "routines"
   | "runner"
   | "summary"
