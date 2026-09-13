@@ -63,3 +63,33 @@ test("the stylesheet has no rule without a selector", async () => {
   const close = (css.match(/\}/g) ?? []).length;
   assert.equal(open, close, "unbalanced braces");
 });
+
+/**
+ * Audit §9. Two files arrived as single-line JSX blobs — 1,578 and 1,058
+ * characters on one line — from a different tool's house style. They are not
+ * wrong, but a change to them is invisible in a diff, which is how a defect
+ * hides in plain sight during review.
+ */
+test("no component is written as a single unreviewable line", async () => {
+  const { readdir } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+
+  const offenders = [];
+  for (const dir of ["app/_screens", "app/_sections", "components/fretlab"]) {
+    for (const name of await readdir(join(process.cwd(), dir))) {
+      if (!name.endsWith(".tsx")) continue;
+      const source = await readProjectFile(join(dir, name));
+      const longest = Math.max(...source.split("\n").map((line) => line.length));
+      // 200 is generous — a long className or a URL can reach it honestly.
+      // A thousand-character line is a file with no line breaks in it.
+      if (longest > 200) offenders.push(`${dir}/${name} (${longest} chars)`);
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `unreviewable lines:\n  ${offenders.join("\n  ")}\n` +
+      "Run: npx prettier --write <file>",
+  );
+});

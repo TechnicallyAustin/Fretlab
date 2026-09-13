@@ -6,7 +6,14 @@
  * renders these from the shell in app/page.tsx; see the README on routing.
  */
 import type { KeyName, Tuning } from "@/lib/fretlab/types";
-import { DROP_D_TUNING, FIFTHS, intervalShape, openPc, spellPitchClass, STANDARD_TUNING } from "@/lib/fretlab/theory";
+import {
+  DROP_D_TUNING,
+  FIFTHS,
+  intervalShape,
+  openPc,
+  spellPitchClass,
+  STANDARD_TUNING,
+} from "@/lib/fretlab/theory";
 import { Fretboard } from "@/components/fretlab/Fretboard";
 import { StatusBar } from "@/components/fretlab/StatusBar";
 import { TRAINING_MODULES } from "@/lib/fretlab/library";
@@ -37,7 +44,8 @@ export function Train({
   );
   const trainingModule = TRAINING_MODULES[moduleIndex];
   const notes = useMemo(
-    () => intervalShape(selectedKey, [...trainingModule.intervals], 1, 7, tuning),
+    () =>
+      intervalShape(selectedKey, [...trainingModule.intervals], 1, 7, tuning),
     [selectedKey, trainingModule, tuning],
   );
   const signature = notes.map((note) => `${note.s}:${note.f}`).join(",");
@@ -71,9 +79,7 @@ export function Train({
       setMissedSince(true);
     }
   };
-  const accuracy = found.size
-    ? Math.round((clean / found.size) * 100)
-    : 0;
+  const accuracy = found.size ? Math.round((clean / found.size) * 100) : 0;
 
   const [recordError, setRecordError] = useState<string | null>(null);
 
@@ -99,7 +105,9 @@ export function Train({
         music_key: selectedKey,
         accuracy,
         reps: found.size + misses,
-        duration_seconds: startedAt.current ? Math.max(1, elapsedSeconds) : undefined,
+        duration_seconds: startedAt.current
+          ? Math.max(1, elapsedSeconds)
+          : undefined,
         tags: [selectedKey, "training"],
       });
       setRecordError(null);
@@ -162,8 +170,44 @@ export function Train({
         </div>
       </section>
       <section className="guitar-setup" aria-label="Guitar setup">
-        <div className="section-head"><h2>Guitar setup</h2><span>{tuning.name} · {leftHanded ? "Left-handed" : "Right-handed"}</span></div>
-        <div className="setup-controls"><div><span>Tuning</span><button className={tuning.id === STANDARD_TUNING.id ? "active" : ""} onClick={() => setTuning?.(STANDARD_TUNING)}>Standard</button><button className={tuning.id === DROP_D_TUNING.id ? "active" : ""} onClick={() => setTuning?.(DROP_D_TUNING)}>Drop D</button></div><div><span>Handedness</span><button className={!leftHanded ? "active" : ""} onClick={() => setLeftHanded?.(false)}>Right-handed</button><button className={leftHanded ? "active" : ""} onClick={() => setLeftHanded?.(true)}>Left-handed</button></div></div>
+        <div className="section-head">
+          <h2>Guitar setup</h2>
+          <span>
+            {tuning.name} · {leftHanded ? "Left-handed" : "Right-handed"}
+          </span>
+        </div>
+        <div className="setup-controls">
+          <div>
+            <span>Tuning</span>
+            <button
+              className={tuning.id === STANDARD_TUNING.id ? "active" : ""}
+              onClick={() => setTuning?.(STANDARD_TUNING)}
+            >
+              Standard
+            </button>
+            <button
+              className={tuning.id === DROP_D_TUNING.id ? "active" : ""}
+              onClick={() => setTuning?.(DROP_D_TUNING)}
+            >
+              Drop D
+            </button>
+          </div>
+          <div>
+            <span>Handedness</span>
+            <button
+              className={!leftHanded ? "active" : ""}
+              onClick={() => setLeftHanded?.(false)}
+            >
+              Right-handed
+            </button>
+            <button
+              className={leftHanded ? "active" : ""}
+              onClick={() => setLeftHanded?.(true)}
+            >
+              Left-handed
+            </button>
+          </div>
+        </div>
       </section>
       <div className="train-hero">
         <p className="kicker">{trainingModule.name}</p>
@@ -172,7 +216,9 @@ export function Train({
         <div>
           <span>{trainingModule.target}</span>
           <button
-            onClick={() => playTones(selectedKey, [...trainingModule.intervals], true)}
+            onClick={() =>
+              playTones(selectedKey, [...trainingModule.intervals], true)
+            }
           >
             ▶ Hear target
           </button>
@@ -244,7 +290,9 @@ export function Train({
             ).length;
             return (
               <div key={string}>
-                <span>{spellPitchClass(openPc(tuning, string), selectedKey)}</span>
+                <span>
+                  {spellPitchClass(openPc(tuning, string), selectedKey)}
+                </span>
                 <i>
                   <b
                     style={{

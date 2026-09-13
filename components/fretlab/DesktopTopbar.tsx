@@ -73,8 +73,25 @@ export function DesktopTopbar({
         <span>{labels[view]}</span>
       </div>
       <div className="desktop-topbar-actions">
-        <button className={`topbar-icon-button${themeMode === "dark" ? " active" : ""}`} type="button" onClick={onToggleTheme} aria-label="Toggle colour theme" title={themeMode === "dark" ? "Use light theme" : "Use dark theme"}><span aria-hidden="true">◐</span></button>
-        <button className={`topbar-icon-button${standMode ? " active" : ""}`} type="button" onClick={onToggleStand} aria-pressed={standMode} aria-label="Toggle stand mode" title="Toggle stand mode"><span aria-hidden="true">↕</span></button>
+        <button
+          className={`topbar-icon-button${themeMode === "dark" ? " active" : ""}`}
+          type="button"
+          onClick={onToggleTheme}
+          aria-label="Toggle colour theme"
+          title={themeMode === "dark" ? "Use light theme" : "Use dark theme"}
+        >
+          <span aria-hidden="true">◐</span>
+        </button>
+        <button
+          className={`topbar-icon-button${standMode ? " active" : ""}`}
+          type="button"
+          onClick={onToggleStand}
+          aria-pressed={standMode}
+          aria-label="Toggle stand mode"
+          title="Toggle stand mode"
+        >
+          <span aria-hidden="true">↕</span>
+        </button>
         <button className="global-key-button" onClick={openKeyPicker}>
           <span className="topbar-key">{selectedKey}</span>
           <span>

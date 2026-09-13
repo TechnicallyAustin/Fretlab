@@ -9,5 +9,16 @@ import { CHORDS } from "@/lib/fretlab/library";
 
 export function ChordToneLegend({ chord }: { chord: (typeof CHORDS)[number] }) {
   const labels = chord.formula.split(" · ");
-  return <div className="chord-tone-legend" aria-label="Chord tone legend"><span><i className="root-shape"/> Root: {labels[0]}</span>{labels.slice(1).map((label, index) => <span key={label}><i className={`tone tone-${index + 1}`} /> {label}: chord tone</span>)}</div>;
+  return (
+    <div className="chord-tone-legend" aria-label="Chord tone legend">
+      <span>
+        <i className="root-shape" /> Root: {labels[0]}
+      </span>
+      {labels.slice(1).map((label, index) => (
+        <span key={label}>
+          <i className={`tone tone-${index + 1}`} /> {label}: chord tone
+        </span>
+      ))}
+    </div>
+  );
 }
