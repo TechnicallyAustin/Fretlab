@@ -3,6 +3,55 @@
 @import "../components/ui/tokens.css";
 @import "../components/ui/fretlab-ui.css";
 
+/* ---------------------------------------------------------------------------
+   The design kit's dark palette, wired to this app's theme switch.
+
+   The kit gates its dark tokens on `:root[data-fl-theme="auto"]`, and nothing
+   sets that attribute — this app switches theme with `.theme-dark` and
+   `.theme-system` on the shell. So the kit stayed light in every theme, and a
+   converted screen in dark mode painted `--fl-ink` (#1b1a1f) on the app's
+   near-black page: text the same colour as the ground behind it.
+
+   Same values the kit ships, under the selectors this app actually uses. Kept
+   here rather than in tokens.css because how the kit's theme maps onto this
+   app's is the app's knowledge, not the kit's.
+   --------------------------------------------------------------------------- */
+.theme-dark,
+.theme-dark .fl-root {
+  --fl-canvas: #131217;
+  --fl-canvas-wash: #1d1b26;
+  --fl-surface: #1c1b21;
+  --fl-surface-sunk: #17161b;
+  --fl-line: #2c2a33;
+  --fl-line-soft: #232128;
+  --fl-ink: #f4f1ea;
+  --fl-ink-2: #c3bfca;
+  --fl-ink-3: #8e8996;
+  --fl-ink-4: #6a6572;
+  --fl-accent-soft: #322b6b;
+  --fl-accent-softer: #23204a;
+  --fl-accent-line: #453c8f;
+}
+
+@media (prefers-color-scheme: dark) {
+  .theme-system,
+  .theme-system .fl-root {
+    --fl-canvas: #131217;
+    --fl-canvas-wash: #1d1b26;
+    --fl-surface: #1c1b21;
+    --fl-surface-sunk: #17161b;
+    --fl-line: #2c2a33;
+    --fl-line-soft: #232128;
+    --fl-ink: #f4f1ea;
+    --fl-ink-2: #c3bfca;
+    --fl-ink-3: #8e8996;
+    --fl-ink-4: #6a6572;
+    --fl-accent-soft: #322b6b;
+    --fl-accent-softer: #23204a;
+    --fl-accent-line: #453c8f;
+  }
+}
+
 :root {
   --paper: #f4f0e7;
   --card: #fbf8f2;
@@ -337,72 +386,6 @@ p {
   letter-spacing: -.01em;
 }
 
-.session-hero {
-  position: relative;
-  overflow: hidden;
-  padding: 20px;
-  border: 1px solid var(--key-edge);
-  border-radius: 18px;
-  background: linear-gradient(152deg, var(--key-fill) 0%, var(--card) 78%);
-  box-shadow: none;
-}
-
-.key-watermark {
-  position: absolute;
-  right: -22px;
-  top: -38px;
-  color: var(--key-bright);
-  font-size: 9.5rem;
-  line-height: 1;
-  font-weight: 500;
-  opacity: .09;
-  animation: breathe 7s ease-in-out infinite;
-}
-
-.session-hero h2 {
-  position: relative;
-  margin-top: 14px;
-  font-size: 1.688rem;
-  line-height: 1.15;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-
-.session-hero>p:not(.kicker) {
-  position: relative;
-  max-width: 250px;
-  margin-top: 6px;
-  color: var(--muted);
-  font-size: 0.9375rem;
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-
-.session-stats {
-  position: relative;
-  display: flex;
-  gap: 18px;
-  margin: 14px 0;
-}
-
-.session-stats strong,
-.session-stats span {
-  display: block;
-}
-
-.session-stats strong {
-  font-size: 1.312rem;
-  line-height: 1;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-.session-stats span {
-  margin-top: 5px;
-  color: var(--quiet);
-  font-size: 0.8125rem;
-}
-
 .primary-action,
 .secondary-action {
   min-height: 50px;
@@ -443,16 +426,6 @@ p {
   transform: scale(.99);
 }
 
-.session-hero .primary-action {
-  position: relative;
-  width: 100%;
-  background: transparent;
-}
-
-.session-hero .primary-action:hover {
-  background: var(--key-fill-2);
-}
-
 .week-chart {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -462,16 +435,6 @@ p {
 
 /* A second heading inside one section: the bars are this week, the grid is
    five. Quieter than the section heading so the section still reads as one. */
-.section-head-sub {
-  margin-top: 14px;
-}
-
-.section-head-sub h3 {
-  margin: 0;
-  color: var(--quiet);
-  font-size: 0.875rem;
-  font-weight: 500;
-}
 
 /* Moves the board along the neck when the whole of it will not fit at legible
    size — a phone column holds about four frets, which is a hand span and a
@@ -790,57 +753,10 @@ p {
   font-weight: 400;
 }
 
-.contribution-wrap {
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: 9px;
-  margin-top: 12px;
-}
-
-.contribution-graph {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(12px, 1fr));
-  grid-template-rows: repeat(5, 16px);
-  grid-auto-flow: column;
-  gap: 4px;
-}
-
-.contribution-graph span {
-  width: 100%;
-  border: 1px solid color-mix(in srgb, var(--line-strong) 55%, transparent);
-  border-radius: 3px;
-  background: var(--sunken);
-}
-
-.contribution-days {
-  display: grid;
-  grid-template-rows: repeat(5, 16px);
-  gap: 4px;
-  color: var(--quiet);
-  font-size: .8125rem;
-  line-height: 16px;
-}
-
 /* The ramp was 24/45/68/100, which put only 1.11:1 between "did not practise"
    and "practised a little" — the lowest signal the graph exists to show was
    invisible. Evened out across all twelve key hues so every step is the same
    size and the first one is visible. */
-.contribution-graph .level-1, .contribution-legend .level-1 { background: color-mix(in srgb, var(--key-bright) 38%, var(--card)); }
-.contribution-graph .level-2, .contribution-legend .level-2 { background: color-mix(in srgb, var(--key-bright) 60%, var(--card)); }
-.contribution-graph .level-3, .contribution-legend .level-3 { background: color-mix(in srgb, var(--key-bright) 80%, var(--card)); }
-.contribution-graph .level-4, .contribution-legend .level-4 { background: var(--key-bright); }
-
-.contribution-note {
-  grid-column: 2;
-  margin: 2px 0 0;
-  color: var(--quiet);
-  font-size: 0.8125rem;
-}
-
-.contribution-legend { grid-column: 2; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: var(--quiet); font-size: .8125rem; }
-.contribution-legend i { width: 12px; height: 12px; border: 1px solid var(--line-strong); border-radius: 3px; background: var(--sunken); }
-.contribution-legend span:first-child { margin-right: 4px; }
-.contribution-legend span:last-child { margin-left: 4px; }
 
 .day {
   display: grid;
@@ -1228,45 +1144,9 @@ p {
   outline-offset: 2px;
 }
 
-.library-home-header h1 {
-  margin-top: 4px;
-  font-size: 1.812rem;
-  font-weight: 500;
-}
-
 .library-home-header>p:last-child {
   margin-top: 5px;
   color: var(--muted);
-}
-
-.library-theory-link {
-  display: grid;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--key-edge);
-  border-radius: 14px;
-  background: var(--key-dim);
-}
-
-.library-theory-link h2 {
-  margin-top: 4px;
-  font-size: 1.25rem;
-  font-weight: 500;
-}
-
-.library-theory-link p:last-child {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: .875rem;
-}
-
-.library-theory-link button {
-  min-height: 48px;
-  border: 1px solid var(--key-edge);
-  border-radius: 11px;
-  background: var(--card);
-  color: var(--key-ink);
-  cursor: pointer;
 }
 
 .onboarding-screen {
@@ -2968,118 +2848,8 @@ p {
   gap: 10px;
 }
 
-.library-launchpad>div:last-child {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-.library-launchpad>div:last-child button {
-  min-height: 112px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-end;
-  padding: 14px;
-  border: 0;
-  border-radius: 15px;
-  background-position: center;
-  background-size: cover;
-  color: #fbf8f2;
-  cursor: pointer;
-  text-align: left;
-}
-
-.library-launchpad button>span {
-  padding: 3px 7px;
-  border-radius: 99px;
-  background: rgba(251, 248, 242, .16);
-  font-size: 0.8125rem;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-
-.library-launchpad button strong {
-  margin-top: 16px;
-  font-size: 1.125rem;
-  font-weight: 500;
-}
-
-.library-launchpad button small {
-  margin-top: 3px;
-  color: rgba(251, 248, 242, .72);
-  font-size: 0.8125rem;
-}
-
-.library-launchpad button b {
-  margin-top: 9px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-
 .library-screen {
   padding-bottom: 76px;
-}
-
-.library-photo-hero,
-.songs-hero {
-  position: relative;
-  overflow: hidden;
-  padding: 20px;
-  border: 1px solid var(--key-edge);
-  border-radius: 18px;
-  background-position: center;
-  background-size: cover;
-  color: #fbf8f2;
-}
-
-.library-photo-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(100deg, rgba(26, 27, 34, .92), rgba(26, 27, 34, .25));
-}
-
-.library-photo-hero>* {
-  position: relative;
-  z-index: 1;
-}
-
-.library-photo-hero>div {
-  max-width: 520px;
-}
-
-.library-photo-hero h2,
-.songs-hero h2 {
-  margin-top: 7px;
-  font-size: 1.625rem;
-  line-height: 1.15;
-  font-weight: 500;
-}
-
-.library-photo-hero p,
-.songs-hero p {
-  margin-top: 7px;
-  color: rgba(251, 248, 242, .74);
-  font-size: 0.875rem;
-}
-
-.library-photo-hero>span {
-  display: inline-flex;
-  margin-top: 18px;
-  padding: 5px 9px;
-  border: 1px solid rgba(251, 248, 242, .28);
-  border-radius: 99px;
-  font-size: 0.8125rem;
-  text-transform: uppercase;
-}
-
-.chord-photo {
-  background-image: url('/guitar-strings.jpg');
-}
-
-.scale-photo {
-  background-image: url('/guitar-neck.jpg');
 }
 
 .library-controls {
@@ -3089,115 +2859,6 @@ p {
 
 .library-controls .chip-scroll button {
   padding-block: 6px;
-}
-
-.chord-library-grid,
-.scale-library-grid,
-.song-library-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-.chord-library-card,
-.scale-library-card {
-  min-width: 0;
-  padding: 13px;
-  border: 1px solid var(--key-edge);
-  border-radius: 15px;
-  background: linear-gradient(135deg, var(--key-dim), var(--card));
-  text-align: left;
-}
-
-.library-card-open {
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  color: inherit;
-  text-align: left;
-}
-
-.chord-library-card .library-card-open>div:first-child {
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 11px;
-}
-
-.chord-symbol {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 11px;
-  background: var(--key-fill-2);
-  color: var(--key-ink);
-  font-size: 1.375rem;
-  font-weight: 500;
-}
-
-.chord-library-card strong,
-.chord-library-card small,
-.scale-library-card strong,
-.scale-library-card small {
-  display: block;
-}
-
-.chord-library-card strong,
-.scale-library-card strong {
-  font-size: 0.9375rem;
-  font-weight: 500;
-}
-
-.chord-library-card small,
-.scale-library-card small {
-  margin-top: 3px;
-  color: var(--quiet);
-  font-size: 0.8125rem;
-}
-
-.chord-library-card>footer,
-.scale-library-card>footer {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-top: 9px;
-  color: var(--quiet);
-  font-size: 0.8125rem;
-}
-
-.chord-library-card>footer>span:nth-child(2),
-.scale-library-card>footer>b {
-  margin-left: auto;
-}
-
-.scale-library-card .library-card-open>div:first-child {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.scale-library-card .library-card-open>div:first-child>span {
-  grid-row: 1 / 3;
-  color: var(--key-ink);
-  font-size: 0.8125rem;
-}
-
-.scale-library-card>footer b {
-  color: var(--key-ink);
-  font-weight: 500;
-}
-
-.experience-badge {
-  padding: 3px 7px;
-  border: 1px solid var(--key-edge);
-  border-radius: 99px;
-  background: var(--key-fill);
-  color: var(--key-ink);
 }
 
 .sample-play {
@@ -3892,91 +3553,6 @@ p {
   font-size: 0.8125rem;
 }
 
-.songs-hero {
-  display: grid;
-  gap: 18px;
-  background: linear-gradient(105deg, rgba(25, 26, 33, .94), rgba(25, 26, 33, .28)), url('/guitar-stage.jpg') center 40%/cover;
-}
-
-.song-search label {
-  display: block;
-  margin-bottom: 5px;
-  color: rgba(251, 248, 242, .7);
-  font-size: 0.8125rem;
-  text-transform: uppercase;
-}
-
-.song-search input {
-  width: 100%;
-  height: 42px;
-  padding: 0 12px;
-  border: 1px solid rgba(251, 248, 242, .28);
-  border-radius: 10px;
-  outline: 0;
-  background: rgba(251, 248, 242, .12);
-  color: #fbf8f2;
-}
-
-.song-search input::placeholder {
-  color: rgba(251, 248, 242, .55);
-}
-
-.song-card {
-  position: relative;
-  min-height: 250px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  overflow: hidden;
-  padding: 14px;
-  border: 0;
-  border-radius: 16px;
-  background-position: center;
-  background-size: cover;
-  color: #fbf8f2;
-  cursor: pointer;
-  text-align: left;
-}
-
-.song-card>div {
-  width: 100%;
-}
-
-.song-card small {
-  color: rgba(251, 248, 242, .7);
-  font-size: 0.8125rem;
-  text-transform: uppercase;
-}
-
-.song-card strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 1.375rem;
-  line-height: 1.15;
-  font-weight: 500;
-}
-
-.song-card p {
-  margin-top: 2px;
-  color: rgba(251, 248, 242, .72);
-  font-size: 0.8125rem;
-}
-
-.song-card footer {
-  display: flex;
-  gap: 4px;
-  margin-top: 12px;
-}
-
-.song-card footer span {
-  padding: 4px 7px;
-  border: 1px solid rgba(251, 248, 242, .28);
-  border-radius: 7px;
-  background: rgba(20, 21, 28, .25);
-  font-size: 0.8125rem;
-}
-
 .song-detail-hero {
   min-height: 260px;
   display: flex;
@@ -4121,45 +3697,6 @@ p {
 .song-workspace>aside>button small {
   color: var(--quiet);
   font-size: 0.8125rem;
-}
-
-.song-practice-goal {
-  margin-top: 13px;
-  padding-top: 12px;
-  border-top: 1px solid var(--line);
-}
-
-.song-practice-goal span,
-.song-practice-goal strong {
-  display: block;
-}
-
-.song-practice-goal span {
-  color: var(--quiet);
-  font-size: 0.8125rem;
-  text-transform: uppercase;
-}
-
-.song-practice-goal strong {
-  margin-top: 3px;
-  font-size: 0.9375rem;
-  font-weight: 500;
-}
-
-.song-practice-goal i {
-  height: 5px;
-  display: block;
-  margin-top: 9px;
-  overflow: hidden;
-  border-radius: 99px;
-  background: var(--sunken);
-}
-
-.song-practice-goal i b {
-  height: 100%;
-  display: block;
-  border-radius: inherit;
-  background: var(--key-bright);
 }
 
 /* Drill thumbnails are an explicit fixed-size grid item on narrow screens. */
@@ -5733,28 +5270,6 @@ p {
     grid-column: 1 / -1;
   }
 
-  .today-screen>.session-hero {
-    grid-column: 1;
-    grid-row: 3 / 5;
-    min-height: 390px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 30px;
-    background-image: linear-gradient(90deg, rgba(244, 240, 231, .97) 0%, rgba(244, 240, 231, .82) 50%, rgba(244, 240, 231, .12) 100%), url('/guitar-neck.jpg');
-    background-position: center;
-    background-size: cover;
-  }
-
-  .today-screen>.session-hero h2 {
-    max-width: 480px;
-    font-size: 2.5rem;
-  }
-
-  .today-screen>.session-hero>p:not(.kicker) {
-    max-width: 470px;
-  }
-
   .today-screen>.section {
     grid-column: 2;
   }
@@ -6442,47 +5957,8 @@ p {
     font-size: 0.8125rem;
   }
 
-  .library-launchpad>div:last-child {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .library-launchpad>div:last-child button {
-    min-height: 164px;
-    padding: 18px;
-    transition: transform .18s ease, box-shadow .18s ease;
-  }
-
-  .library-launchpad>div:last-child button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 34px rgba(35, 36, 47, .18);
-  }
-
-  .library-launchpad button strong {
-    font-size: 1.375rem;
-  }
-
   .library-screen {
     max-width: 1380px;
-  }
-
-  .library-photo-hero {
-    min-height: 220px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 26px;
-  }
-
-  .library-photo-hero h2,
-  .songs-hero h2 {
-    max-width: 650px;
-    font-size: 2.25rem;
-  }
-
-  .library-photo-hero p,
-  .songs-hero p {
-    max-width: 610px;
-    font-size: 0.875rem;
   }
 
   .library-controls {
@@ -6492,31 +5968,6 @@ p {
 
   .library-controls .chip-scroll {
     justify-content: flex-end;
-  }
-
-  .chord-library-grid,
-  .scale-library-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .chord-library-card,
-  .scale-library-card {
-    min-height: 210px;
-    padding: 16px;
-    transition: transform .18s ease, box-shadow .18s ease;
-  }
-
-  .chord-library-card:hover,
-  .scale-library-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 30px rgba(60, 50, 30, .11);
-  }
-
-  .chord-library-card .fretboard.mini,
-  .scale-library-card .fretboard.mini {
-    width: 240px;
-    max-width: 100%;
-    margin-inline: auto;
   }
 
   .theory-hub-screen {
@@ -6671,40 +6122,6 @@ p {
 
   .position-overlap {
     padding: 18px;
-  }
-
-  .songs-hero {
-    min-height: 280px;
-    grid-template-columns: 1fr 330px;
-    align-items: end;
-    padding: 30px;
-  }
-
-  .song-search {
-    padding: 18px;
-    border: 1px solid rgba(251, 248, 242, .22);
-    border-radius: 14px;
-    background: rgba(25, 26, 33, .35);
-    backdrop-filter: blur(10px);
-  }
-
-  .song-library-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .song-card {
-    min-height: 300px;
-    padding: 20px;
-    transition: transform .18s ease, box-shadow .18s ease;
-  }
-
-  .song-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 34px rgba(35, 36, 47, .2);
-  }
-
-  .song-card strong {
-    font-size: 1.625rem;
   }
 
   .song-detail-hero {
@@ -7343,7 +6760,6 @@ p {
     align-self: center;
   }
 
-  .session-hero,
   .drill-card,
   .dial-card,
   .chart-card,
@@ -7400,10 +6816,6 @@ p {
     grid-row: auto !important;
   }
 
-  .today-screen>.session-hero {
-    min-height: 360px;
-  }
-
   .today-screen>.desktop-studio {
     grid-row: auto;
   }
@@ -7458,12 +6870,6 @@ p {
   }
 
   .view-routines .routine-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .chord-library-grid,
-  .scale-library-grid,
-  .song-library-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 

@@ -317,8 +317,10 @@ test("Today uses a contribution graph and fretboards keep stable viewports", asy
     "levels are pre-bucketed; the heatmap wants minutes",
   );
   assert.match(today, /Weekdays only/);
-  assert.match(css, /\.contribution-graph/);
-  assert.match(css, /grid-template-rows: repeat\(5, 16px\)/);
+  // .contribution-graph and its row grid were the hand-rolled activity grid's
+  // own CSS. The kit's Heatmap draws it now, so those rules are gone and the
+  // layout they encoded is asserted against .fl-heat above instead.
+  assert.ok(!css.includes(".contribution-graph"), "dead CSS for replaced markup");
   // These two asserted the board's *old* sizing: a width cap at 1.15x natural,
   // and the type clamp living inside the component. FD-01 removes both — the
   // cap was the regression that shrank boards on desktop, and the clamp was

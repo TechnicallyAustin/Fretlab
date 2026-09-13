@@ -169,3 +169,58 @@ test("no kit component the app renders sets type below 13px", async () => {
     `kit type under the 13px floor, on components the app renders:\n  ${offenders.join("\n  ")}`,
   );
 });
+
+/**
+ * App CSS does not reach inside kit components.
+ *
+ * The class-name collision test above passes and always did — the kit's names
+ * and the app's never overlapped. That was never the whole risk. Kit markup is
+ * mounted inside the app's own containers, so any app rule written as an
+ * ancestor plus a bare element selector lands on it.
+ *
+ * It happened. `.library-launchpad button>span` was written for the
+ * hand-rolled tiles it replaced, and it matched three spans inside the kit's
+ * LibraryTile — the scrim, the count and the body — giving the text container
+ * a pill background and uppercase tracking, laid over the tile. That is the
+ * overlaid text that got reported.
+ */
+test("no app rule reaches into a converted screen with a bare element selector", async () => {
+  const css = await readProjectFile("app/globals.css");
+
+  // The containers that hold kit components today. A screen joins this list
+  // when it is converted, and its own CSS has to stop reaching inside.
+  const converted = [
+    "library-home-header",
+    "library-launchpad",
+    "song-library-screen",
+    "scale-library-screen",
+    "chord-library-screen",
+    "today-screen",
+  ];
+  const ELEMENTS =
+    /(?:^|[\s>+~])(?:button|span|small|strong|b|i|p|h1|h2|h3|article|section|div|img|footer|header)(?:\s*[>+~]|\s|$)/;
+
+  const offenders = [];
+  for (const [, selector] of css.matchAll(/(?:^|\})\s*([^{}@]+)\{/g)) {
+    for (const part of selector.split(",")) {
+      const trimmed = part.trim();
+      if (!converted.some((name) => trimmed.includes(`.${name}`))) continue;
+      // Only the part after the container matters: the container's own
+      // element qualifier is fine, reaching past it is not.
+      const tail = trimmed.slice(
+        Math.max(...converted.map((name) => {
+          const at = trimmed.indexOf(`.${name}`);
+          return at === -1 ? -1 : at + name.length + 1;
+        })),
+      );
+      if (tail && ELEMENTS.test(tail)) offenders.push(trimmed.slice(0, 70));
+    }
+  }
+
+  assert.deepEqual(
+    offenders,
+    [],
+    `app rules that can land on kit markup:\n  ${offenders.join("\n  ")}\n` +
+      "Scope them to a class, or delete them if the markup they were written for is gone.",
+  );
+});

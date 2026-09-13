@@ -13,8 +13,14 @@
   /* Ink */
   --fl-ink: #1b1a1f;
   --fl-ink-2: #4a4753;
-  --fl-ink-3: #79747f;
-  --fl-ink-4: #a19caa;
+  /* #79747f and #a19caa as the kit ships them, which are 4.14:1 and 2.60:1 on
+     the kit's own canvas — under WCAG AA, and this is the type that carries
+     card meta, moods, note lists, counts and indices. The same defect this
+     app's own palette had in FD-07, and fixed the same way: darkened until the
+     worst surface clears 4.5, and ink-3 pushed further so the two do not
+     collapse into one grey. tests/contrast.test.mjs holds both. */
+  --fl-ink-3: #615d66;
+  --fl-ink-4: #6e6b74;
 
   /* Accent — the practice lavender */
   --fl-accent: #6152d9;

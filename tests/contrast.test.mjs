@@ -114,14 +114,16 @@ test("every step of the activity graph is visible against the one below", async 
   // "some practice": the lowest signal the graph exists to show could not be
   // seen. Checked across all twelve key hues, since the fill is key-coloured.
   const css = await readProjectFile("app/globals.css");
-  // Every ramp in the stylesheet, not the first: the activity graph on Today
-  // and the 26-week consistency graph on Progress each define their own, and
-  // they were both wrong in the same way. A test that checked one would have
-  // left the other invisible.
+  // Every ramp in the stylesheet, not the first. There were two — the activity
+  // graph on Today and the 26-week consistency graph on Progress — and both
+  // were wrong in the same way, so a test that read one would have left the
+  // other invisible. Today's is now the design kit's Heatmap, which buckets
+  // and fills its own cells, so one app ramp is left. The rule this guards is
+  // unchanged: whatever ramps exist must agree and must be distinguishable.
   const found = [...css.matchAll(
     /\.level-(\d)[^{]*\{\s*background: color-mix\(in srgb, var\(--key-bright\) (\d+)%/g,
   )];
-  assert.ok(found.length >= 6, `expected two ramps of three, found ${found.length}`);
+  assert.ok(found.length >= 3, `expected at least one ramp of three, found ${found.length}`);
   const mixes = {};
   for (const [, level, percent] of found) {
     const value = Number(percent);
@@ -167,4 +169,71 @@ test("every step of the activity graph is visible against the one below", async 
       );
     }
   }
+});
+
+/**
+ * The design kit's text tiers meet AA too.
+ *
+ * The kit ships `--fl-ink-3` at 4.14:1 and `--fl-ink-4` at 2.60:1 on its own
+ * canvas — the same defect the app's own palette had in FD-07, arriving again
+ * through a vendored dependency. These carry card meta, moods, note lists,
+ * counts and indices on every converted screen.
+ *
+ * The kit's dark palette is checked against the app's page, not the kit's own
+ * canvas: the kit gates its dark tokens on an attribute nothing sets, so a
+ * converted screen in dark mode was painting near-black text on the app's
+ * near-black ground at 1.15:1. globals.css re-declares those tokens under this
+ * app's theme classes; this is what proves it.
+ */
+test("the kit's text tiers meet WCAG AA on its own surfaces", async () => {
+  const tokens = await readProjectFile("components/ui/tokens.css");
+  const value = (name) => {
+    const match = tokens.match(new RegExp(`\\n\\s*--fl-${name}:\\s*(#[0-9a-fA-F]{3,8})`));
+    assert.ok(match, `--fl-${name} is not a hex value`);
+    return rgb(match[1]);
+  };
+
+  const surfaces = ["canvas", "surface", "surface-sunk"].map((name) => ({
+    name,
+    value: value(name),
+  }));
+  for (const ink of ["ink", "ink-2", "ink-3", "ink-4"]) {
+    for (const surface of surfaces) {
+      const ratio = contrast(value(ink), surface.value);
+      assert.ok(
+        ratio >= AA,
+        `--fl-${ink} on --fl-${surface.name} is ${ratio.toFixed(2)}:1, needs ${AA}`,
+      );
+    }
+  }
+
+  // Three tiers, not one grey repeated.
+  assert.ok(contrast(value("ink-2"), value("ink-3")) >= 1.2, "ink-2 and ink-3 collapsed");
+  assert.ok(contrast(value("ink-3"), value("ink-4")) >= 1.2, "ink-3 and ink-4 collapsed");
+});
+
+test("a converted screen is readable in the app's dark theme", async () => {
+  const globals = await readProjectFile("app/globals.css");
+
+  // The kit's own gate is an attribute this app never sets, so the app has to
+  // re-declare the dark tokens under the classes it does set.
+  const block = globals.match(/\.theme-dark[^{]*\{([^}]*)\}/);
+  assert.ok(block, "the kit's dark tokens are not wired to .theme-dark");
+  const darkInk = block[1].match(/--fl-ink:\s*(#[0-9a-fA-F]{3,8})/);
+  assert.ok(darkInk, ".theme-dark does not redefine --fl-ink");
+
+  // Against the app's dark page, which is the ground a converted screen sits
+  // on. Two blocks now start `.theme-dark,` — the app's own palette and the
+  // kit's, added for this fix — so match the app's by the pair of selectors it
+  // has always used rather than by whichever comes first.
+  const appDark = globals.match(/\.theme-dark,\s*\n\.theme-system\s*\{([^}]*)\}/);
+  assert.ok(appDark, "the app's dark palette block moved");
+  const paperMatch = appDark[1].match(/--paper:\s*(#[0-9a-fA-F]{3,8})/);
+  assert.ok(paperMatch, "the app's dark block does not define --paper");
+  const paper = paperMatch[1];
+  const ratio = contrast(rgb(darkInk[1]), rgb(paper));
+  assert.ok(
+    ratio >= AA,
+    `kit text on the app's dark page is ${ratio.toFixed(2)}:1, needs ${AA}`,
+  );
 });
