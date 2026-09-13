@@ -2,6 +2,16 @@
 
 A guitar practice app. Next on Cloudflare Workers (vinext), D1 via Drizzle.
 
+## Start here
+
+`docs/AUDIT-2026-09.md` is the current state of the app, measured rather than
+recalled, with a priority list at the end. `docs/HANDOFF-2026-09.md` says how to
+act on it and what was learned building the thing it audits.
+
+**The audit's first finding gates Stage 4:** 21 drills exist and only 4 can be
+scored, so progress tracking and the review scheduler both rest on a quarter of
+the content. Adding more unscored practice widens that gap.
+
 ## If you are here to work on the remediation
 
 There is an audit-driven remediation in progress. **Read `docs/HANDOFF.md`
