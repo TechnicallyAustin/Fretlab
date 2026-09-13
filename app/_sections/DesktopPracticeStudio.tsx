@@ -148,10 +148,14 @@ export function DesktopPracticeStudio({
             <strong>{meter}/4 meter</strong>
           </div>
           <div>
+            {/* The visible label is a bare digit, which announces as "3".
+                What it sets is the time signature, so that is what it says. */}
             {([3, 4] as const).map((value) => (
               <button
                 className={meter === value ? "active" : ""}
                 onClick={() => metronome.setMeter(value)}
+                aria-label={`${value}/4 time`}
+                aria-pressed={meter === value}
                 key={value}
               >
                 {value}
