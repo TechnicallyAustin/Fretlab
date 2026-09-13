@@ -477,6 +477,70 @@ p {
 /* What the app has decided should be practised today. Only appears when the
    schedule actually has something due — an empty review queue shows nothing
    rather than a zero, because a zero reads as a failure. */
+/* The route-level error state. There was no boundary at all, so a throw during
+   render left a blank page — which is what both reported crashes looked like. */
+.route-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 24px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.route-error>div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 34rem;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+}
+
+.route-error h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -.01em;
+}
+
+.route-error p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.route-error-digest {
+  font-size: 0.8125rem;
+}
+
+.route-error-digest code {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--sunken);
+  font-size: 0.8125rem;
+}
+
+.route-error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 6px;
+}
+
+.route-error-actions .secondary-action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
 .review-banner {
   display: grid;
   grid-template-columns: 1fr auto;

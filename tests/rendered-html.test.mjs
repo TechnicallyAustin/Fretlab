@@ -458,3 +458,30 @@ test("screens handle the loading state §1 requires", async () => {
   assert.match(strip(await (await render("/progress")).text()), /Loading your practice history/);
   assert.match(strip(await (await render("/signin")).text()), /Checking your session/);
 });
+
+/**
+ * Audit §6. There was no error boundary anywhere — no error.tsx, no
+ * global-error, no componentDidCatch — so both faults reported from the
+ * browser took out the whole screen and left a blank page.
+ */
+test("a route that throws has somewhere to land", async () => {
+  const boundary = await readProjectFile("app/error.tsx");
+
+  // §7: an error state names what failed and what to do next, and does not
+  // apologise. It also must not imply the practice was lost, because it wasn't.
+  assert.match(boundary, /export default function/);
+  assert.match(boundary, /reset/, "the reader needs a way to retry");
+  assert.match(boundary, /Your practice is safe/);
+  assert.match(boundary, /digest/, "a bug report needs a reference");
+  // Comments stripped first: the doc comment above the component explains the
+  // no-apologies rule, and matching the explanation instead of the copy is how
+  // this assertion failed on its first run.
+  const copy = boundary
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/\/\/[^\n]*/g, " ");
+  assert.doesNotMatch(copy, /sorry|apologi/i, "§7: no apologies");
+
+  // The CSS must exist too, or the boundary renders unstyled on a blank page.
+  const css = await readProjectFile("app/globals.css");
+  assert.match(css, /\.route-error\s*\{/);
+});
