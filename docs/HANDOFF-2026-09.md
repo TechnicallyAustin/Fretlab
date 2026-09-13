@@ -14,7 +14,14 @@ this adds what changed and what to do next.
 | Branch | `main`, pushed to `origin`. Tree clean. |
 | Suite | 221 tests, 208 passing, **13 skipped**. |
 
-**Do the audit's top three before Stage 4.** FL-24 (ear training) and FL-25
+**All ten findings were worked on 13 September; see the status table at the top
+of the audit.** §10 is open and needs a real guitar. §7 is improved, not closed.
+Stage 4's FL-24, FL-25 and FL-26 are next.
+
+The note below stood while §1 was open and is kept because the reasoning still
+applies to any future feature that adds practice without adding scoring:
+
+> **Do the audit's top three before Stage 4.** FL-24 (ear training) and FL-25
 (drones) both add ways to practise, and the audit's first finding is that the
 app cannot score most of what it already offers. Adding more unscored practice
 widens the gap rather than closing it.
